@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel-Scope | Demo China Trip旅行攻略</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f4f8; color: #333; line-height: 1.6; padding: 20px; }
+.container { max-width: 1200px; margin: 0 auto; }
+header { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: white; padding: 30px; border-radius: 16px; margin-bottom: 24px; text-align: center; }
+header h1 { font-size: 24px; margin-bottom: 8px; }
+header p { font-size: 14px; opacity: 0.9; }
+header .stats { display: flex; justify-content: center; gap: 20px; margin-top: 16px; flex-wrap: wrap; }
+header .stat { background: rgba(255,255,255,0.15); padding: 8px 18px; border-radius: 8px; font-size: 14px; }
+header .stat strong { font-size: 20px; display: block; }
+#tab-list { display: block; }
+#tab-map { display: none; }
+.tab-bar { display: flex; gap: 0; margin-bottom: 20px; background: white; border-radius: 12px 12px 0 0; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.tab-btn { flex: 1; padding: 14px 20px; border: none; background: #f5f5f5; color: #666; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; border-bottom: 3px solid transparent; }
+.tab-btn:hover { background: #e8f0fe; color: #1a73e8; }
+.tab-btn.active { background: white; color: #1a73e8; border-bottom-color: #1a73e8; }
+.tab-btn.tab-disabled { opacity: 0.5; cursor: not-allowed; }
+.toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+.btn-all { background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+.btn-all:hover { background: #1557b0; }
+.search-box { flex: 1; min-width: 200px; padding: 10px 16px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+.search-box:focus { border-color: #1a73e8; }
+.tip { background: #e8f5e9; border-left: 4px solid #4caf50; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #2e7d32; }
+.dest-section { background: white; border-radius: 12px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.dest-header { padding: 16px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; border-bottom: 2px solid #f0f0f0; user-select: none; }
+.dest-header:hover { background: #f8f9fa; }
+.dest-header .emoji { font-size: 24px; }
+.dest-header .dest-count { background: #e8f0fe; color: #1a73e8; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: normal; }
+.dest-header .arrow { margin-left: auto; transition: transform 0.2s; color: #999; }
+.dest-section.collapsed .arrow { transform: rotate(-90deg); }
+.dest-section.collapsed .dest-body { display: none; }
+.cat-block { margin: 0; }
+.cat-header { padding: 10px 20px; background: #f8fbff; font-size: 14px; font-weight: 600; color: #1a73e8; border-bottom: 1px solid #eef2f7; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+.cat-header:hover { background: #eef2f9; }
+.cat-header .cat-count { background: #e8f0fe; color: #1a73e8; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: normal; }
+.cat-header .cat-arrow { margin-left: auto; transition: transform 0.2s; color: #999; font-size: 12px; }
+.cat-block.collapsed .cat-arrow { transform: rotate(-90deg); }
+.cat-block.collapsed .cat-body { display: none; }
+.loc-card { display: flex; align-items: center; padding: 10px 20px; border-bottom: 1px solid #f5f5f5; gap: 12px; transition: background 0.15s; }
+.loc-card:hover { background: #f0f7ff; }
+.loc-card:last-child { border-bottom: none; }
+.loc-info { flex: 1; min-width: 0; }
+.loc-name { font-size: 14px; font-weight: 500; color: #202124; margin-bottom: 1px; }
+.loc-name .en { font-size: 12px; color: #80868b; font-weight: normal; margin-left: 6px; }
+.loc-detail { font-size: 12px; color: #5f6368; margin-bottom: 1px; }
+.loc-coords { font-size: 11px; color: #80868b; font-family: 'Roboto Mono', monospace; }
+.loc-rating { display: inline-block; background: #fef7e0; color: #f9ab00; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 6px; }
+.loc-ai-rating { display: inline-block; background: #eef7ff; color: #2471a3; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 6px; }
+.btn-group { display: flex; gap: 6px; flex-shrink: 0; }
+.btn-map { color: white; border: none; padding: 7px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; transition: all 0.2s; }
+.btn-map:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+.btn-google { background: #1a73e8; }.btn-google:hover { background: #1a73e8dd; }
+
+.loc-thumbs { display: flex; gap: 6px; flex-shrink: 0; }
+.loc-thumb-wrap { position: relative; width: 120px; height: 80px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #f0f0f0; }
+.loc-thumb { width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: transform 0.2s; position: relative; z-index: 1; }
+.loc-thumb:hover { transform: scale(1.08); }
+.loc-thumb-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: #f0f0f0; font-size: 24px; color: #bbb; }
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; cursor: pointer; }
+.lightbox.active { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
+footer { text-align: center; padding: 20px; color: #999; font-size: 13px; }
+/* Map route view */
+.map-container { display: flex; gap: 0; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); height: 700px; }
+.itinerary-panel { width: 300px; flex-shrink: 0; border-right: 1px solid #e0e0e0; overflow-y: auto; background: #fafbff; }
+.itinerary-panel h3 { padding: 16px; font-size: 16px; color: #1a73e8; border-bottom: 2px solid #e8f0fe; }
+.route-selector { padding: 12px 16px; border-bottom: 1px solid #eef2f7; }
+.route-selector select { width: 100%; padding: 8px 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+.route-selector select:focus { border-color: #1a73e8; }
+.day-group { margin: 0; }
+.day-header { padding: 10px 16px; font-size: 14px; font-weight: 600; color: #333; background: #f0f4f8; border-bottom: 1px solid #e8eef5; display: flex; align-items: center; gap: 8px; }
+.day-header .day-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.itin-item { padding: 8px 16px 8px 32px; font-size: 13px; color: #5f6368; border-bottom: 1px solid #f5f5f5; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.15s; }
+.itin-item:hover { background: #e8f0fe; }
+.itin-item.active { background: #e8f0fe; color: #1a73e8; font-weight: 600; }
+.itin-item .type-icon { font-size: 14px; flex-shrink: 0; }
+.itin-item .seq-num { display: inline-block; min-width: 20px; height: 20px; line-height: 20px; text-align: center; border-radius: 50%; background: #1a73e8; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.map-canvas-wrapper { flex: 1; position: relative; }
+#amap-container { width: 100%; height: 100%; }
+.map-legend { position: absolute; bottom: 16px; right: 16px; background: white; padding: 10px 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: 12px; z-index: 1000; }
+.map-legend .legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+.map-legend .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.map-legend .legend-line { width: 16px; height: 3px; flex-shrink: 0; }
+.map-info-window { min-width: 200px; }
+.map-info-window h4 { font-size: 15px; color: #202124; margin-bottom: 6px; }
+.map-info-window .info-detail { font-size: 12px; color: #5f6368; margin-bottom: 8px; }
+.map-info-window .info-thumbs { display: flex; gap: 4px; margin-bottom: 8px; }
+.map-info-window .info-thumb { width: 80px; height: 54px; border-radius: 6px; object-fit: cover; cursor: pointer; }
+.map-info-window .info-thumb-placeholder { width: 80px; height: 54px; border-radius: 6px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #bbb; }
+.map-info-window .info-nav { display: flex; gap: 4px; }
+.map-info-window .info-nav a { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; color: white; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<div style="background:#fff3cd;color:#856404;padding:8px 12px;border-radius:8px;margin-bottom:12px;font-size:13px">Demo fixture — 离线演示数据；不是实时平台数据</div>
+<h1>Travel-Scope | D e m o   C h i n a   T r i p旅行攻略</h1>
+<p>互动探索 · Google Maps一键导航 · 按目的地分类</p>
+<div class="stats">
+<div class="stat"><strong>1</strong>住宿</div>
+<div class="stat"><strong>1</strong>美食</div>
+<div class="stat"><strong>1</strong>景点</div>
+<div class="stat"><strong>0</strong>潜水</div>
+<div class="stat"><strong>1</strong>目的地</div>
+</div>
+</header>
+<div class="tab-bar"><button class="tab-btn active" onclick="switchTab('list')">📋 卡片列表</button><button class="tab-btn tab-disabled" title="需要高德JS API Key">🗺️ 地图路线 (需Key)</button></div>
+<div id="tab-list">
+<div class="toolbar">
+<button class="btn-all" onclick="toggleAll()">展开/收起全部</button>
+<input class="search-box" type="text" placeholder="搜索目的地/酒店/餐厅/景点..." oninput="filterCards(this.value)">
+</div>
+<div class="tip">点击地点右侧 <strong>Google Maps</strong> 按钮可一键导航；点击目的地标题可展开/收起</div>
+
+
+<div class="dest-section" data-dest="演示城市">
+<div class="dest-header" onclick="toggleSection(this)"><span class="emoji">📍</span> 演示城市 <span class="dest-count">5个地点</span> <span class="arrow">▼</span></div>
+<div class="dest-body">
+<div class="cat-block" data-cat="住宿"><div class="cat-header" onclick="toggleCat(this)">🏨 住宿 <span class="cat-count">1</span><span class="cat-arrow">▼</span></div><div class="cat-body">
+<div class="loc-card" data-search="演示城市 演示住宿 (Demo Hotel) demo hotel">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示住宿 (Demo Hotel) <span class="en">Demo Hotel</span><span class="loc-rating">搜索补充：Demo:4.0</span></div>
+<div class="loc-detail">Demo accommodation | 300元/晚</div>
+<div class="loc-coords">39.9042,116.4074</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9042,116.4074" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a></div>
+</div>
+</div></div>
+<div class="cat-block" data-cat="美食"><div class="cat-header" onclick="toggleCat(this)">🍽 美食 <span class="cat-count">1</span><span class="cat-arrow">▼</span></div><div class="cat-body">
+<div class="loc-card" data-search="演示城市 演示餐厅 (Demo Restaurant) demo restaurant">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示餐厅 (Demo Restaurant) <span class="en">Demo Restaurant</span><span class="loc-rating">搜索补充：Demo:4.0</span></div>
+<div class="loc-detail">Demo cuisine | 人均80元</div>
+<div class="loc-coords">39.9050,116.4080</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.905,116.408" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a></div>
+</div>
+</div></div>
+<div class="cat-block" data-cat="景点"><div class="cat-header" onclick="toggleCat(this)">📍 景点 <span class="cat-count">1</span><span class="cat-arrow">▼</span></div><div class="cat-body">
+<div class="loc-card" data-search="演示城市 演示景点 (Demo Attraction) demo attraction">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示景点 (Demo Attraction) <span class="en">Demo Attraction</span><span class="loc-rating">搜索补充：Demo:4.0</span></div>
+<div class="loc-detail">Demo attraction | 0元</div>
+<div class="loc-coords">39.9048,116.4077</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9048,116.4077" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a></div>
+</div>
+</div></div>
+<div class="cat-block" data-cat="交通"><div class="cat-header" onclick="toggleCat(this)">🚌 交通 <span class="cat-count">2</span><span class="cat-arrow">▼</span></div><div class="cat-body">
+<div class="loc-card" data-search="演示城市 出发演示城市 → 到达演示城市 from 演示城市 to 演示城市">
+<div class="loc-info">
+<div class="loc-name">出发演示城市 → 到达演示城市 <span class="en">From 演示城市 to 演示城市</span></div>
+<div class="loc-detail">Demo transfer | Demo operator | 0元 | 0h | Demo  [Synthetic fixture edge]</div>
+<div class="loc-coords">39.9042,116.4074</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9042,116.4074" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a></div>
+</div>
+<div class="loc-card" data-search="演示城市 出发演示城市 → 到达演示城市 from 演示城市 to 演示城市">
+<div class="loc-info">
+<div class="loc-name">出发演示城市 → 到达演示城市 <span class="en">From 演示城市 to 演示城市</span></div>
+<div class="loc-detail">Demo transfer | Demo operator | 0元 | 0h | Demo  [Synthetic fixture edge]</div>
+<div class="loc-coords">39.9042,116.4074</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9042,116.4074" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a></div>
+</div>
+</div></div>
+</div></div>
+
+</div><!-- /tab-list -->
+
+<div id="tab-map">
+<div class="map-container">
+  <div class="itinerary-panel" id="itin-panel">
+    <h3>🗺️ 行程路线</h3>
+    <div class="route-selector">
+      <select id="route-select" onchange="switchRoute()"></select>
+    </div>
+    <div id="itin-list"></div>
+  </div>
+  <div class="map-canvas-wrapper">
+    <div id="amap-container"></div>
+    <div class="map-legend" id="map-legend">
+      <div class="legend-item"><span class="legend-dot" style="background:#4CAF50"></span> 景点</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#FF9800"></span> 餐厅</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#2196F3"></span> 酒店</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#9E9E9E"></span> 交通</div>
+    </div>
+  </div>
+</div>
+</div><!-- /tab-map -->
+
+
+<footer>
+<p>Demo China Trip旅行攻略 · 地图标记页 · 数据仅供参考</p>
+<p>导航平台: Google Maps</p>
+</footer>
+</div>
+<div class="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src=""></div>
+<script>
+// === Card list view JS ===
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.querySelector('.lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.querySelector('.lightbox').classList.remove('active');
+}
+function toggleSection(el) { el.parentElement.classList.toggle('collapsed'); }
+function toggleCat(el) { el.parentElement.classList.toggle('collapsed'); }
+function toggleAll() {
+  const sections = document.querySelectorAll('.dest-section');
+  const allCollapsed = [...sections].every(s => s.classList.contains('collapsed'));
+  sections.forEach(s => { if (allCollapsed) { s.classList.remove('collapsed'); s.querySelectorAll('.cat-block').forEach(c => c.classList.remove('collapsed')); } else { s.classList.add('collapsed'); } });
+}
+function filterCards(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.dest-section').forEach(sec => {
+    let hasVisible = false;
+    sec.querySelectorAll('.loc-card').forEach(card => {
+      const match = card.dataset.search.toLowerCase().includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) hasVisible = true;
+    });
+    sec.style.display = hasVisible ? '' : 'none';
+    if (q && hasVisible) sec.classList.remove('collapsed');
+  });
+}
+
+// === Tab switching ===
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    if ((tab === 'list' && btn.textContent.includes('卡片')) ||
+        (tab === 'map' && btn.textContent.includes('地图'))) {
+      btn.classList.add('active');
+    }
+  });
+  document.getElementById('tab-list').style.display = tab === 'list' ? 'block' : 'none';
+  document.getElementById('tab-map').style.display = tab === 'map' ? 'block' : 'none';
+  if (tab === 'map' && !window._mapInit) {
+    initMap();
+    window._mapInit = true;
+  }
+}
+
+    // === Map route view (dual engine: AMap domestic / Google Maps overseas) ===
+var itineraryData = {"Demo Route": {"Day 1": [{"name": "演示景点", "type": "景点", "coords": "39.9048,116.4077", "seq": 1, "img1": "", "img2": ""}, {"name": "演示餐厅", "type": "餐厅", "coords": "39.9050,116.4080", "seq": 2, "img1": "", "img2": ""}, {"name": "演示住宿", "type": "酒店", "coords": "39.9042,116.4074", "seq": 3, "img1": "", "img2": ""}]}};
+var allRouteNames = ["Demo Route"];
+var mapInstance = null;
+var markersLayer = null;
+var polylinesLayer = null;
+var currentRoute = null;
+var currentMarkers = [];
+var currentPolylines = [];
+var currentOverlays = [];
+
+var DAY_COLORS = ['#E53935', '#1E88E5', '#43A047', '#8E24AA', '#FB8C00', '#00ACC1', '#3949AB', '#D81B60'];
+var TYPE_COLORS = {'景点': '#4CAF50', '餐厅': '#FF9800', '酒店': '#2196F3', '交通': '#9E9E9E'};
+var TYPE_ICONS = {'景点': '📍', '餐厅': '🍽️', '酒店': '🏨', '交通': '🚌'};
+
+var IS_OVERSEAS = false;
+var GOOGLE_MAPS_KEY = "";
+var MAP_ENGINE = IS_OVERSEAS && GOOGLE_MAPS_KEY ? "google" : "amap";
+
+function initMap() {
+  if (MAP_ENGINE === "google") {
+    initGoogleMap();
+  } else {
+    initAMap();
+  }
+}
+
+// === AMap (domestic China) ===
+function initAMap() {
+  var script = document.createElement('script');
+  script.src = 'https://webapi.amap.com/maps?v=2.0&key=';
+  script.onload = function() {
+    mapInstance = new AMap.Map('amap-container', {
+      zoom: 6,
+      mapStyle: 'amap://styles/normal',
+      viewMode: '2D'
+    });
+    mapInstance._engine = 'amap';
+    // Populate route selector with ALL routes
+    var select = document.getElementById('route-select');
+    allRouteNames.forEach(function(name, i) {
+      var opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      select.appendChild(opt);
+    });
+    if (allRouteNames.length > 0) {
+      currentRoute = allRouteNames[0];
+      renderRoute(currentRoute);
+    }
+  };
+  document.head.appendChild(script);
+}
+
+// === Google Maps (overseas) ===
+function initGoogleMap() {
+  var script = document.createElement('script');
+  script.src = 'https://maps.googleapis.com/maps/api/js?key=' + GOOGLE_MAPS_KEY + '&callback=_gmapReady';
+  window._gmapReady = function() {
+    mapInstance = new google.maps.Map(document.getElementById('amap-container'), {
+      zoom: 6,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      center: {lat: 0, lng: 0}
+    });
+    mapInstance._engine = 'google';
+    // Populate route selector
+    var select = document.getElementById('route-select');
+    allRouteNames.forEach(function(name, i) {
+      var opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      select.appendChild(opt);
+    });
+    if (allRouteNames.length > 0) {
+      currentRoute = allRouteNames[0];
+      renderRoute(currentRoute);
+    }
+  };
+  document.head.appendChild(script);
+}
+
+function switchRoute() {
+  currentRoute = document.getElementById('route-select').value;
+  renderRoute(currentRoute);
+}
+
+function renderRoute(routeName) {
+  // Clear previous
+  if (mapInstance._engine === 'google') {
+    currentMarkers.forEach(function(m) { m.setMap(null); });
+    currentPolylines.forEach(function(p) { p.setMap(null); });
+    currentOverlays.forEach(function(o) { o.setMap(null); });
+  } else {
+    currentMarkers.forEach(function(m) { mapInstance.remove(m); });
+    currentPolylines.forEach(function(p) { mapInstance.remove(p); });
+  }
+  currentMarkers = [];
+  currentPolylines = [];
+  currentOverlays = [];
+
+  var routeData = itineraryData[routeName];
+  if (!routeData) {
+    document.getElementById('itin-list').innerHTML = '<div style="padding:24px 16px;color:#999;text-align:center;font-size:14px;">📋 该路线暂无详细行程编排<br><span style="font-size:12px;color:#bbb;">仅推荐路线提供每日行程地图展示</span></div>';
+    return;
+  }
+
+  var allPoints = [];
+  var days = Object.keys(routeData).sort(function(a, b) {
+    var na = parseInt(a.replace(/\D/g, ''), 10) || 0;
+    var nb = parseInt(b.replace(/\D/g, ''), 10) || 0;
+    return na - nb;
+  });
+
+  // Build itinerary panel
+  var panelHtml = '';
+  var globalIdx = 0;
+  days.forEach(function(day, dayIdx) {
+    var color = DAY_COLORS[dayIdx % DAY_COLORS.length];
+    var items = routeData[day];
+    panelHtml += '<div class="day-group">';
+    panelHtml += '<div class="day-header"><span class="day-dot" style="background:' + color + '"></span>' + day + '</div>';
+    items.forEach(function(item, itemIdx) {
+      var letter = String.fromCharCode(65 + itemIdx); // A, B, C...
+      item._label = day + '-' + letter; // e.g. "Day 1-A"
+      item._letter = letter;
+      item._dayIdx = dayIdx;
+      item._dayFirst = (itemIdx === 0);
+      allPoints.push(item);
+      var typeIcon = TYPE_ICONS[item.type] || '📍';
+      panelHtml += '<div class="itin-item" onclick="flyTo(' + globalIdx + ')">';
+      panelHtml += '<span class="seq-num" style="background:' + color + '">' + letter + '</span>';
+      panelHtml += '<span class="type-icon">' + typeIcon + '</span>';
+      panelHtml += '<span>' + item.name + '</span>';
+      panelHtml += '</div>';
+      globalIdx++;
+    });
+    panelHtml += '</div>';
+  });
+  document.getElementById('itin-list').innerHTML = panelHtml;
+
+  // Update legend with actual days
+  var legendEl = document.getElementById('map-legend');
+  var typeLegendHtml = '<div class="legend-item"><span class="legend-dot" style="background:#4CAF50"></span> 景点</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#FF9800"></span> 餐厅</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#2196F3"></span> 酒店</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:#9E9E9E"></span> 交通</div>';
+  var dayLegendHtml = '';
+  days.forEach(function(day, dayIdx) {
+    var color = DAY_COLORS[dayIdx % DAY_COLORS.length];
+    dayLegendHtml += '<div class="legend-item"><span class="legend-line" style="background:' + color + '"></span> ' + day + '</div>';
+  });
+  if (legendEl) legendEl.innerHTML = typeLegendHtml + dayLegendHtml;
+
+  // Add markers based on engine type
+  if (mapInstance._engine === 'google') {
+    renderRouteGoogle(allPoints, routeData, days);
+  } else {
+    renderRouteAMap(allPoints, routeData, days);
+  }
+}
+
+function renderRouteAMap(allPoints, routeData, days) {
+  allPoints.forEach(function(item, idx) {
+    var parts = item.coords.split(',');
+    var lat = parseFloat(parts[0]);
+    var lng = parseFloat(parts[1]);
+    var gcj = wgs84ToGcj02(lat, lng);
+    var marker = new AMap.Marker({
+      position: [gcj.lng, gcj.lat],
+      title: item.name,
+      label: {
+        content: '<div style="background:' + (DAY_COLORS[item._dayIdx % DAY_COLORS.length]) + ';color:white;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;font-size:12px;font-weight:700;">' + (item._letter || item.seq) + '</div>',
+        direction: 'top'
+      }
+    });
+    // Day label marker for first point of each day
+    var isFirstOfDay = item._dayFirst;
+    if (isFirstOfDay) {
+      var dayColor = DAY_COLORS[item._dayIdx % DAY_COLORS.length];
+      var dayMarker = new AMap.Marker({
+        position: [gcj.lng, gcj.lat],
+        content: '<div style="position:relative;top:-32px;left:16px;background:' + dayColor + ';color:white;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.3);pointer-events:none;">' + ('Day ' + (item._dayIdx + 1)) + '</div>',
+        offset: new AMap.Pixel(0, 0)
+      });
+      currentMarkers.push(dayMarker);
+      mapInstance.add(dayMarker);
+    }
+
+    var thumbHtml = '';
+    if (item.img1) {
+      thumbHtml += '<img class="info-thumb" src="' + item.img1 + '" onerror="this.style.display=\'none\'" onclick="openLightbox(this.src)">';
+    } else {
+      thumbHtml += '<div class="info-thumb-placeholder">📷</div>';
+    }
+    if (item.img2) {
+      thumbHtml += '<img class="info-thumb" src="' + item.img2 + '" onerror="this.style.display=\'none\'" onclick="openLightbox(this.src)">';
+    }
+    var navLinks = '';
+    var navPlatforms = ["google"];
+    navPlatforms.forEach(function(p) {
+      var uri = genNavUri(p, lat, lng, item.name);
+      var names = {'google':'Google','amap':'高德','baidu':'百度'};
+      var colors = {'google':'#1a73e8','amap':'#008dfd','baidu':'#2932e1'};
+      navLinks += '<a href="' + uri + '" target="_blank" style="background:' + colors[p] + '">' + names[p] + '</a>';
+    });
+
+    var infoContent = '<div class="map-info-window">' +
+      '<h4>' + typeIconHtml(item) + ' ' + item.name + '</h4>' +
+      '<div class="info-detail">类型: ' + item.type + '</div>' +
+      '<div class="info-thumbs">' + thumbHtml + '</div>' +
+      '<div class="info-nav">' + navLinks + '</div>' +
+      '</div>';
+
+    marker.infoWindow = new AMap.InfoWindow({
+      content: infoContent,
+      offset: new AMap.Pixel(0, -30)
+    });
+    marker.on('click', function(e) {
+      marker.infoWindow.open(mapInstance, marker.getPosition());
+    });
+    currentMarkers.push(marker);
+    mapInstance.add(marker);
+  });
+
+  // Draw polylines (AMap)
+  days.forEach(function(day, dayIdx) {
+    var color = DAY_COLORS[dayIdx % DAY_COLORS.length];
+    var items = routeData[day];
+    var path = [];
+    items.forEach(function(item) {
+      var parts = item.coords.split(',');
+      var lat = parseFloat(parts[0]);
+      var lng = parseFloat(parts[1]);
+      var gcj = wgs84ToGcj02(lat, lng);
+      path.push([gcj.lng, gcj.lat]);
+    });
+    if (path.length >= 2) {
+      var polyline = new AMap.Polyline({
+        path: path,
+        strokeColor: color,
+        strokeWeight: 3,
+        strokeOpacity: 0.8,
+        strokeStyle: 'solid',
+        showDir: true
+      });
+      currentPolylines.push(polyline);
+      mapInstance.add(polyline);
+    }
+  });
+
+  // Dashed lines between days (AMap)
+  for (var i = 0; i < days.length - 1; i++) {
+    var dayItems1 = routeData[days[i]];
+    var dayItems2 = routeData[days[i + 1]];
+    var lastItem = dayItems1[dayItems1.length - 1];
+    var firstItem = dayItems2[0];
+    var p1 = lastItem.coords.split(',');
+    var p2 = firstItem.coords.split(',');
+    var gcj1 = wgs84ToGcj02(parseFloat(p1[0]), parseFloat(p1[1]));
+    var gcj2 = wgs84ToGcj02(parseFloat(p2[0]), parseFloat(p2[1]));
+    var dashLine = new AMap.Polyline({
+      path: [[gcj1.lng, gcj1.lat], [gcj2.lng, gcj2.lat]],
+      strokeColor: '#999',
+      strokeWeight: 2,
+      strokeOpacity: 0.6,
+      strokeStyle: 'dashed'
+    });
+    currentPolylines.push(dashLine);
+    mapInstance.add(dashLine);
+  }
+
+  if (currentMarkers.length > 0) {
+    mapInstance.setFitView(currentMarkers.concat(currentPolylines), false, [60, 60, 60, 60]);
+  }
+}
+
+function renderRouteGoogle(allPoints, routeData, days) {
+  var bounds = new google.maps.LatLngBounds();
+
+  allPoints.forEach(function(item, idx) {
+    var parts = item.coords.split(',');
+    var lat = parseFloat(parts[0]);
+    var lng = parseFloat(parts[1]);
+
+    var marker = new google.maps.Marker({
+      position: {lat: lat, lng: lng},
+      title: item.name,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 12,
+        fillColor: DAY_COLORS[item._dayIdx % DAY_COLORS.length],
+        fillOpacity: 1,
+        strokeColor: '#fff',
+        strokeWeight: 2
+      },
+      label: {
+        text: item._letter || String(item.seq),
+        color: 'white',
+        fontWeight: '700',
+        fontSize: '11px'
+      }
+    });
+
+    // Day label on first point of each day (proper OverlayView)
+    if (item._dayFirst) {
+      (function(txt, clr, latLng) {
+        var overlay = new google.maps.OverlayView();
+        overlay.onAdd = function() {
+          var div = document.createElement('div');
+          div.style.cssText = 'position:absolute;background:' + clr + ';color:white;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.3);pointer-events:none;';
+          div.textContent = txt;
+          this._div = div;
+          this.getPanes().floatPane.appendChild(div);
+        };
+        overlay.draw = function() {
+          var proj = this.getProjection();
+          if (!proj || !this._div) return;
+          var pixel = proj.fromLatLngToDivPixel(latLng);
+          this._div.style.left = (pixel.x + 14) + 'px';
+          this._div.style.top = (pixel.y - 28) + 'px';
+        };
+        overlay.onRemove = function() {
+          if (this._div) {
+            this._div.parentNode.removeChild(this._div);
+            this._div = null;
+          }
+        };
+        overlay.setMap(mapInstance);
+        currentOverlays.push(overlay);
+      })('Day ' + (item._dayIdx + 1), DAY_COLORS[item._dayIdx % DAY_COLORS.length], new google.maps.LatLng(lat, lng));
+    }
+
+    // InfoWindow content
+    var thumbHtml = '';
+    if (item.img1) {
+      thumbHtml += '<img class="info-thumb" src="' + item.img1 + '" onerror="this.style.display=\'none\'" onclick="openLightbox(this.src)" style="width:80px;height:54px;object-fit:cover;border-radius:6px;cursor:pointer;margin-right:4px;">';
+    } else {
+      thumbHtml += '<div style="width:80px;height:54px;border-radius:6px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:18px;color:#bbb;">📷</div>';
+    }
+    if (item.img2) {
+      thumbHtml += '<img class="info-thumb" src="' + item.img2 + '" onerror="this.style.display=\'none\'" onclick="openLightbox(this.src)" style="width:80px;height:54px;object-fit:cover;border-radius:6px;cursor:pointer;">';
+    }
+    var navLinks = '';
+    var navPlatforms = ["google"];
+    navPlatforms.forEach(function(p) {
+      var uri = genNavUri(p, lat, lng, item.name);
+      var names = {'google':'Google','amap':'高德','baidu':'百度'};
+      var colors = {'google':'#1a73e8','amap':'#008dfd','baidu':'#2932e1'};
+      navLinks += '<a href="' + uri + '" target="_blank" style="background:' + colors[p] + ';color:white;padding:2px 8px;border-radius:4px;font-size:12px;text-decoration:none;margin-right:4px;">' + names[p] + '</a>';
+    });
+
+    var infoContent = '<div style="max-width:280px;">' +
+      '<h4 style="margin:0 0 4px;font-size:14px;">' + (TYPE_ICONS[item.type] || '📍') + ' ' + item.name + '</h4>' +
+      '<div style="font-size:12px;color:#666;margin-bottom:4px;">类型: ' + item.type + '</div>' +
+      '<div style="display:flex;gap:4px;margin-bottom:6px;">' + thumbHtml + '</div>' +
+      '<div style="display:flex;gap:4px;">' + navLinks + '</div>' +
+      '</div>';
+
+    var infoWindow = new google.maps.InfoWindow({
+      content: infoContent,
+      maxWidth: 300
+    });
+
+    marker.addListener('click', function() {
+      // Close all other info windows
+      currentMarkers.forEach(function(m) {
+        if (m._infoWindow) m._infoWindow.close();
+      });
+      infoWindow.open(mapInstance, marker);
+    });
+    marker._infoWindow = infoWindow;
+
+    bounds.extend({lat: lat, lng: lng});
+    currentMarkers.push(marker);
+    marker.setMap(mapInstance);
+  });
+
+  // Draw polylines (Google Maps)
+  days.forEach(function(day, dayIdx) {
+    var color = DAY_COLORS[dayIdx % DAY_COLORS.length];
+    var items = routeData[day];
+    var path = [];
+    items.forEach(function(item) {
+      var parts = item.coords.split(',');
+      path.push({lat: parseFloat(parts[0]), lng: parseFloat(parts[1])});
+    });
+    if (path.length >= 2) {
+      var polyline = new google.maps.Polyline({
+        path: path,
+        strokeColor: color,
+        strokeWeight: 3,
+        strokeOpacity: 0.8,
+        geodesic: true
+      });
+      currentPolylines.push(polyline);
+      polyline.setMap(mapInstance);
+    }
+  });
+
+  // Dashed lines between days (Google Maps)
+  for (var i = 0; i < days.length - 1; i++) {
+    var dayItems1 = routeData[days[i]];
+    var dayItems2 = routeData[days[i + 1]];
+    var lastItem = dayItems1[dayItems1.length - 1];
+    var firstItem = dayItems2[0];
+    var p1 = lastItem.coords.split(',');
+    var p2 = firstItem.coords.split(',');
+    var dashLine = new google.maps.Polyline({
+      path: [
+        {lat: parseFloat(p1[0]), lng: parseFloat(p1[1])},
+        {lat: parseFloat(p2[0]), lng: parseFloat(p2[1])}
+      ],
+      strokeColor: '#999',
+      strokeWeight: 2,
+      strokeOpacity: 0.6,
+      icons: [{icon: {path: 'M 0,-1 0,1', strokeOpacity: 1, strokeWeight: 2}, offset: '0', repeat: '12px'}]
+    });
+    currentPolylines.push(dashLine);
+    dashLine.setMap(mapInstance);
+  }
+
+  if (currentMarkers.length > 0) {
+    mapInstance.fitBounds(bounds, {top: 60, right: 60, bottom: 60, left: 60});
+  }
+}
+
+function flyTo(idx) {
+  document.querySelectorAll('.itin-item').forEach(function(el) { el.classList.remove('active'); });
+  var items = document.querySelectorAll('.itin-item');
+  if (items[idx]) {
+    items[idx].classList.add('active');
+  }
+  if (currentMarkers[idx]) {
+    if (mapInstance._engine === 'google') {
+      var pos = currentMarkers[idx].getPosition();
+      mapInstance.setCenter(pos);
+      mapInstance.setZoom(12);
+      // Close all info windows then open this one
+      currentMarkers.forEach(function(m) {
+        if (m._infoWindow) m._infoWindow.close();
+      });
+      if (currentMarkers[idx]._infoWindow) {
+        currentMarkers[idx]._infoWindow.open(mapInstance, currentMarkers[idx]);
+      }
+    } else {
+      mapInstance.setZoomAndCenter(12, currentMarkers[idx].getPosition());
+      currentMarkers[idx].infoWindow.open(mapInstance, currentMarkers[idx].getPosition());
+    }
+  }
+}
+
+function typeIconHtml(item) {
+  return '<span style="color:' + (TYPE_COLORS[item.type] || '#9E9E9E') + '">' + (TYPE_ICONS[item.type] || '📍') + '</span>';
+}
+
+function genNavUri(platform, lat, lng, name) {
+  if (platform === 'google') {
+    return 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
+  } else if (platform === 'amap') {
+    var gcj = wgs84ToGcj02(lat, lng);
+    return 'https://uri.amap.com/marker?position=' + gcj.lng + ',' + gcj.lat + '&name=' + encodeURIComponent(name);
+  } else if (platform === 'baidu') {
+    var bd = wgs84ToBd09(lat, lng);
+    return 'https://api.map.baidu.com/marker?location=' + bd.lat + ',' + bd.lng + '&title=' + encodeURIComponent(name) + '&content=&output=html&src=webapp.travelGuide';
+  }
+  return '';
+}
+
+// === Coordinate conversion (WGS84 -> GCJ02 -> BD09) ===
+function wgs84ToGcj02(lat, lng) {
+  var a = 6378245.0;
+  var ee = 0.00669342162296594323;
+  var dLat = transformLat(lng - 105.0, lat - 35.0);
+  var dLng = transformLng(lng - 105.0, lat - 35.0);
+  var radLat = lat / 180.0 * Math.PI;
+  var magic = Math.sin(radLat);
+  magic = 1 - ee * magic * magic;
+  var sqrtMagic = Math.sqrt(magic);
+  dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * Math.PI);
+  dLng = (dLng * 180.0) / (a / sqrtMagic * Math.cos(radLat) * Math.PI);
+  return {lat: lat + dLat, lng: lng + dLng};
+}
+
+function wgs84ToBd09(lat, lng) {
+  var gcj = wgs84ToGcj02(lat, lng);
+  var x = gcj.lng, y = gcj.lat;
+  var z = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * Math.PI * 3000.0 / 180.0);
+  var theta = Math.atan2(y, x) + 0.000003 * Math.cos(x * Math.PI * 3000.0 / 180.0);
+  return {lat: z * Math.sin(theta) + 0.006, lng: z * Math.cos(theta) + 0.0065};
+}
+
+function transformLat(lng, lat) {
+  var ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat + 0.1 * lng * lat + 0.2 * Math.sqrt(Math.abs(lng));
+  ret += (20.0 * Math.sin(6.0 * lng * Math.PI) + 20.0 * Math.sin(2.0 * lng * Math.PI)) * 2.0 / 3.0;
+  ret += (20.0 * Math.sin(lat * Math.PI) + 40.0 * Math.sin(lat / 3.0 * Math.PI)) * 2.0 / 3.0;
+  ret += (160.0 * Math.sin(lat / 12.0 * Math.PI) + 320 * Math.sin(lat * Math.PI / 30.0)) * 2.0 / 3.0;
+  return ret;
+}
+
+function transformLng(lng, lat) {
+  var ret = 300.0 + lng + 2.0 * lat + 0.1 * lng * lng + 0.1 * lng * lat + 0.1 * Math.sqrt(Math.abs(lng));
+  ret += (20.0 * Math.sin(6.0 * lng * Math.PI) + 20.0 * Math.sin(2.0 * lng * Math.PI)) * 2.0 / 3.0;
+  ret += (20.0 * Math.sin(lng * Math.PI) + 40.0 * Math.sin(lng / 3.0 * Math.PI)) * 2.0 / 3.0;
+  ret += (150.0 * Math.sin(lng / 12.0 * Math.PI) + 300.0 * Math.sin(lng / 30.0 * Math.PI)) * 2.0 / 3.0;
+  return ret;
+}
+</script>
+</body>
+</html>
