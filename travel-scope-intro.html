@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel-Scope - 旅行攻略生成器 / Travel Guide Generator</title>
+<style>
+  :root {
+    --primary: #1a73e8; --primary-dark: #0d47a1; --primary-light: #e3f2fd;
+    --accent: #ff6d00; --accent-light: #fff3e0;
+    --teal: #00897b; --teal-light: #e0f2f1;
+    --purple: #7b1fa2; --purple-light: #f3e8fd;
+    --green: #2e7d32; --green-light: #e8f5e9;
+    --gray-50: #fafafa; --gray-100: #f5f5f5; --gray-200: #eee;
+    --gray-400: #bdbdbd; --gray-600: #757575; --gray-800: #424242; --gray-900: #212121;
+    --radius: 16px; --radius-sm: 10px; --radius-xs: 6px;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+    --shadow-lg: 0 12px 48px rgba(0,0,0,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif; color:var(--gray-900); line-height:1.7; background:#fff; }
+  .container { max-width:1100px; margin:0 auto; padding:0 24px; }
+
+  /* ===== Hero ===== */
+  .hero {
+    background: linear-gradient(135deg, #0d47a1 0%, #1a73e8 40%, #7b1fa2 100%);
+    color: #fff; padding: 72px 0 80px; text-align:center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -40%; left: -20%; width: 60%; height: 160%;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.08) 0%, transparent 70%);
+  }
+  .hero-badge { display:inline-block; background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); padding:6px 18px; border-radius:24px; font-size:13px; margin-bottom:20px; backdrop-filter:blur(8px); }
+  .hero h1 { font-size:42px; font-weight:800; margin-bottom:14px; letter-spacing:-1px; position:relative; }
+  .hero h1 span { background: linear-gradient(90deg, #ffd54f, #ffab40); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .hero p { font-size:18px; opacity:0.88; max-width:640px; margin:0 auto 28px; line-height:1.8; }
+  .hero-cta { display:inline-flex; align-items:center; gap:8px; background:#fff; color:var(--primary-dark); font-weight:700; font-size:16px; padding:14px 32px; border-radius:50px; text-decoration:none; box-shadow:var(--shadow-md); transition:transform 0.2s,box-shadow 0.2s; }
+  .hero-cta:hover { transform:translateY(-2px); box-shadow:var(--shadow-lg); }
+  .hero-stats { display:flex; justify-content:center; gap:40px; margin-top:36px; }
+  .hero-stat { text-align:center; }
+  .hero-stat-num { font-size:28px; font-weight:800; }
+  .hero-stat-label { font-size:13px; opacity:0.7; }
+
+  /* ===== Section Title ===== */
+  .section { padding:72px 0; }
+  .section-alt { background:var(--gray-50); }
+  .section-title { font-size:32px; font-weight:800; text-align:center; margin-bottom:10px; letter-spacing:-0.5px; }
+  .section-title .accent { color:var(--primary); }
+  .section-sub { text-align:center; color:var(--gray-600); font-size:16px; max-width:620px; margin:0 auto 48px; }
+
+  /* ===== Showcase (Product Screenshots) ===== */
+  .showcase-grid { display:grid; gap:32px; }
+  .showcase-item { position:relative; }
+  .showcase-label { display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:700; color:var(--primary); margin-bottom:12px; padding:6px 14px; background:var(--primary-light); border-radius:20px; }
+  .showcase-desc { font-size:15px; color:var(--gray-600); margin-bottom:16px; max-width:560px; }
+  .showcase-img-wrap { background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); transition:box-shadow 0.3s; }
+  .showcase-img-wrap:hover { box-shadow:var(--shadow-md); }
+  .showcase-img-wrap:hover img { transform:scale(1.02); }
+  .showcase-img-wrap img { display:block; width:100%; height:auto; transition:transform 0.3s ease; }
+  .showcase-img-caption { padding:14px 18px; font-size:13px; color:var(--gray-600); background:var(--gray-50); border-top:1px solid var(--gray-200); }
+  /* Two-col layout for text + image */
+  .showcase-row { display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; }
+  .showcase-row.reverse { direction:rtl; }
+  .showcase-row.reverse > * { direction:ltr; }
+  @media (max-width:768px) { .showcase-row { grid-template-columns:1fr; } .showcase-row.reverse { direction:ltr; } }
+
+  /* ===== Feature Grid ===== */
+  .feature-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; }
+  .feature-card { background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius); padding:24px; transition:transform 0.2s, box-shadow 0.2s; position:relative; }
+  .feature-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); }
+  .feature-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:14px; }
+  .feature-card h3 { font-size:15px; font-weight:700; margin-bottom:6px; }
+  .feature-card p { font-size:13px; color:var(--gray-600); line-height:1.6; }
+  .feature-tag { display:inline-block; font-size:10px; font-weight:700; background:linear-gradient(90deg,#ff6d00,#ff9100); color:#fff; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle; letter-spacing:0.5px; }
+
+  /* ===== Pain Points ===== */
+  .pain-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
+  .pain-card { background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius-sm); padding:20px; text-align:center; }
+  .pain-emoji { font-size:32px; margin-bottom:10px; }
+  .pain-card h3 { font-size:14px; font-weight:700; margin-bottom:4px; color:var(--gray-800); }
+  .pain-card p { font-size:13px; color:var(--gray-600); }
+
+  /* ===== Comparison ===== */
+  .compare-wrap { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .compare-col { border-radius:var(--radius); padding:28px; }
+  .compare-col.before { background:#fff5f5; border:2px dashed #ffcdd2; }
+  .compare-col.after { background:var(--green-light); border:2px solid #a5d6a7; }
+  .compare-title { font-size:16px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .compare-list { list-style:none; }
+  .compare-list li { padding:8px 0; font-size:14px; display:flex; align-items:flex-start; gap:8px; border-bottom:1px solid rgba(0,0,0,0.06); }
+  .compare-list li:last-child { border-bottom:none; }
+  @media (max-width:768px) { .compare-wrap { grid-template-columns:1fr; } }
+
+  /* ===== Workflow ===== */
+  .workflow-steps { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .workflow-step { flex:1; min-width:180px; max-width:220px; text-align:center; }
+  .workflow-num { width:48px; height:48px; border-radius:50%; background:var(--primary); color:#fff; font-size:20px; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; }
+  .workflow-step h4 { font-size:14px; font-weight:700; margin-bottom:4px; }
+  .workflow-step p { font-size:12px; color:var(--gray-600); }
+
+  /* ===== CTA ===== */
+  .cta-section { background:linear-gradient(135deg, #1a73e8, #7b1fa2); color:#fff; padding:64px 0; text-align:center; border-radius:40px 40px 0 0; margin-top:48px; }
+  .cta-section h2 { font-size:30px; font-weight:800; margin-bottom:12px; }
+  .cta-section p { font-size:16px; opacity:0.85; max-width:520px; margin:0 auto 28px; }
+
+  /* ===== Footer ===== */
+  footer { text-align:center; padding:28px 0; font-size:13px; color:var(--gray-600); border-top:1px solid var(--gray-200); }
+
+  /* ===== Animations ===== */
+  @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  .animate { opacity:0; animation:fadeInUp 0.6s ease forwards; }
+  .delay-1 { animation-delay:0.1s; } .delay-2 { animation-delay:0.2s; } .delay-3 { animation-delay:0.3s; }
+
+  /* Scroll reveal */
+  .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+  .language-switch { position:absolute; top:20px; right:24px; z-index:2; display:flex; gap:6px; }
+  .language-switch a { color:#fff; text-decoration:none; padding:5px 10px; border:1px solid rgba(255,255,255,.45); border-radius:16px; font-size:12px; }
+  .language-switch a.active, .language-switch a:hover { background:#fff; color:var(--primary-dark); }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="language-switch"><a class="active" href="travel-scope-intro.html">中文</a><a href="travel-scope-intro-en.html">EN</a></div>
+  <div class="container">
+    <div class="hero-badge">Travel-Scope · TeleAgent Skill · 零部署 · 开箱即用</div>
+    <h1>一句话，生成你的<br><span>旅行攻略</span></h1>
+    <p>输入目的地与旅行偏好，生成可核验、可编辑、可导航的完整旅行攻略<br><small>历史案例与动态信息均需出发前复核</small></p>
+    <a href="#showcase" class="hero-cta">看看做出来长什么样 ↓</a>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num">CN/EN</div><div class="hero-stat-label">双语交付</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">3</div><div class="hero-stat-label">HTML / MD / Excel</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">2</div><div class="hero-stat-label">国内/国际分支</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">QA</div><div class="hero-stat-label">完整性门禁</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRODUCT SHOWCASE (核心：真实截图) ===== -->
+<section class="section" id="showcase">
+  <div class="container">
+    <h2 class="section-title">做出来 <span class="accent">长这样</span></h2>
+    <p class="section-sub">不是功能列表，而是你能拿到的真实产出物</p>
+
+    <div class="showcase-grid">
+
+      <!-- Banner + 卡片列表 -->
+      <div class="showcase-item reveal">
+        <div class="showcase-row">
+          <div>
+            <span class="showcase-label">📋 卡片列表视图</span>
+            <h3 style="font-size:20px;margin-bottom:8px;">点位信息，一页全览</h3>
+            <p class="showcase-desc">按目的地分组，住宿、美食、景点与交通分类展示。平台评分与 AI 推荐分分开呈现，点位可直接跳转地图。</p>
+          </div>
+          <div class="showcase-img-wrap">
+            <img src="assets/screenshot-indonesia-cn-cards.png" alt="中文卡片列表视图">
+            <div class="showcase-img-caption">中文 HTML 卡片列表：住宿、美食、景点分组展示</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 酒店卡片特写 -->
+      <div class="showcase-item reveal" style="margin-top:24px;">
+        <div class="showcase-row reverse">
+          <div class="showcase-img-wrap">
+            <img src="assets/screenshot-indonesia-en-cards.png" alt="English cards view">
+            <div class="showcase-img-caption">English HTML cards: localized structure with Chinese names retained for wayfinding</div>
+          </div>
+          <div>
+            <span class="showcase-label" style="background:var(--accent-light);color:var(--accent);">🏨 酒店卡片</span>
+            <h3 style="font-size:20px;margin-bottom:8px;">价格、评分一目了然</h3>
+            <p class="showcase-desc">住宿卡片展示平台评分、评价数（有数据时）、参考价格与导航入口；AI 推荐分仅供参考，不是平台评分。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 美食卡片特写 -->
+      <div class="showcase-item reveal" style="margin-top:24px;">
+        <div class="showcase-row">
+          <div>
+            <span class="showcase-label" style="background:var(--teal-light);color:var(--teal);">🍽️ 美食卡片</span>
+            <h3 style="font-size:20px;margin-bottom:8px;">大众点评评分 + 人均消费</h3>
+            <p class="showcase-desc">国内数据以高德为主、百度作补充；海外以 Google Maps 等可用来源为主，搜索摘要只作为辅助证据。</p>
+          </div>
+          <div class="showcase-img-wrap">
+            <img src="assets/screenshot-indonesia-cn-cards.png" alt="美食卡片示例">
+            <div class="showcase-img-caption">卡片视图示例：评分、价格、坐标与地图跳转</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 景点卡片 -->
+      <div class="showcase-item reveal" style="margin-top:24px;">
+        <div class="showcase-row reverse">
+          <div class="showcase-img-wrap">
+            <img src="assets/screenshot-indonesia-en-cards.png" alt="Attraction cards example">
+            <div class="showcase-img-caption">English example: bilingual names help with asking directions and taxi rides</div>
+          </div>
+          <div>
+            <span class="showcase-label" style="background:var(--green-light);color:var(--green);">📍 景点卡片</span>
+            <h3 style="font-size:20px;margin-bottom:8px;">门票 + 时长，合理规划</h3>
+            <p class="showcase-desc">景点标注门票价格和建议游览时长，结合每日行程自动编排，避免赶路式打卡。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地图路线视图 -->
+      <div class="showcase-item reveal" style="margin-top:24px;">
+        <div class="showcase-row">
+          <div>
+            <span class="showcase-label" style="background:var(--purple-light);color:var(--purple);">🗺️ 地图路线</span>
+            <h3 style="font-size:20px;margin-bottom:8px;">行程路线，连线可视化</h3>
+            <p class="showcase-desc">路线视图按天展示景点、餐厅、住宿和交通节点；不同方案必须完整编排，避免切换方案时出现空白或只有单点。</p>
+          </div>
+          <div class="showcase-img-wrap">
+            <img src="assets/screenshot-route-cn.png" alt="路线规划视图示例">
+            <div class="showcase-img-caption">路线规划示例：按天行程面板、方案切换与地图连线（示例截图）</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== BEFORE vs AFTER ===== -->
+<section class="section section-alt">
+  <div class="container">
+    <h2 class="section-title">做攻略 <span class="accent">不再痛苦</span></h2>
+    <p class="section-sub">从"信息碎片"到"可导航的完整攻略"</p>
+    <div class="compare-wrap reveal">
+      <div class="compare-col before">
+        <div class="compare-title">❌ 以前做攻略</div>
+        <ul class="compare-list">
+          <li>🔍 多个平台来回搜索，信息散落各处</li>
+          <li>📊 手动整理Excel，复制粘贴到眼花</li>
+          <li>🗺️ 地图App逐个搜索收藏，没法连成路线</li>
+          <li>📱 到了当地才发现收藏列表毫无结构</li>
+          <li>📝 行程规划全凭记忆，遗漏关键点</li>
+          <li>🔄 路线变了一切推倒重来</li>
+        </ul>
+      </div>
+      <div class="compare-col after">
+        <div class="compare-title">✅ 现在用攻略生成器</div>
+        <ul class="compare-list">
+          <li>💬 说一句"大兴安岭自驾7天"，自动搜索</li>
+          <li>📊 Excel 11个Sheet分类输出，即用即查</li>
+          <li>🗺️ HTML地图页连线可视化，路线一目了然</li>
+          <li>📱 按地区提供地图导航跳转</li>
+          <li>📝 每日行程自动编排，方案随时切换</li>
+          <li>🔄 多条备选路线全量编排，灵活调整</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURE GRID ===== -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">12 项 <span class="accent">核心能力</span></h2>
+    <p class="section-sub">每一个功能都经过实战验证</p>
+    <div class="feature-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--primary-light);color:var(--primary);">🔍</div>
+        <h3>多源交叉验证 <span class="feature-tag">核心</span></h3>
+        <p>地图 POI、公开网页和可用平台信息分层记录；搜索摘要仅作辅助，不把缺失数据伪装成确定事实。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--accent-light);color:var(--accent);">🏨</div>
+        <h3>酒店比选</h3>
+        <p>评分、热度、价格区间、类型标签，快速比选。含实拍缩略图</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--teal-light);color:var(--teal);">🍽️</div>
+        <h3>餐厅避雷</h3>
+        <p>评分、评价数、价格与菜系信息按可获得字段展示，AI 推荐分与平台评分严格分离。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--green-light);color:var(--green);">📍</div>
+        <h3>景点推荐</h3>
+        <p>门票价格+建议游览时长，帮你在有限时间里安排更多精彩</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--purple-light);color:var(--purple);">🗺️</div>
+        <h3>地图路线连线 <span class="feature-tag">核心</span></h3>
+        <p>高德JS API地图上按天着色连线，Marker带序号，InfoWindow含缩略图</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fce4ec;color:#c62828;">📱</div>
+        <h3>按地区提供导航 <span class="feature-tag">核心</span></h3>
+        <p>国内优先高德并提供百度跳转；海外优先 Google Maps；导航链接生成不等于调用地点检索。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--primary-light);color:var(--primary);">📋</div>
+        <h3>双视图切换</h3>
+        <p>卡片列表查信息，地图路线看行程，一键Tab切换</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--accent-light);color:var(--accent);">🗓️</div>
+        <h3>每日行程编排 <span class="feature-tag">核心</span></h3>
+        <p>每天展示景点、餐厅、住宿和必要的交通节点；路线方案切换时保持完整行程。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--teal-light);color:var(--teal);">📊</div>
+        <h3>Excel多Sheet</h3>
+        <p>输出结构化 Excel、Markdown 和 HTML；字段统一，便于复核、打印和二次编辑。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--green-light);color:var(--green);">📝</div>
+        <h3>Markdown全文</h3>
+        <p>完整Markdown攻略文档，含每日行程详情，方便二次编辑</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--purple-light);color:var(--purple);">🖼️</div>
+        <h3>图片与来源透明</h3>
+        <p>公开示例使用中性占位图；真实运行时按授权和 API 返回情况补图，不把占位图伪装成实拍图。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fff3e0;color:#e65100;">🌍</div>
+        <h3>国内外通吃</h3>
+        <p>国内与国际使用不同的数据源、地图和问答分支，但共享同一套输出 Schema 与 QA 约束。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== WORKFLOW ===== -->
+<section class="section section-alt">
+  <div class="container">
+    <h2 class="section-title">4 步 <span class="accent">生成攻略</span></h2>
+    <p class="section-sub">从想法到结构化交付物，按搜索深度执行</p>
+    <div class="workflow-steps reveal">
+      <div class="workflow-step">
+        <div class="workflow-num">1</div>
+        <h4>告诉我目的地</h4>
+        <p>"大兴安岭自驾7天"<br>"东京5天自由行"</p>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-num">2</div>
+        <h4>确认参数</h4>
+        <p>出行时间、预算偏好<br>路线风格、地图平台</p>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-num">3</div>
+        <h4>自动搜索编排</h4>
+        <p>多源交叉验证<br>每日行程自动编排</p>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-num">4</div>
+        <h4>三件套交付</h4>
+        <p>HTML地图页<br>Excel + Markdown</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DELIVERABLES ===== -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">三件套 <span class="accent">交付物</span></h2>
+    <p class="section-sub">每次生成都会得到三个完整文件</p>
+    <div class="feature-grid reveal" style="max-width:800px;margin:0 auto;">
+      <div class="feature-card" style="text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">🌐</div>
+        <h3 style="font-size:18px;">HTML 地图标记页</h3>
+        <p>交互式网页，卡片列表+地图路线双视图，按地区提供地图跳转，行程面板按天展示</p>
+      </div>
+      <div class="feature-card" style="text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">📊</div>
+        <h3 style="font-size:18px;">Excel 攻略大全</h3>
+        <p>结构化工作表：总览、酒店、美食、景点、交通、路线行程、每日行程和实用信息</p>
+      </div>
+      <div class="feature-card" style="text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">📝</div>
+        <h3 style="font-size:18px;">Markdown 全文攻略</h3>
+        <p>完整文字版攻略，含每日行程详情、所有点位信息，方便二次编辑分享</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-section">
+  <div class="container">
+    <h2>开始你的第一次旅行攻略</h2>
+    <p>只需一句话，按标准 Q0-Q9 确认参数后生成完整攻略三件套</p>
+    <div style="background:rgba(255,255,255,0.12);border:2px dashed rgba(255,255,255,0.3);border-radius:16px;padding:20px 28px;max-width:520px;margin:0 auto 24px;">
+      <div style="font-size:14px;opacity:0.7;margin-bottom:8px;">试试这样说：</div>
+      <div style="font-size:18px;font-weight:700;">"帮我制作3天2晚厦门亲子游攻略"</div>
+      <div style="font-size:14px;opacity:0.6;margin-top:4px;">或 "大兴安岭自驾7天" "东京5天自由行"</div>
+    </div>
+    <a href="#" style="display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--primary-dark);font-weight:700;font-size:16px;padding:14px 32px;border-radius:50px;text-decoration:none;box-shadow:var(--shadow-md);transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 48px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.12)';">对智能体说 →</a>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <p>Travel-Scope · v2.9.1 · 数据仅供参考 · 公开案例为历史快照，出发前请复核动态信息</p>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+(function(){
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold:0.15 });
+  els.forEach(el => obs.observe(el));
+})();
+</script>
+</body>
+</html>

@@ -30,6 +30,13 @@ python travel-scope/scripts/gen_travel_scope.py `
 
 See [travel-scope/SKILL.md](travel-scope/SKILL.md) for the SOP and QA gates. See [travel-scope/README.md](travel-scope/README.md) for skill-specific usage.
 
+## Product and workflow previews
+
+- [中文产品介绍](travel-scope-intro.html) / [English product introduction](travel-scope-intro-en.html)
+- [中文工作流说明](travel-scope-workflow.html) / [English workflow](travel-scope-workflow-en.html)
+
+The previews include bilingual card screenshots and a route-planning interface example. Public screenshots do not contain provider API keys.
+
 ## Current release
 
 `v2.9.1` — internationalized CN/EN output and offline Demo/Live separation.

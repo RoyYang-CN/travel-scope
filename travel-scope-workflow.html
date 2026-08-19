@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel-Scope v2.9.1 - 工作流程 / Workflow</title>
+<style>
+  :root {
+    --primary: #1a73e8;
+    --primary-light: #e8f0fe;
+    --success: #34a853;
+    --warning: #fbbc04;
+    --danger: #ea4335;
+    --gray-50: #f8f9fa;
+    --gray-100: #f1f3f4;
+    --gray-200: #e8eaed;
+    --gray-500: #9aa0a6;
+    --gray-700: #5f6368;
+    --gray-900: #202124;
+    --radius: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--gray-900);
+    line-height: 1.7;
+    background: var(--gray-50);
+  }
+  .container { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+  
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+    color: white;
+    padding: 40px 0;
+    margin-bottom: 32px;
+    border-radius: var(--radius);
+  }
+  .header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .header p { font-size: 15px; opacity: 0.9; }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .badge-domestic { background: #e8f5e9; color: #2e7d32; }
+  .badge-overseas { background: #fff3e0; color: #e65100; }
+  .badge-new { background: #fce4ec; color: #c62828; }
+  
+  /* Flow Steps */
+  .flow { display: flex; flex-direction: column; gap: 0; position: relative; }
+  .step {
+    position: relative;
+    padding: 20px 24px 20px 72px;
+    background: white;
+    border: 1px solid var(--gray-200);
+    transition: box-shadow 0.2s;
+  }
+  .step:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+  .step:last-child { border-radius: 0 0 var(--radius) var(--radius); }
+  .step:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); z-index: 1; }
+  .step + .step { border-top: none; }
+  
+  .step-number {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .step-number.api { background: var(--success); }
+  .step-number.warn { background: var(--warning); color: var(--gray-900); }
+  .step-number.danger { background: var(--danger); }
+  
+  .step h3 { font-size: 16px; margin-bottom: 8px; }
+  .step p, .step li { font-size: 14px; color: var(--gray-700); }
+  .step ul { padding-left: 20px; margin-top: 6px; }
+  .step li { margin-bottom: 4px; }
+  
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .card {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .card h4 { font-size: 14px; color: var(--primary); margin-bottom: 6px; }
+  .card p { font-size: 13px; color: var(--gray-700); }
+  
+  /* Code blocks */
+  code {
+    background: var(--gray-100);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+    color: #d32f2f;
+  }
+  pre {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-x: auto;
+    margin-top: 8px;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+  
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 13px;
+  }
+  th {
+    background: var(--primary);
+    color: white;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  tr:nth-child(even) { background: var(--gray-50); }
+  
+  /* Tip boxes */
+  .tip {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-top: 8px;
+    font-size: 13px;
+  }
+  .tip-info { background: #e3f2fd; border-left: 4px solid #2196f3; }
+  .tip-warn { background: #fff8e1; border-left: 4px solid #ffc107; }
+  .tip-danger { background: #fce4ec; border-left: 4px solid #e91e63; }
+  .tip-success { background: #e8f5e9; border-left: 4px solid #4caf50; }
+  .tip strong { display: block; margin-bottom: 4px; }
+  
+  /* Section */
+  .section { margin-top: 32px; }
+  .section h2 {
+    font-size: 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary);
+    margin-bottom: 16px;
+  }
+  
+  /* Flow diagram */
+  .flow-diagram {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin: 16px 0;
+    justify-content: center;
+  }
+  .flow-node {
+    background: white;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--gray-500); font-size: 18px; }
+  
+  /* Data fields */
+  .field-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 4px; margin-top: 8px; }
+  .field-item { font-size: 13px; padding: 4px 8px; background: var(--gray-50); border-radius: 4px; }
+  .field-item span { color: var(--primary); font-weight: 600; }
+  
+  @media (max-width: 640px) {
+    .container { padding: 12px; }
+    .step { padding: 16px 16px 16px 56px; }
+    .step-number { left: 12px; width: 30px; height: 30px; font-size: 12px; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+  .language-switch { display:flex; justify-content:flex-end; gap:8px; margin-bottom:12px; }
+  .language-switch a { color:var(--primary); text-decoration:none; padding:5px 12px; border:1px solid var(--gray-200); border-radius:16px; font-size:12px; background:#fff; }
+  .language-switch a.active, .language-switch a:hover { color:#fff; background:var(--primary); border-color:var(--primary); }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="language-switch"><a class="active" href="travel-scope-workflow.html">中文</a><a href="travel-scope-workflow-en.html">EN</a><a href="travel-scope-intro.html">产品介绍</a></div>
+
+<!-- Header -->
+<div class="header" style="padding: 32px 24px;">
+  <h1>Travel-Scope <span class="badge badge-new">v2.9.1</span></h1>
+  <p>为任意国家/地区制作多目的地旅行攻略，输出 HTML、Markdown 与 Excel。</p>
+  <p style="margin-top:8px; font-size:13px; opacity:0.85;">国内/国际双分支 &bull; 中文/英文双语 &bull; 地图导航跳转 &bull; 路线与点位全链路 QA</p>
+</div>
+
+<!-- Overview Flow -->
+<div class="flow-diagram">
+  <div class="flow-node">收集参数</div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-node">目的地盘点</div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-node">路线设计</div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-node">行程编排</div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-node">数据收集+验证</div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-node">图片补全</div>
+  <div class="flow-arrow">&rarr;</div>
+  <div class="flow-node">生成三件套</div>
+</div>
+
+<!-- Workflow Steps -->
+<div class="section">
+  <h2>核心工作流 (8步)</h2>
+  <div class="flow">
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-number">1</div>
+      <h3>交互收集参数</h3>
+      <p>通过问答收集以下参数（合并为尽量少的轮次，已提供的跳过）：</p>
+      <div class="card-grid">
+        <div class="card">
+          <h4>标准化 Q0-Q3</h4>
+          <p>Q0 目的地范围、Q1 出行月份/日期、Q2 旅行天数、Q3 预算档位。</p>
+        </div>
+        <div class="card">
+          <h4>标准化 Q4-Q9</h4>
+          <p>Q4 出行方式（仅自驾/非自驾）；Q5 抵达口岸；Q6 离开口岸；Q7 搜索深度；Q8 地图平台；Q9 路线方案。国内非自驾时，另触发公共交通或包车/接送的交通规划分支。</p>
+        </div>
+      </div>
+      <div class="tip tip-info"><strong>自动判断</strong>：国内以高德 POI 为主、百度重点核验/补图/导航，搜索引擎作辅助；海外按可用地图与公开来源执行。平台缺失字段不伪造，AI 推荐分单独标注。</div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-number">2</div>
+      <h3>数据源判断与目的地盘点</h3>
+      <p>在线搜索补充8-16个主要旅行目的地的信息：</p>
+      <ul>
+        <li>名称（中英文）、所属区域、核心体验</li>
+        <li>建议天数、最佳季节、到达方式</li>
+      </ul>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-number">3</div>
+      <h3>路线设计</h3>
+      <p>根据地理位置和交通可行性，设计3-6条备选路线方案（ROUTES数组）：</p>
+      <ul>
+        <li>每条包含：方案名、天数、路线串联、特色、适合人群、预算、交通方式</li>
+      </ul>
+    </div>
+
+    <!-- Step 3.5 -->
+    <div class="step">
+      <div class="step-number warn">3.5</div>
+      <h3>每日行程编排 (ITINERARY) <span class="badge badge-new">全量编排</span></h3>
+      <p><strong>所有路线方案都必须编排完整每日行程</strong>，确保HTML下拉每条方案都有完整的地图路线展示。</p>
+      <div class="tip tip-danger"><strong>全量编排原则</strong>：不要只编排1-2条主路线！否则用户切换方案时看到空白页面，体验极差。多方案通常有大量重叠点位，先编排方案A，再基于A的骨架调整出其他方案。</div>
+      <table>
+        <tr><th>字段</th><th>说明</th></tr>
+        <tr><td><code>方案名</code></td><td>对应ROUTES中的方案名称</td></tr>
+        <tr><td><code>日序</code></td><td>"Day 1", "Day 2", ...</td></tr>
+        <tr><td><code>序号</code></td><td>当日顺序（1,2,3...）</td></tr>
+        <tr><td><code>点位类型</code></td><td>景点 / 餐厅 / 酒店 / 交通</td></tr>
+        <tr><td><code>点位名称</code></td><td>必须与HOTELS/RESTAURANTS/ATTRACTIONS的[1]中文名完全一致</td></tr>
+        <tr><td><code>经纬度</code></td><td>WGS84格式 "纬度,经度"</td></tr>
+      </table>
+      <div class="tip tip-warn"><strong>编排经验</strong>：每天4-6个点位；跨城市移动用交通类型标注；新增城市需先<code>.extend()</code>追加数据再编排</div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-number">4</div>
+      <h3>深度数据收集（含交叉验证）</h3>
+      <p>对每个目的地按数据源分流规则收集数据，每个点位交叉验证至少N篇：</p>
+      <div class="card-grid">
+        <div class="card">
+          <h4>国内评分格式</h4>
+          <p>酒店/景点：<code>小红书热度:高|携程:4.5</code><br>
+          餐厅：<code>大众点评:4.5分|850条</code></p>
+        </div>
+        <div class="card">
+          <h4>海外评分格式</h4>
+          <p>统一：<code>Google:4.3</code> 或 <code>Google:4.3|1200条</code></p>
+        </div>
+        <div class="card">
+          <h4>交叉验证流程</h4>
+          <p>搜索点位名&rarr;多源提取N篇&rarr;核对名称/地址/评分&rarr;剔除已关闭&rarr;独立确认坐标</p>
+        </div>
+      </div>
+      <div class="tip tip-info"><strong>11字段格式</strong>：HOTELS [目的地,中文名,英文名,类型,参考价,评分,评价数,经纬度,图片1,图片2,特色描述]</div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step">
+      <div class="step-number">5</div>
+      <h3>交通 + 实用信息</h3>
+      <p>收集目的地间交通方式（航班/快船/大巴/自驾/火车）和签证/汇率/SIM卡等实用信息</p>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="step">
+      <div class="step-number api">6</div>
+      <h3>坐标获取 <span class="badge badge-domestic">高德POI API</span></h3>
+      <p>国内目的地坐标必须通过高德POI搜索获取（WGS84格式存储）：</p>
+      <pre><code>GET https://restapi.amap.com/v3/place/text
+    ?key=YOUR_AMAP_KEY
+    &keywords=点位名
+    &city=城市名
+    &extensions=all  # 返回坐标+图片</code></pre>
+      <div class="tip tip-danger"><strong>坐标转换</strong>：高德API返回GCJ02坐标（火星坐标系），存储到数据数组前必须转换为WGS84！<br>API返回 <code>location</code> 格式是 <code>"经度,纬度"</code>（经度在前），存储需反转为 <code>"纬度,经度"</code></div>
+    </div>
+
+    <!-- Step 7 -->
+    <div class="step">
+      <div class="step-number api">7</div>
+      <h3>图片搜索与补全 <span class="badge badge-new">高德photos优先</span></h3>
+      <p>按优先级获取图片：</p>
+      <table>
+        <tr><th>优先级</th><th>方式</th><th>命中率</th></tr>
+        <tr><td>1</td><td><strong>高德POI API <code>photos</code>字段</strong>（<code>extensions=all</code>返回）</td><td>~81%</td></tr>
+        <tr><td>2</td><td>在线搜索（携程/马蜂窝/大众点评图片）</td><td>~15%</td></tr>
+        <tr><td>3</td><td>留空显示📷占位图</td><td>&mdash;</td></tr>
+      </table>
+      <div class="tip tip-success"><strong>实战经验</strong>：高德POI API一步获取坐标+图片，效率最高。64个缺图点位测试：52个找到图片(81%)，无防盗链限制，图片可正常加载。找不到的主要是小型经济宾馆和偏远景点。</div>
+      <div class="tip tip-info"><strong>批量补全模式</strong>：先运行脚本生成初版三件套&rarr;用高德POI API批量查询缺图点位&rarr;注入图片URL&rarr;重新生成</div>
+    </div>
+
+    <!-- Step 8 -->
+    <div class="step">
+      <div class="step-number">8</div>
+      <h3>生成三件套</h3>
+      <pre><code>python gen_travel_guide.py \
+    --output-dir "输出目录" \
+    --map-platform all \
+    --country 大兴安岭 \
+    --amap-js-key YOUR_AMAP_KEY  # 启用地图路线视图</code></pre>
+      <div class="card-grid">
+        <div class="card">
+          <h4>Excel (11个Sheet)</h4>
+          <p>目的地总览/路线方案/住宿/美食/交通/景点/潜水/预算/实用信息/坐标汇总/每日行程</p>
+        </div>
+        <div class="card">
+          <h4>Markdown</h4>
+          <p>完整文字攻略，含每日行程详情章节</p>
+        </div>
+        <div class="card">
+          <h4>HTML地图标记</h4>
+          <p>双视图Tab：卡片列表+地图路线(高德JS API)<br>Marker着色+按天连线+InfoWindow+导航按钮</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Data Source -->
+<div class="section">
+  <h2>数据源分流</h2>
+  <table>
+    <tr><th>数据类型</th><th>国内（中国大陆）</th><th>海外</th></tr>
+    <tr><td>酒店/住宿</td><td>小红书攻略 + 携程</td><td>Google Maps + TripAdvisor</td></tr>
+    <tr><td>餐厅/美食</td><td>小红书攻略 + 大众点评</td><td>Google Maps + TripAdvisor</td></tr>
+    <tr><td>景点/活动</td><td>小红书攻略 + 携程</td><td>Google Maps + TripAdvisor</td></tr>
+    <tr><td>坐标来源</td><td>高德地图POI搜索</td><td>Google Maps</td></tr>
+    <tr><td>图片来源</td><td>高德POI photos + 在线搜索</td><td>在线搜索(Google/TripAdvisor)</td></tr>
+  </table>
+</div>
+
+<!-- HTML Structure -->
+<div class="section">
+  <h2>HTML双视图结构</h2>
+  <div class="card-grid">
+    <div class="card">
+      <h4>Tab 1: 卡片列表视图</h4>
+      <p>目的地城市(一级) &rarr; 住宿/美食/景点/潜水/交通(二级) &rarr; 具体点位<br>
+      每个点位含2张缩略图+lightbox大图+三平台导航按钮</p>
+    </div>
+    <div class="card">
+      <h4>Tab 2: 地图路线视图</h4>
+      <p>高德JS API动态地图<br>
+      Marker按类型着色(景点绿/餐厅橙/酒店蓝) + 序号标签<br>
+      连线按天8色循环(同天实线+箭头/跨天虚线)<br>
+      InfoWindow含图片+导航 &bull; 左侧行程面板flyTo &bull; 路线选择器</p>
+    </div>
+  </div>
+  <div class="tip tip-info"><strong>禁用条件</strong>：无<code>--amap-js-key</code> / 海外目的地 / ITINERARY为空 &rarr; 地图Tab灰色禁用</div>
+</div>
+
+<!-- Extend Pattern -->
+<div class="section">
+  <h2>扩展城市数据模式</h2>
+  <p>当追加新城市POI数据时（如方案B/C涉及新城市），使用<code>.extend()</code>追加：</p>
+  <pre><code># 在合并脚本中追加新城市数据
+HOTELS.extend([
+    ["满洲里", "满洲里大饭店", "Manzhouli Grand Hotel", ...],
+])
+RESTAURANTS.extend([...])
+ATTRACTIONS.extend([...])</code></pre>
+  <div class="tip tip-warn"><strong>先追加数据再编排行程</strong>：新城市的点位数据必须先<code>.extend()</code>到数组中，才能在ITINERARY中引用这些点位名称</div>
+</div>
+
+<!-- Verification Checklist -->
+<div class="section">
+  <h2>验证清单</h2>
+  <table>
+    <tr><th>检查项</th><th>要求</th></tr>
+    <tr><td>Excel工作表</td><td>11个（含"每日行程"Sheet）</td></tr>
+    <tr><td>数据深度</td><td>每个目的地达到深度标准(8+6+6)</td></tr>
+    <tr><td>评分格式</td><td>国内: <code>小红书热度:X|携程:X.X</code> / 海外: <code>Google:X.X</code></td></tr>
+    <tr><td>ITINERARY名称</td><td>与HOTELS/RESTAURANTS/ATTRACTIONS中文名完全一致</td></tr>
+    <tr><td>所有方案allRouteNames</td><td>在itineraryData中都有对应数据</td></tr>
+    <tr><td>下拉选择器</td><td>切换每条方案都能显示完整地图路线</td></tr>
+    <tr><td>图片覆盖率</td><td>&gt; 85%（低于则补充搜索）</td></tr>
+    <tr><td>坐标格式</td><td>"纬度,经度"（WGS84格式）</td></tr>
+  </table>
+</div>
+
+<!-- Cross Platform -->
+<div class="section">
+  <h2>跨平台适配</h2>
+  <table>
+    <tr><th>能力</th><th>TeleAgent</th><th>OpenAI Codex</th><th>Google Astra</th></tr>
+    <tr><td>联网搜索</td><td><code>online_search</code></td><td>Web搜索工具</td><td>Grounding搜索</td></tr>
+    <tr><td>交互问答</td><td><code>question</code></td><td>函数调用</td><td>函数调用</td></tr>
+    <tr><td>运行脚本</td><td><code>powershell</code></td><td>沙箱执行</td><td>代码执行</td></tr>
+    <tr><td>脚本本身</td><td colspan="3">纯Python+openpyxl，跨平台通用，无需修改</td></tr>
+  </table>
+  <div class="tip tip-info"><strong>适配核心</strong>：只需将 <code>online_search</code> 替换为对应平台的搜索API，脚本生成/坐标转换/Excel/HTML/Markdown渲染全部在脚本内部完成。</div>
+</div>
+
+<!-- File Structure -->
+<div class="section">
+  <h2>交付文件</h2>
+  <div class="field-list">
+    <div class="field-item"><span>SKILL.md</span> 技能提示词(755行)</div>
+    <div class="field-item"><span>gen_travel_guide.py</span> 生成脚本(2000+行)</div>
+    <div class="field-item"><span>destinations.md</span> 目的地参考数据</div>
+    <div class="field-item"><span>.xlsx</span> Excel攻略(11个Sheet)</div>
+    <div class="field-item"><span>.md</span> Markdown攻略</div>
+    <div class="field-item"><span>.html</span> 地图标记页(双视图)</div>
+  </div>
+</div>
+
+<div style="text-align:center; padding:32px 0; color:var(--gray-500); font-size:12px;">
+  Travel-Scope v7 &bull; 2026-08-13 &bull; 基于大兴安岭150+点位实战验证
+</div>
+
+</div>
+</body>
+</html>
