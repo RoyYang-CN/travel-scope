@@ -144,6 +144,7 @@ def gen_map_uri(platform, lat, lng, name="", content=""):
 # ============================================================
 
 COUNTRY = "菲律宾"  # Used in filenames and titles
+COUNTRY_EN = "Philippines"
 TRAVEL_MODE = ""  # Standard Q4: 自驾 / 非自驾
 DOMESTIC_DESTINATION = False  # Set by domestic builders; overseas always audits required transport
 OUTPUT_LANG = "cn"  # cn / en; the --language=both mode generates both artifacts
@@ -152,7 +153,7 @@ DEMO_MODE = False
 
 def load_demo_fixture(path):
     """Load a sanitized, offline fixture without touching provider APIs."""
-    global COUNTRY, TRAVEL_MODE, DOMESTIC_DESTINATION
+    global COUNTRY, COUNTRY_EN, TRAVEL_MODE, DOMESTIC_DESTINATION
     global DESTINATIONS, DESTINATION_COVERAGE, SOURCE_EVIDENCE, DYNAMIC_INFO
     global ROUTES, HOTELS, RESTAURANTS, TRANSPORT, ATTRACTIONS, DIVE_SITES
     global BUDGET, PRACTICAL, ITINERARY
@@ -161,6 +162,7 @@ def load_demo_fixture(path):
     if not isinstance(payload, dict):
         raise ValueError("Demo fixture must be a JSON object")
     COUNTRY = payload.get("country", COUNTRY)
+    COUNTRY_EN = payload.get("country_en", COUNTRY_EN)
     TRAVEL_MODE = payload.get("travel_mode", "非自驾")
     DOMESTIC_DESTINATION = bool(payload.get("domestic_destination", False))
     for key in (
@@ -182,6 +184,8 @@ def display_name(cn, en="", lang=None):
     """Return a traveller-facing name while retaining Chinese for wayfinding."""
     lang = lang or OUTPUT_LANG
     cn, en = str(cn or "").strip(), str(en or "").strip()
+    if en and en.casefold() == cn.casefold():
+        return cn or en
     if lang == "en" and en:
         return f"{en} ({cn})"
     return f"{cn} ({en})" if en and lang != "en" else (cn or en)
@@ -233,6 +237,10 @@ def destination_display(name):
         if row and row[0] == name:
             return display_name(row[0], row[1] if len(row) > 1 else "")
     return name
+
+
+def country_display(lang=None):
+    return COUNTRY_EN if (lang or OUTPUT_LANG) == "en" and COUNTRY_EN else COUNTRY
 
 def effective_travel_mode():
     """Normalize missing/invalid Q4 conservatively to non-self-drive."""
@@ -583,6 +591,7 @@ def _prepare_itinerary_json():
 
 def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', google_maps_key=''): 
     """Generate HTML with dual-view: card list + map route (dual-engine: AMap JS API for domestic / Google Maps JS API for overseas)."""
+    guide_title = f"{country_display()} Travel Guide" if OUTPUT_LANG == "en" else f"{COUNTRY}旅行攻略"
 
     def valid_search_supplement(value):
         """Show only extracted search evidence; hide all-pending placeholders."""
@@ -740,7 +749,7 @@ window._AMapSecurityConfig = {{ securityJsCode: {sec} }};
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Travel-Scope | {COUNTRY}旅行攻略</title>
+<title>Travel-Scope | {guide_title}</title>
 {amap_security_script}
 <style>
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
@@ -837,7 +846,7 @@ footer {{ text-align: center; padding: 20px; color: #999; font-size: 13px; }}
 <body>
 <div class="container">
 <header>
-<h1>Travel-Scope | {' '.join(list(COUNTRY))}旅行攻略</h1>
+<h1>Travel-Scope | {guide_title}</h1>
 <p>互动探索 · {platform_names}一键导航 · 按目的地分类{' · 含地图路线' if map_route_enabled else ''}</p>
 <div class="stats">
 <div class="stat"><strong>{len(HOTELS)}</strong>住宿</div>
@@ -947,7 +956,7 @@ footer {{ text-align: center; padding: 20px; color: #999; font-size: 13px; }}
 
     parts.append(f"""
 <footer>
-<p>{COUNTRY}旅行攻略 · 地图标记页 · 数据仅供参考</p>
+<p>{guide_title} · 地图标记页 · 数据仅供参考</p>
 <p>导航平台: {platform_names}</p>
 </footer>
 </div>
@@ -1565,8 +1574,9 @@ function transformLng(lng, lat) {{
 
 def generate_markdown(output_path):
     """Generate comprehensive Markdown travel guide."""
+    guide_title = f"{country_display()} Travel Guide" if OUTPUT_LANG == "en" else f"{COUNTRY}旅行攻略大全"
     md = []
-    md.append(f"# {COUNTRY}旅行攻略大全")
+    md.append(f"# {guide_title}")
     if DEMO_MODE:
         md.append("> **Demo fixture / 离线演示数据：** This guide is generated from sanitized sample data and is not live platform data.")
     md.append("")
@@ -1719,7 +1729,7 @@ def generate_markdown(output_path):
     md.append("")
     md.append("---")
     md.append("")
-    md.append(f"*{COUNTRY}旅行攻略大全*")
+    md.append(f"*{guide_title}*")
 
     md_text = '\n'.join(md)
     if OUTPUT_LANG == "en":
