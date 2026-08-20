@@ -37,6 +37,20 @@ See [travel-scope/SKILL.md](travel-scope/SKILL.md) for the SOP and QA gates. See
 
 The previews include bilingual card screenshots and a route-planning interface example. Public screenshots do not contain provider API keys.
 
+### HTML output preview
+
+Chinese card view:
+
+![Travel-Scope Chinese HTML cards](assets/screenshot-indonesia-cn-cards.png)
+
+English card view:
+
+![Travel-Scope English HTML cards](assets/screenshot-indonesia-en-cards.png)
+
+Route planning view:
+
+![Travel-Scope route planning](assets/screenshot-route-cn.png)
+
 ## Current release
 
 `v2.9.1` — internationalized CN/EN output and offline Demo/Live separation.
