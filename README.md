@@ -4,6 +4,13 @@ Evidence-aware travel research and itinerary generation for domestic and interna
 
 Travel-Scope combines destination discovery, route-corridor exploration, multi-source evidence, structured POI data, and output QA. It generates HTML, Markdown, and Excel from one validated data model, with Chinese and English output.
 
+## Who is Travel-Scope for?
+
+- **Open-source and Python developers** — reuse the generator, data model, QA gates, and provider adapters in your own travel tools.
+- **AI Agent users** — provide a standard travel brief and let the workflow discover destinations, search places, compare route corridors, and produce editable deliverables.
+- **International visitors to China** — use English explanations while retaining Chinese names and pinyin for maps, taxis, tickets, and asking for directions.
+- **Travel planners** — start from the Indonesia, Philippines, or China examples and adapt the route, budget, transport, and POI choices.
+
 ## Try it without API keys
 
 ```powershell
@@ -35,21 +42,35 @@ See [travel-scope/SKILL.md](travel-scope/SKILL.md) for the SOP and QA gates. See
 - [中文产品介绍](travel-scope-intro.html) / [English product introduction](travel-scope-intro-en.html)
 - [中文工作流说明](travel-scope-workflow.html) / [English workflow](travel-scope-workflow-en.html)
 
-The previews include bilingual card screenshots and a route-planning interface example. Public screenshots do not contain provider API keys.
+The previews include bilingual card, accommodation, food, attraction and route-interface screenshots. Public screenshots do not contain provider API keys.
 
 ### HTML output preview
 
-Chinese card view:
+<details>
+<summary>English interface screenshots</summary>
 
-![Travel-Scope Chinese HTML cards](assets/screenshot-indonesia-cn-cards.png)
+English card view and product output:
 
-English card view:
+| Overview / cards | Route map | Accommodation | Food | Attractions |
+|---|---|---|---|---|
+| ![Travel-Scope English overview](assets/screenshot-indonesia-en-overview.png) | ![Travel-Scope English route](assets/screenshot-indonesia-en-route-full.png) | ![Travel-Scope English accommodation](assets/screenshot-indonesia-en-accommodation.png) | ![Travel-Scope English food](assets/screenshot-indonesia-en-food.png) | ![Travel-Scope English attractions](assets/screenshot-indonesia-en-attractions.png) |
 
-![Travel-Scope English HTML cards](assets/screenshot-indonesia-en-cards.png)
+The English route screenshot was rendered with a temporary local key and contains no API key. The public HTML still requires the user's own configuration for a live Google Maps view; no provider key is embedded in this repository.
 
-Route planning view:
+</details>
 
-![Travel-Scope route planning](assets/screenshot-route-cn.png)
+<details>
+<summary>中文界面截图</summary>
+
+Chinese card view and product output:
+
+| 总览与目的地 | 路线地图 | 住宿 | 美食 | 景点 |
+|---|---|---|---|---|
+| ![Travel-Scope 中文总览](assets/screenshot-indonesia-cn-overview.png) | ![Travel-Scope 中文路线](assets/screenshot-indonesia-cn-route-full.png) | ![Travel-Scope 中文住宿](assets/screenshot-indonesia-cn-accommodation.png) | ![Travel-Scope 中文美食](assets/screenshot-indonesia-cn-food.png) | ![Travel-Scope 中文景点](assets/screenshot-indonesia-cn-attractions.png) |
+
+补充： [目的地折叠总览](assets/screenshot-indonesia-cn-destinations-collapsed.png)
+
+</details>
 
 ## Current release
 
@@ -58,3 +79,8 @@ Route planning view:
 ## Status
 
 This repository is currently a private release candidate while API, data-source, licensing, and output safety checks are completed.
+
+## Security and licensing
+
+- Security reports: see [SECURITY.md](SECURITY.md). Sensitive reports should be emailed privately to `hnzzlulu@gmail.com`, not posted in Issues.
+- Licensed under [Apache-2.0](LICENSE). Commercial use, modification, and redistribution are permitted subject to the license terms.
