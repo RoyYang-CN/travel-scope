@@ -234,9 +234,58 @@ def localize_sheet_name(name):
 
 def destination_display(name):
     for row in DESTINATIONS:
+        if isinstance(row, dict) and row.get("name") == name:
+            return display_name(row.get("name", ""), row.get("name_en", ""))
         if row and row[0] == name:
             return display_name(row[0], row[1] if len(row) > 1 else "")
     return name
+
+
+def route_display(name):
+    """Localize route labels while keeping the Chinese route key stable."""
+    for row in ROUTES:
+        if isinstance(row, dict) and row.get("name") == name:
+            return display_name(row.get("name", ""), row.get("name_en", ""))
+        if row and row[0] == name:
+            return display_name(row[0], row[7] if len(row) > 7 else "")
+    return name
+
+
+def poi_display_html(item):
+    """Render English first while retaining Chinese for wayfinding."""
+    cn = html_mod.escape(str(item.get("cn", "")))
+    en = html_mod.escape(str(item.get("en", "")))
+    if OUTPUT_LANG == "en" and en:
+        return f"{en} <span class=\"cn\">({cn})</span>"
+    return f"{cn} <span class=\"en\">{en}</span>" if en else cn
+
+
+def validate_english_dynamic_labels(destination_names):
+    """Block incomplete EN output instead of silently publishing Chinese labels."""
+    if OUTPUT_LANG != "en":
+        return
+    destination_en = {}
+    for row in DESTINATIONS:
+        if isinstance(row, dict):
+            destination_en[row.get("name", "")] = row.get("name_en", "")
+        elif row:
+            destination_en[row[0]] = row[1] if len(row) > 1 else ""
+    missing_destinations = [name for name in destination_names if not str(destination_en.get(name, "")).strip()]
+    missing_routes = []
+    for row in ROUTES:
+        if not row:
+            continue
+        route_name = row.get("name", "") if isinstance(row, dict) else row[0]
+        has_english = row.get("name_en", "") if isinstance(row, dict) else (row[7] if len(row) > 7 else "")
+        if not str(has_english).strip():
+            missing_routes.append(str(route_name))
+    if missing_destinations or missing_routes:
+        problems = []
+        if missing_destinations:
+            problems.append("destinations missing name_en: " + ", ".join(missing_destinations[:20]))
+        if missing_routes:
+            problems.append("routes missing name_en: " + ", ".join(missing_routes[:20]))
+        raise ValueError("English output blocked: " + "; ".join(problems))
 
 
 def country_display(lang=None):
@@ -279,7 +328,7 @@ DYNAMIC_INFO = [
 ]
 
 # Sheet: 路线方案
-# [方案名, 天数, 路线, 特色, 适合人群, 预算(元,不含机票), 交通方式]
+# [方案名, 天数, 路线, 特色, 适合人群, 预算(元,不含机票), 交通方式, 英文方案名]
 ROUTES = [
     ["方案A: 示例环线", "12天", "目的地A→目的地B→目的地C→目的地A", "特色描述", "适合人群", "5,000-7,000", "交通方式"],
     # ... (LLM: add all routes here)
@@ -606,7 +655,7 @@ def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', 
         d = h[0]
         dest_items.setdefault(d, {"住宿": [], "美食": [], "景点": [], "潜水": [], "交通": []})
         dest_items[d]["住宿"].append({
-            "cn": display_name(h[1], h[2]), "en": "" if OUTPUT_LANG == "en" else h[2], "coords": h[7],
+            "cn": h[1], "en": h[2], "coords": h[7],
             "detail": f"{h[3]} | {h[4]}元/晚",
             "rating": h[5],
             "amap_rating": h[12] if len(h) > 12 else "",
@@ -620,7 +669,7 @@ def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', 
         d = r[0]
         dest_items.setdefault(d, {"住宿": [], "美食": [], "景点": [], "潜水": [], "交通": []})
         dest_items[d]["美食"].append({
-            "cn": display_name(r[1], r[2]), "en": "" if OUTPUT_LANG == "en" else r[2], "coords": r[7],
+            "cn": r[1], "en": r[2], "coords": r[7],
             "detail": f"{r[3]} | 人均{r[4]}元",
             "rating": r[5],
             "amap_rating": r[12] if len(r) > 12 else "",
@@ -634,7 +683,7 @@ def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', 
         d = a[0]
         dest_items.setdefault(d, {"住宿": [], "美食": [], "景点": [], "潜水": [], "交通": []})
         dest_items[d]["景点"].append({
-            "cn": display_name(a[1], a[2]), "en": "" if OUTPUT_LANG == "en" else a[2], "coords": a[6],
+            "cn": a[1], "en": a[2], "coords": a[6],
             "detail": f"{a[3]} | {a[4]}元",
             "rating": a[5],
             "amap_rating": a[12] if len(a) > 12 else "",
@@ -648,7 +697,7 @@ def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', 
         d = dv[0]
         dest_items.setdefault(d, {"住宿": [], "美食": [], "景点": [], "潜水": [], "交通": []})
         dest_items[d]["潜水"].append({
-            "cn": display_name(dv[1], dv[2]), "en": "" if OUTPUT_LANG == "en" else dv[2], "coords": dv[6],
+            "cn": dv[1], "en": dv[2], "coords": dv[6],
             "detail": f"{dv[3]} | {dv[4]}元 | {dv[9]}",
             "rating": dv[5],
             "img1": dv[7], "img2": dv[8]
@@ -716,6 +765,7 @@ def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', 
     map_route_enabled = (bool(amap_js_key) and not overseas or bool(google_maps_key) and overseas) and has_itinerary
     itinerary_json = _prepare_itinerary_json() if has_itinerary else "{}"
     all_route_names = json.dumps([r[0] for r in ROUTES], ensure_ascii=False)
+    all_route_labels = json.dumps([route_display(r[0]) for r in ROUTES], ensure_ascii=False)
     _is_overseas_str = 'true' if overseas else 'false'
 
     # Build CSS for map buttons
@@ -869,6 +919,7 @@ footer {{ text-align: center; padding: 20px; color: #999; font-size: 13px; }}
     # overview table is a higher-level country summary and does not enumerate
     # every collected area.
     destination_names = list(dict.fromkeys([d[0] for d in DESTINATIONS] + list(dest_items.keys())))
+    validate_english_dynamic_labels(destination_names)
     for dest_name in destination_names:
         items = dest_items.get(dest_name, {})
         emoji = DEST_EMOJIS_DEFAULT.get(dest_name, "📍")
@@ -877,7 +928,7 @@ footer {{ text-align: center; padding: 20px; color: #999; font-size: 13px; }}
             continue
 
         parts.append(f'\n<div class="dest-section" data-dest="{html_mod.escape(dest_name)}">')
-        parts.append(f'<div class="dest-header" onclick="toggleSection(this)"><span class="emoji">{emoji}</span> {html_mod.escape(dest_name)} <span class="dest-count">{total}个地点</span> <span class="arrow">▼</span></div>')
+        parts.append(f'<div class="dest-header" onclick="toggleSection(this)"><span class="emoji">{emoji}</span> {html_mod.escape(destination_display(dest_name))} <span class="dest-count">{total}个地点</span> <span class="arrow">▼</span></div>')
         parts.append('<div class="dest-body">')
 
         for cat in ["住宿", "美食", "景点", "潜水", "交通"]:
@@ -915,7 +966,7 @@ footer {{ text-align: center; padding: 20px; color: #999; font-size: 13px; }}
                     thumbs_html = f'<div class="loc-thumbs">{thumbs_inner}</div>'
                 parts.append(f"""<div class="loc-card" data-search="{search_text}">
 {thumbs_html}<div class="loc-info">
-<div class="loc-name">{html_mod.escape(item['cn'])} <span class="en">{html_mod.escape(item.get('en',''))}</span>{rating_html}{amap_html}{baidu_html}{ai_html}</div>
+<div class="loc-name">{poi_display_html(item)}{rating_html}{amap_html}{baidu_html}{ai_html}</div>
 <div class="loc-detail">{html_mod.escape(item['detail'])}</div>
 <div class="loc-coords">{item['coords']}</div>
 </div>
@@ -1011,6 +1062,7 @@ function switchTab(tab) {{
     // === Map route view (dual engine: AMap domestic / Google Maps overseas) ===
 var itineraryData = {itinerary_json};
 var allRouteNames = {all_route_names};
+var allRouteLabels = {all_route_labels};
 var mapInstance = null;
 var markersLayer = null;
 var polylinesLayer = null;
@@ -1051,7 +1103,7 @@ function initAMap() {{
     allRouteNames.forEach(function(name, i) {{
       var opt = document.createElement('option');
       opt.value = name;
-      opt.textContent = name;
+       opt.textContent = allRouteLabels[i] || name;
       select.appendChild(opt);
     }});
     if (allRouteNames.length > 0) {{
@@ -1078,7 +1130,7 @@ function initGoogleMap() {{
     allRouteNames.forEach(function(name, i) {{
       var opt = document.createElement('option');
       opt.value = name;
-      opt.textContent = name;
+       opt.textContent = allRouteLabels[i] || name;
       select.appendChild(opt);
     }});
     if (allRouteNames.length > 0) {{

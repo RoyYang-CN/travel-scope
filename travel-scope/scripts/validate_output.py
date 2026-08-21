@@ -48,6 +48,13 @@ def main():
         fail(errors, "卡片价格字段仍包含占位值")
 
     destination_names = set(re.findall(r'<div class="dest-section" data-dest="([^"]+)"', html))
+    is_english = bool(re.search(r'<html[^>]+lang=["\']en["\']', html, re.I))
+    if is_english:
+        destination_headers = re.findall(r'<div class="dest-header"[^>]*>(.*?)<span class="dest-count">', html, re.S)
+        for header in destination_headers:
+            visible = re.sub(r'<[^>]+>', ' ', header)
+            if not re.search(r'[A-Za-z]', visible):
+                fail(errors, f"英文页面目的地标题缺少英文名称: {visible.strip()}")
     if args.scope_json:
         scope = json.loads(Path(args.scope_json).read_text(encoding="utf-8"))
         expected_destinations = {
@@ -64,6 +71,15 @@ def main():
     else:
         itinerary = json.loads(route_match.group(1))
         route_names = json.loads(route_match.group(2))
+        if is_english:
+            labels_match = re.search(r'var allRouteLabels = (\[.*?\]);', html, re.S)
+            if not labels_match:
+                fail(errors, "英文页面缺少 allRouteLabels")
+            else:
+                route_labels = json.loads(labels_match.group(1))
+                for route, label in zip(route_names, route_labels):
+                    if not re.search(r'[A-Za-z]', str(label)):
+                        fail(errors, f"英文页面路线名称缺少英文名称: {route}")
         expected_days = args.expected_days
         if expected_days is None:
             expected_days = max((int(d.replace("Day ", "")) for r in itinerary.values() for d in r), default=0)

@@ -7,7 +7,7 @@
   "destination_coverage": [["演示城市", "Demo fixture", "是", "Synthetic sample only", "Replace with live research", ""]],
   "source_evidence": [["demo-001", "演示城市", "演示景点", "https://example.com", "fixture", "", "synthetic sample", "否", "not live evidence", "demo"]],
   "dynamic_info": [["demo-dynamic-001", "演示城市", "Data status", "Offline fixture; verify before travel", "", "高", "是", "", "demo"]],
-  "routes": [["Demo Route", "7 days", "演示城市→演示城市", "Shows a complete multi-day output pipeline", "Developer demo", "1,000-2,000", "Demo transport"]],
+  "routes": [["Demo Route", "7 days", "演示城市→演示城市", "Shows a complete multi-day output pipeline", "Developer demo", "1,000-2,000", "Demo transport", "Demo Route"]],
   "hotels": [
     ["演示城市", "演示住宿一", "Demo Hotel One", "Demo accommodation", "300", "Demo:4.0", "0", "39.9042,116.4074", "https://example.com/demo-hotel-one-1.jpg", "https://example.com/demo-hotel-one-2.jpg", "Synthetic fixture record"],
     ["演示城市", "演示住宿二", "Demo Hotel Two", "Demo accommodation", "420", "Demo:4.2", "0", "39.9060,116.4100", "https://example.com/demo-hotel-two-1.jpg", "https://example.com/demo-hotel-two-2.jpg", "Synthetic fixture record"]
