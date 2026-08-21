@@ -76,6 +76,8 @@ Chinese card view and product output:
 
 `v2.9.1` — internationalized CN/EN output and offline Demo/Live separation.
 
+The EN delivery gate now checks dynamic destination and route labels as well as the fixed interface text. English output uses `English Name (中文名)` for places and blocks incomplete route/destination translations before release.
+
 ## Status
 
 This repository is currently a private release candidate while API, data-source, licensing, and output safety checks are completed.
