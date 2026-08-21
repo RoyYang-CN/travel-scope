@@ -46,7 +46,7 @@ The previews include bilingual card, accommodation, food, attraction and route-i
 
 ### HTML output preview
 
-<details>
+<details open>
 <summary>English interface screenshots</summary>
 
 English card view and product output:
@@ -59,7 +59,7 @@ The English route screenshot was rendered with a temporary local key and contain
 
 </details>
 
-<details>
+<details open>
 <summary>中文界面截图</summary>
 
 Chinese card view and product output:
