@@ -51,7 +51,7 @@ The previews include bilingual card, accommodation, food, attraction and route-i
 
 English card view and product output:
 
-| Overview / cards | Route map | Accommodation | Food | Attractions |
+| Collapsed overview / cards | Route map | Accommodation | Food | Attractions |
 |---|---|---|---|---|
 | ![Travel-Scope English overview](assets/screenshot-indonesia-en-overview.png) | ![Travel-Scope English route](assets/screenshot-indonesia-en-route-full.png) | ![Travel-Scope English accommodation](assets/screenshot-indonesia-en-accommodation.png) | ![Travel-Scope English food](assets/screenshot-indonesia-en-food.png) | ![Travel-Scope English attractions](assets/screenshot-indonesia-en-attractions.png) |
 
@@ -64,7 +64,7 @@ The English route screenshot was rendered with a temporary local key and contain
 
 Chinese card view and product output:
 
-| 总览与目的地 | 路线地图 | 住宿 | 美食 | 景点 |
+| 折叠总览 / 卡片 | 路线地图 | 住宿 | 美食 | 景点 |
 |---|---|---|---|---|
 | ![Travel-Scope 中文总览](assets/screenshot-indonesia-cn-overview.png) | ![Travel-Scope 中文路线](assets/screenshot-indonesia-cn-route-full.png) | ![Travel-Scope 中文住宿](assets/screenshot-indonesia-cn-accommodation.png) | ![Travel-Scope 中文美食](assets/screenshot-indonesia-cn-food.png) | ![Travel-Scope 中文景点](assets/screenshot-indonesia-cn-attractions.png) |
 
