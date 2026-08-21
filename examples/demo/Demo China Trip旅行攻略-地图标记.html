@@ -57,6 +57,8 @@ header .stat strong { font-size: 20px; display: block; }
 .btn-map { color: white; border: none; padding: 7px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; transition: all 0.2s; }
 .btn-map:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
 .btn-google { background: #1a73e8; }.btn-google:hover { background: #1a73e8dd; }
+.btn-amap { background: #008dfd; }.btn-amap:hover { background: #008dfddd; }
+.btn-baidu { background: #2932e1; }.btn-baidu:hover { background: #2932e1dd; }
 
 .loc-thumbs { display: flex; gap: 6px; flex-shrink: 0; }
 .loc-thumb-wrap { position: relative; width: 120px; height: 80px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #f0f0f0; }
@@ -102,12 +104,12 @@ footer { text-align: center; padding: 20px; color: #999; font-size: 13px; }
 <div class="container">
 <header>
 <div style="background:#fff3cd;color:#856404;padding:8px 12px;border-radius:8px;margin-bottom:12px;font-size:13px">Demo fixture — 离线演示数据；不是实时平台数据</div>
-<h1>Travel-Scope | D e m o   C h i n a   T r i p旅行攻略</h1>
-<p>互动探索 · Google Maps一键导航 · 按目的地分类</p>
+<h1>Travel-Scope | Demo China Trip旅行攻略</h1>
+<p>互动探索 · Google Maps / 高德地图 / 百度地图一键导航 · 按目的地分类</p>
 <div class="stats">
-<div class="stat"><strong>1</strong>住宿</div>
-<div class="stat"><strong>1</strong>美食</div>
-<div class="stat"><strong>1</strong>景点</div>
+<div class="stat"><strong>2</strong>住宿</div>
+<div class="stat"><strong>2</strong>美食</div>
+<div class="stat"><strong>5</strong>景点</div>
 <div class="stat"><strong>0</strong>潜水</div>
 <div class="stat"><strong>1</strong>目的地</div>
 </div>
@@ -118,40 +120,88 @@ footer { text-align: center; padding: 20px; color: #999; font-size: 13px; }
 <button class="btn-all" onclick="toggleAll()">展开/收起全部</button>
 <input class="search-box" type="text" placeholder="搜索目的地/酒店/餐厅/景点..." oninput="filterCards(this.value)">
 </div>
-<div class="tip">点击地点右侧 <strong>Google Maps</strong> 按钮可一键导航；点击目的地标题可展开/收起</div>
+<div class="tip">点击地点右侧 <strong>Google Maps / 高德地图 / 百度地图</strong> 按钮可一键导航；点击目的地标题可展开/收起</div>
 
 
 <div class="dest-section" data-dest="演示城市">
-<div class="dest-header" onclick="toggleSection(this)"><span class="emoji">📍</span> 演示城市 <span class="dest-count">5个地点</span> <span class="arrow">▼</span></div>
+<div class="dest-header" onclick="toggleSection(this)"><span class="emoji">📍</span> 演示城市 <span class="dest-count">11个地点</span> <span class="arrow">▼</span></div>
 <div class="dest-body">
-<div class="cat-block" data-cat="住宿"><div class="cat-header" onclick="toggleCat(this)">🏨 住宿 <span class="cat-count">1</span><span class="cat-arrow">▼</span></div><div class="cat-body">
-<div class="loc-card" data-search="演示城市 演示住宿 (Demo Hotel) demo hotel">
-<div class="loc-thumbs"><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
-<div class="loc-name">演示住宿 (Demo Hotel) <span class="en">Demo Hotel</span><span class="loc-rating">搜索补充：Demo:4.0</span></div>
+<div class="cat-block" data-cat="住宿"><div class="cat-header" onclick="toggleCat(this)">🏨 住宿 <span class="cat-count">2</span><span class="cat-arrow">▼</span></div><div class="cat-body">
+<div class="loc-card" data-search="演示城市 演示住宿一 (Demo Hotel One) demo hotel one">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-hotel-one-1.jpg" alt="演示住宿一 (Demo Hotel One)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-hotel-one-2.jpg" alt="演示住宿一 (Demo Hotel One)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示住宿一 (Demo Hotel One) <span class="en">Demo Hotel One</span><span class="loc-rating">搜索补充：Demo:4.0</span></div>
 <div class="loc-detail">Demo accommodation | 300元/晚</div>
 <div class="loc-coords">39.9042,116.4074</div>
 </div>
-<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9042,116.4074" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a></div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9042,116.4074" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.41364225378803,39.90560334316507&name=%E6%BC%94%E7%A4%BA%E4%BD%8F%E5%AE%BF%E4%B8%80%20%28Demo%20Hotel%20One%29" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.91186533561899,116.42004633029816&title=%E6%BC%94%E7%A4%BA%E4%BD%8F%E5%AE%BF%E4%B8%80%20%28Demo%20Hotel%20One%29&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
+</div>
+<div class="loc-card" data-search="演示城市 演示住宿二 (Demo Hotel Two) demo hotel two">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-hotel-two-1.jpg" alt="演示住宿二 (Demo Hotel Two)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-hotel-two-2.jpg" alt="演示住宿二 (Demo Hotel Two)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示住宿二 (Demo Hotel Two) <span class="en">Demo Hotel Two</span><span class="loc-rating">搜索补充：Demo:4.2</span></div>
+<div class="loc-detail">Demo accommodation | 420元/晚</div>
+<div class="loc-coords">39.9060,116.4100</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.906,116.41" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.41624138058846,39.90740271402409&name=%E6%BC%94%E7%A4%BA%E4%BD%8F%E5%AE%BF%E4%BA%8C%20%28Demo%20Hotel%20Two%29" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.91363065675568,116.42265525045778&title=%E6%BC%94%E7%A4%BA%E4%BD%8F%E5%AE%BF%E4%BA%8C%20%28Demo%20Hotel%20Two%29&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
 </div>
 </div></div>
-<div class="cat-block" data-cat="美食"><div class="cat-header" onclick="toggleCat(this)">🍽 美食 <span class="cat-count">1</span><span class="cat-arrow">▼</span></div><div class="cat-body">
-<div class="loc-card" data-search="演示城市 演示餐厅 (Demo Restaurant) demo restaurant">
-<div class="loc-thumbs"><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
-<div class="loc-name">演示餐厅 (Demo Restaurant) <span class="en">Demo Restaurant</span><span class="loc-rating">搜索补充：Demo:4.0</span></div>
+<div class="cat-block" data-cat="美食"><div class="cat-header" onclick="toggleCat(this)">🍽 美食 <span class="cat-count">2</span><span class="cat-arrow">▼</span></div><div class="cat-body">
+<div class="loc-card" data-search="演示城市 演示餐厅一 (Demo Restaurant One) demo restaurant one">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-restaurant-one-1.jpg" alt="演示餐厅一 (Demo Restaurant One)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-restaurant-one-2.jpg" alt="演示餐厅一 (Demo Restaurant One)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示餐厅一 (Demo Restaurant One) <span class="en">Demo Restaurant One</span><span class="loc-rating">搜索补充：Demo:4.1</span></div>
 <div class="loc-detail">Demo cuisine | 人均80元</div>
 <div class="loc-coords">39.9050,116.4080</div>
 </div>
-<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.905,116.408" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a></div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.905,116.408" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.41424213517867,39.9064032418034&name=%E6%BC%94%E7%A4%BA%E9%A4%90%E5%8E%85%E4%B8%80%20%28Demo%20Restaurant%20One%29" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.91265766219899,116.42064796398272&title=%E6%BC%94%E7%A4%BA%E9%A4%90%E5%8E%85%E4%B8%80%20%28Demo%20Restaurant%20One%29&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
+</div>
+<div class="loc-card" data-search="演示城市 演示餐厅二 (Demo Restaurant Two) demo restaurant two">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-restaurant-two-1.jpg" alt="演示餐厅二 (Demo Restaurant Two)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-restaurant-two-2.jpg" alt="演示餐厅二 (Demo Restaurant Two)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示餐厅二 (Demo Restaurant Two) <span class="en">Demo Restaurant Two</span><span class="loc-rating">搜索补充：Demo:4.3</span></div>
+<div class="loc-detail">Demo cuisine | 人均120元</div>
+<div class="loc-coords">39.9070,116.4120</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.907,116.412" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.41824039952658,39.90840200661478&name=%E6%BC%94%E7%A4%BA%E9%A4%90%E5%8E%85%E4%BA%8C%20%28Demo%20Restaurant%20Two%29" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.914600958539644,116.4246631941715&title=%E6%BC%94%E7%A4%BA%E9%A4%90%E5%8E%85%E4%BA%8C%20%28Demo%20Restaurant%20Two%29&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
 </div>
 </div></div>
-<div class="cat-block" data-cat="景点"><div class="cat-header" onclick="toggleCat(this)">📍 景点 <span class="cat-count">1</span><span class="cat-arrow">▼</span></div><div class="cat-body">
-<div class="loc-card" data-search="演示城市 演示景点 (Demo Attraction) demo attraction">
-<div class="loc-thumbs"><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
-<div class="loc-name">演示景点 (Demo Attraction) <span class="en">Demo Attraction</span><span class="loc-rating">搜索补充：Demo:4.0</span></div>
+<div class="cat-block" data-cat="景点"><div class="cat-header" onclick="toggleCat(this)">📍 景点 <span class="cat-count">5</span><span class="cat-arrow">▼</span></div><div class="cat-body">
+<div class="loc-card" data-search="演示城市 演示景点一 (Demo Attraction One) demo attraction one">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-attraction-one-1.jpg" alt="演示景点一 (Demo Attraction One)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-attraction-one-2.jpg" alt="演示景点一 (Demo Attraction One)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示景点一 (Demo Attraction One) <span class="en">Demo Attraction One</span><span class="loc-rating">搜索补充：Demo:4.0</span></div>
 <div class="loc-detail">Demo attraction | 0元</div>
 <div class="loc-coords">39.9048,116.4077</div>
 </div>
-<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9048,116.4077" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a></div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9048,116.4077" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.41394222251434,39.906203303317454&name=%E6%BC%94%E7%A4%BA%E6%99%AF%E7%82%B9%E4%B8%80%20%28Demo%20Attraction%20One%29" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.91246147657436,116.4203469744472&title=%E6%BC%94%E7%A4%BA%E6%99%AF%E7%82%B9%E4%B8%80%20%28Demo%20Attraction%20One%29&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
+</div>
+<div class="loc-card" data-search="演示城市 演示景点二 (Demo Attraction Two) demo attraction two">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-attraction-two-1.jpg" alt="演示景点二 (Demo Attraction Two)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-attraction-two-2.jpg" alt="演示景点二 (Demo Attraction Two)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示景点二 (Demo Attraction Two) <span class="en">Demo Attraction Two</span><span class="loc-rating">搜索补充：Demo:4.1</span></div>
+<div class="loc-detail">Demo attraction | 0元</div>
+<div class="loc-coords">39.9055,116.4090</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9055,116.409" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.41524178614088,39.906903000328&name=%E6%BC%94%E7%A4%BA%E6%99%AF%E7%82%B9%E4%BA%8C%20%28Demo%20Attraction%20Two%29" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.91314451472106,116.4216515187842&title=%E6%BC%94%E7%A4%BA%E6%99%AF%E7%82%B9%E4%BA%8C%20%28Demo%20Attraction%20Two%29&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
+</div>
+<div class="loc-card" data-search="演示城市 演示景点三 (Demo Attraction Three) demo attraction three">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-attraction-three-1.jpg" alt="演示景点三 (Demo Attraction Three)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-attraction-three-2.jpg" alt="演示景点三 (Demo Attraction Three)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示景点三 (Demo Attraction Three) <span class="en">Demo Attraction Three</span><span class="loc-rating">搜索补充：Demo:4.2</span></div>
+<div class="loc-detail">Demo attraction | 0元</div>
+<div class="loc-coords">39.9065,116.4110</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9065,116.411" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.41724091841321,39.90790238280889&name=%E6%BC%94%E7%A4%BA%E6%99%AF%E7%82%B9%E4%B8%89%20%28Demo%20Attraction%20Three%29" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.91411612516455,116.42365914658416&title=%E6%BC%94%E7%A4%BA%E6%99%AF%E7%82%B9%E4%B8%89%20%28Demo%20Attraction%20Three%29&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
+</div>
+<div class="loc-card" data-search="演示城市 演示景点四 (Demo Attraction Four) demo attraction four">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-attraction-four-1.jpg" alt="演示景点四 (Demo Attraction Four)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-attraction-four-2.jpg" alt="演示景点四 (Demo Attraction Four)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示景点四 (Demo Attraction Four) <span class="en">Demo Attraction Four</span><span class="loc-rating">搜索补充：Demo:4.3</span></div>
+<div class="loc-detail">Demo attraction | 0元</div>
+<div class="loc-coords">39.9080,116.4130</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.908,116.413" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.41923988759015,39.9094016071499&name=%E6%BC%94%E7%A4%BA%E6%99%AF%E7%82%B9%E5%9B%9B%20%28Demo%20Attraction%20Four%29" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.91558506716588,116.42566700344376&title=%E6%BC%94%E7%A4%BA%E6%99%AF%E7%82%B9%E5%9B%9B%20%28Demo%20Attraction%20Four%29&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
+</div>
+<div class="loc-card" data-search="演示城市 演示景点五 (Demo Attraction Five) demo attraction five">
+<div class="loc-thumbs"><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-attraction-five-1.jpg" alt="演示景点五 (Demo Attraction Five)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div><div class="loc-thumb-wrap"><img class="loc-thumb" src="https://example.com/demo-attraction-five-2.jpg" alt="演示景点五 (Demo Attraction Five)" onclick="openLightbox(this.src)" onerror="this.hidden=true"><div class="loc-thumb-fallback">📷</div></div></div><div class="loc-info">
+<div class="loc-name">演示景点五 (Demo Attraction Five) <span class="en">Demo Attraction Five</span><span class="loc-rating">搜索补充：Demo:4.4</span></div>
+<div class="loc-detail">Demo attraction | 0元</div>
+<div class="loc-coords">39.9090,116.4140</div>
+</div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.909,116.414" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.42023931881957,39.91040116249179&name=%E6%BC%94%E7%A4%BA%E6%99%AF%E7%82%B9%E4%BA%94%20%28Demo%20Attraction%20Five%29" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.916568628909495,116.42667095544743&title=%E6%BC%94%E7%A4%BA%E6%99%AF%E7%82%B9%E4%BA%94%20%28Demo%20Attraction%20Five%29&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
 </div>
 </div></div>
 <div class="cat-block" data-cat="交通"><div class="cat-header" onclick="toggleCat(this)">🚌 交通 <span class="cat-count">2</span><span class="cat-arrow">▼</span></div><div class="cat-body">
@@ -161,7 +211,7 @@ footer { text-align: center; padding: 20px; color: #999; font-size: 13px; }
 <div class="loc-detail">Demo transfer | Demo operator | 0元 | 0h | Demo  [Synthetic fixture edge]</div>
 <div class="loc-coords">39.9042,116.4074</div>
 </div>
-<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9042,116.4074" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a></div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9042,116.4074" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.41364225378803,39.90560334316507&name=%E5%87%BA%E5%8F%91%E6%BC%94%E7%A4%BA%E5%9F%8E%E5%B8%82%20%E2%86%92%20%E5%88%B0%E8%BE%BE%E6%BC%94%E7%A4%BA%E5%9F%8E%E5%B8%82" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.91186533561899,116.42004633029816&title=%E5%87%BA%E5%8F%91%E6%BC%94%E7%A4%BA%E5%9F%8E%E5%B8%82%20%E2%86%92%20%E5%88%B0%E8%BE%BE%E6%BC%94%E7%A4%BA%E5%9F%8E%E5%B8%82&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
 </div>
 <div class="loc-card" data-search="演示城市 出发演示城市 → 到达演示城市 from 演示城市 to 演示城市">
 <div class="loc-info">
@@ -169,7 +219,7 @@ footer { text-align: center; padding: 20px; color: #999; font-size: 13px; }
 <div class="loc-detail">Demo transfer | Demo operator | 0元 | 0h | Demo  [Synthetic fixture edge]</div>
 <div class="loc-coords">39.9042,116.4074</div>
 </div>
-<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9042,116.4074" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a></div>
+<div class="btn-group"><a class="btn-map btn-google" href="https://www.google.com/maps/search/?api=1&query=39.9042,116.4074" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Google Maps</a><a class="btn-map btn-amap" href="https://uri.amap.com/marker?position=116.41364225378803,39.90560334316507&name=%E5%87%BA%E5%8F%91%E6%BC%94%E7%A4%BA%E5%9F%8E%E5%B8%82%20%E2%86%92%20%E5%88%B0%E8%BE%BE%E6%BC%94%E7%A4%BA%E5%9F%8E%E5%B8%82" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/></svg>高德地图</a><a class="btn-map btn-baidu" href="https://api.map.baidu.com/marker?location=39.91186533561899,116.42004633029816&title=%E5%87%BA%E5%8F%91%E6%BC%94%E7%A4%BA%E5%9F%8E%E5%B8%82%20%E2%86%92%20%E5%88%B0%E8%BE%BE%E6%BC%94%E7%A4%BA%E5%9F%8E%E5%B8%82&content=&output=html&src=webapp.travelGuide" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>百度地图</a></div>
 </div>
 </div></div>
 </div></div>
@@ -200,7 +250,7 @@ footer { text-align: center; padding: 20px; color: #999; font-size: 13px; }
 
 <footer>
 <p>Demo China Trip旅行攻略 · 地图标记页 · 数据仅供参考</p>
-<p>导航平台: Google Maps</p>
+<p>导航平台: Google Maps / 高德地图 / 百度地图</p>
 </footer>
 </div>
 <div class="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src=""></div>
@@ -252,7 +302,7 @@ function switchTab(tab) {
 }
 
     // === Map route view (dual engine: AMap domestic / Google Maps overseas) ===
-var itineraryData = {"Demo Route": {"Day 1": [{"name": "演示景点", "type": "景点", "coords": "39.9048,116.4077", "seq": 1, "img1": "", "img2": ""}, {"name": "演示餐厅", "type": "餐厅", "coords": "39.9050,116.4080", "seq": 2, "img1": "", "img2": ""}, {"name": "演示住宿", "type": "酒店", "coords": "39.9042,116.4074", "seq": 3, "img1": "", "img2": ""}]}};
+var itineraryData = {"Demo Route": {"Day 1": [{"name": "演示景点一", "type": "景点", "coords": "39.9048,116.4077", "seq": 1, "img1": "https://example.com/demo-attraction-one-1.jpg", "img2": "https://example.com/demo-attraction-one-2.jpg"}, {"name": "演示餐厅一", "type": "餐厅", "coords": "39.9050,116.4080", "seq": 2, "img1": "https://example.com/demo-restaurant-one-1.jpg", "img2": "https://example.com/demo-restaurant-one-2.jpg"}], "Day 2": [{"name": "演示景点二", "type": "景点", "coords": "39.9055,116.4090", "seq": 1, "img1": "https://example.com/demo-attraction-two-1.jpg", "img2": "https://example.com/demo-attraction-two-2.jpg"}, {"name": "演示住宿一", "type": "酒店", "coords": "39.9042,116.4074", "seq": 2, "img1": "https://example.com/demo-hotel-one-1.jpg", "img2": "https://example.com/demo-hotel-one-2.jpg"}], "Day 3": [{"name": "演示城市→演示城市", "type": "交通", "coords": "39.9042,116.4074", "seq": 1, "img1": "", "img2": ""}, {"name": "演示景点三", "type": "景点", "coords": "39.9065,116.4110", "seq": 2, "img1": "https://example.com/demo-attraction-three-1.jpg", "img2": "https://example.com/demo-attraction-three-2.jpg"}], "Day 4": [{"name": "演示餐厅二", "type": "餐厅", "coords": "39.9070,116.4120", "seq": 1, "img1": "https://example.com/demo-restaurant-two-1.jpg", "img2": "https://example.com/demo-restaurant-two-2.jpg"}, {"name": "演示景点四", "type": "景点", "coords": "39.9080,116.4130", "seq": 2, "img1": "https://example.com/demo-attraction-four-1.jpg", "img2": "https://example.com/demo-attraction-four-2.jpg"}], "Day 5": [{"name": "演示景点五", "type": "景点", "coords": "39.9090,116.4140", "seq": 1, "img1": "https://example.com/demo-attraction-five-1.jpg", "img2": "https://example.com/demo-attraction-five-2.jpg"}, {"name": "演示住宿二", "type": "酒店", "coords": "39.9060,116.4100", "seq": 2, "img1": "https://example.com/demo-hotel-two-1.jpg", "img2": "https://example.com/demo-hotel-two-2.jpg"}], "Day 6": [{"name": "演示景点一", "type": "景点", "coords": "39.9048,116.4077", "seq": 1, "img1": "https://example.com/demo-attraction-one-1.jpg", "img2": "https://example.com/demo-attraction-one-2.jpg"}, {"name": "演示餐厅二", "type": "餐厅", "coords": "39.9070,116.4120", "seq": 2, "img1": "https://example.com/demo-restaurant-two-1.jpg", "img2": "https://example.com/demo-restaurant-two-2.jpg"}], "Day 7": [{"name": "演示景点二", "type": "景点", "coords": "39.9055,116.4090", "seq": 1, "img1": "https://example.com/demo-attraction-two-1.jpg", "img2": "https://example.com/demo-attraction-two-2.jpg"}, {"name": "演示住宿一", "type": "酒店", "coords": "39.9042,116.4074", "seq": 2, "img1": "https://example.com/demo-hotel-one-1.jpg", "img2": "https://example.com/demo-hotel-one-2.jpg"}]}};
 var allRouteNames = ["Demo Route"];
 var mapInstance = null;
 var markersLayer = null;
@@ -449,7 +499,7 @@ function renderRouteAMap(allPoints, routeData, days) {
       thumbHtml += '<img class="info-thumb" src="' + item.img2 + '" onerror="this.style.display=\'none\'" onclick="openLightbox(this.src)">';
     }
     var navLinks = '';
-    var navPlatforms = ["google"];
+    var navPlatforms = ["google", "amap", "baidu"];
     navPlatforms.forEach(function(p) {
       var uri = genNavUri(p, lat, lng, item.name);
       var names = {'google':'Google','amap':'高德','baidu':'百度'};
@@ -594,7 +644,7 @@ function renderRouteGoogle(allPoints, routeData, days) {
       thumbHtml += '<img class="info-thumb" src="' + item.img2 + '" onerror="this.style.display=\'none\'" onclick="openLightbox(this.src)" style="width:80px;height:54px;object-fit:cover;border-radius:6px;cursor:pointer;">';
     }
     var navLinks = '';
-    var navPlatforms = ["google"];
+    var navPlatforms = ["google", "amap", "baidu"];
     navPlatforms.forEach(function(p) {
       var uri = genNavUri(p, lat, lng, item.name);
       var names = {'google':'Google','amap':'高德','baidu':'百度'};

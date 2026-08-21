@@ -126,7 +126,7 @@
 <section class="hero">
   <div class="language-switch"><a class="active" href="travel-scope-intro.html">中文</a><a href="travel-scope-intro-en.html">EN</a></div>
   <div class="container">
-    <div class="hero-badge">Travel-Scope · TeleAgent Skill · 零部署 · 开箱即用</div>
+    <div class="hero-badge">Travel-Scope · Portable Skill · 零部署 · 开箱即用</div>
     <h1>一句话，生成你的<br><span>旅行攻略</span></h1>
     <p>输入目的地与旅行偏好，生成可核验、可编辑、可导航的完整旅行攻略<br><small>历史案例与动态信息均需出发前复核</small></p>
     <a href="#showcase" class="hero-cta">看看做出来长什么样 ↓</a>
@@ -156,8 +156,8 @@
             <p class="showcase-desc">按目的地分组，住宿、美食、景点与交通分类展示。平台评分与 AI 推荐分分开呈现，点位可直接跳转地图。</p>
           </div>
           <div class="showcase-img-wrap">
-            <img src="assets/screenshot-indonesia-cn-cards.png" alt="中文卡片列表视图">
-            <div class="showcase-img-caption">中文 HTML 卡片列表：住宿、美食、景点分组展示</div>
+            <img src="assets/screenshot-indonesia-cn-overview.png" alt="中文 HTML 总览与卡片列表视图">
+            <div class="showcase-img-caption">中文 HTML 总览：目的地、卡片入口和住宿列表</div>
           </div>
         </div>
       </div>
@@ -166,8 +166,8 @@
       <div class="showcase-item reveal" style="margin-top:24px;">
         <div class="showcase-row reverse">
           <div class="showcase-img-wrap">
-            <img src="assets/screenshot-indonesia-en-cards.png" alt="English cards view">
-            <div class="showcase-img-caption">English HTML cards: localized structure with Chinese names retained for wayfinding</div>
+            <img src="assets/screenshot-indonesia-cn-accommodation.png" alt="中文住宿卡片视图">
+            <div class="showcase-img-caption">中文住宿卡片：图片、评分、价格、坐标和地图跳转</div>
           </div>
           <div>
             <span class="showcase-label" style="background:var(--accent-light);color:var(--accent);">🏨 酒店卡片</span>
@@ -182,12 +182,12 @@
         <div class="showcase-row">
           <div>
             <span class="showcase-label" style="background:var(--teal-light);color:var(--teal);">🍽️ 美食卡片</span>
-            <h3 style="font-size:20px;margin-bottom:8px;">大众点评评分 + 人均消费</h3>
+            <h3 style="font-size:20px;margin-bottom:8px;">平台评分 + 人均消费</h3>
             <p class="showcase-desc">国内数据以高德为主、百度作补充；海外以 Google Maps 等可用来源为主，搜索摘要只作为辅助证据。</p>
           </div>
           <div class="showcase-img-wrap">
-            <img src="assets/screenshot-indonesia-cn-cards.png" alt="美食卡片示例">
-            <div class="showcase-img-caption">卡片视图示例：评分、价格、坐标与地图跳转</div>
+            <img src="assets/screenshot-indonesia-cn-food.png" alt="中文美食卡片示例">
+            <div class="showcase-img-caption">中文美食卡片：平台评分、参考价格、坐标与导航</div>
           </div>
         </div>
       </div>
@@ -196,8 +196,8 @@
       <div class="showcase-item reveal" style="margin-top:24px;">
         <div class="showcase-row reverse">
           <div class="showcase-img-wrap">
-            <img src="assets/screenshot-indonesia-en-cards.png" alt="Attraction cards example">
-            <div class="showcase-img-caption">English example: bilingual names help with asking directions and taxi rides</div>
+            <img src="assets/screenshot-indonesia-cn-attractions.png" alt="中文景点卡片示例">
+            <div class="showcase-img-caption">中文景点卡片：景点图片、评分、门票提示与导航</div>
           </div>
           <div>
             <span class="showcase-label" style="background:var(--green-light);color:var(--green);">📍 景点卡片</span>
@@ -216,12 +216,26 @@
             <p class="showcase-desc">路线视图按天展示景点、餐厅、住宿和交通节点；不同方案必须完整编排，避免切换方案时出现空白或只有单点。</p>
           </div>
           <div class="showcase-img-wrap">
-            <img src="assets/screenshot-route-cn.png" alt="路线规划视图示例">
-            <div class="showcase-img-caption">路线规划示例：按天行程面板、方案切换与地图连线（示例截图）</div>
+            <img src="assets/screenshot-indonesia-cn-route-full.png" alt="中文路线规划视图示例">
+            <div class="showcase-img-caption">路线规划示例：按天行程面板、方案切换与地图连线</div>
           </div>
         </div>
       </div>
 
+    </div>
+  </div>
+</section>
+
+<!-- ===== AUDIENCE ===== -->
+<section class="section" id="audience">
+  <div class="container">
+    <h2 class="section-title">谁适合使用 <span class="accent">Travel-Scope</span></h2>
+    <p class="section-sub">它同时面向开发者、AI Agent 用户、外国游客和普通旅行规划者。</p>
+    <div class="feature-grid">
+      <div class="feature-card"><div class="feature-icon">🧑‍💻</div><h3>开源与 Python 开发者</h3><p>复用生成器、统一数据模型、API 适配和 QA 门禁，构建自己的旅行工具。</p></div>
+      <div class="feature-card"><div class="feature-icon">🤖</div><h3>AI Agent 用户</h3><p>输入标准化旅行需求，让 Agent 自动发现目的地、比较路线走廊并生成可编辑攻略。</p></div>
+      <div class="feature-card"><div class="feature-icon">🌏</div><h3>来中国旅行的外国游客</h3><p>使用英文说明，同时保留中文名和拼音，方便地图、打车、购票和问路。</p></div>
+      <div class="feature-card"><div class="feature-icon">🧳</div><h3>旅行规划者</h3><p>从印度尼西亚、菲律宾和中国案例出发，自定义路线、预算、交通和点位。</p></div>
     </div>
   </div>
 </section>

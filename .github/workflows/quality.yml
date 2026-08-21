@@ -1,0 +1,54 @@
+name: Travel-Scope quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install validation dependency
+        run: python -m pip install openpyxl
+      - name: Compile Python
+        run: python -m compileall -q travel-scope/scripts
+      - name: Generate offline demo
+        run: >-
+          python travel-scope/scripts/gen_travel_scope.py
+          --mode demo
+          --fixture travel-scope/fixtures/demo.json
+          --output-dir .temp/ci-demo
+          --language both
+          --map-platform all
+          --expected-days 7
+      - name: Validate generated demo
+        shell: bash
+        run: |
+          python travel-scope/scripts/validate_output.py \
+            --html ".temp/ci-demo/Demo China Trip旅行攻略-地图标记.html" \
+            --delivery-xlsx ".temp/ci-demo/Demo China Trip旅行攻略大全.xlsx" \
+            --research-xlsx ".temp/ci-demo/Demo China Trip旅行攻略研究版.xlsx" \
+            --expected-days 7
+          python travel-scope/scripts/validate_output.py \
+            --html ".temp/ci-demo/Demo China Trip旅行攻略-地图标记-en.html" \
+            --delivery-xlsx ".temp/ci-demo/Demo China Trip旅行攻略大全-en.xlsx" \
+            --research-xlsx ".temp/ci-demo/Demo China Trip旅行攻略研究版-en.xlsx" \
+            --expected-days 7
+      - name: Scan for credential-shaped strings
+        shell: bash
+        run: |
+          if grep -RInE --exclude-dir=.git --exclude-dir=.temp --exclude='quality.yml' '(AIzaSy[A-Za-z0-9_-]{20,}|57b5e285da943e6c4c4e39d102d33f21|4E6gSx5WuNcyswjNCdB2Wj28HxHjrBO)' .; then
+            echo 'Credential-shaped string found in tracked source'
+            exit 1
+          fi
+      - name: Check English UI labels
+        shell: bash
+        run: |
+          if grep -nE '🏨 住宿|🍽 美食|📍 景点|Google评分：|搜索补充：|互动探索' .temp/ci-demo/*-en.html; then
+            echo 'Untranslated stable UI label found in English HTML'
+            exit 1
+          fi

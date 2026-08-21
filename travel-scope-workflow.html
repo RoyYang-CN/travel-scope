@@ -293,7 +293,7 @@
         <tr><td><code>点位名称</code></td><td>必须与HOTELS/RESTAURANTS/ATTRACTIONS的[1]中文名完全一致</td></tr>
         <tr><td><code>经纬度</code></td><td>WGS84格式 "纬度,经度"</td></tr>
       </table>
-      <div class="tip tip-warn"><strong>编排经验</strong>：每天4-6个点位；跨城市移动用交通类型标注；新增城市需先<code>.extend()</code>追加数据再编排</div>
+      <div class="tip tip-warn"><strong>编排经验</strong>：每天按正常旅行节奏安排景点、餐食、住宿和交通；跨城市移动用交通类型标注；新增城市必须先纳入统一数据模型并通过QA再编排。</div>
     </div>
 
     <!-- Step 4 -->
@@ -303,13 +303,12 @@
       <p>对每个目的地按数据源分流规则收集数据，每个点位交叉验证至少N篇：</p>
       <div class="card-grid">
         <div class="card">
-          <h4>国内评分格式</h4>
-          <p>酒店/景点：<code>小红书热度:高|携程:4.5</code><br>
-          餐厅：<code>大众点评:4.5分|850条</code></p>
+          <h4>国内评分与证据口径</h4>
+          <p>高德为主接口；百度仅用于重点核验、补图和导航；搜索引擎只补充热度与特色信息。平台字段缺失时不伪造评分，AI推荐分必须单独标注为参考。</p>
         </div>
         <div class="card">
           <h4>海外评分格式</h4>
-          <p>统一：<code>Google:4.3</code> 或 <code>Google:4.3|1200条</code></p>
+          <p>Google Maps为主要平台；其他搜索结果只作为辅助证据。平台评分、评价数和AI推荐分分开呈现。</p>
         </div>
         <div class="card">
           <h4>交叉验证流程</h4>
@@ -330,7 +329,7 @@
     <div class="step">
       <div class="step-number api">6</div>
       <h3>坐标获取 <span class="badge badge-domestic">高德POI API</span></h3>
-      <p>国内目的地坐标必须通过高德POI搜索获取（WGS84格式存储）：</p>
+      <p>国内目的地以高德POI为主接口获取坐标、评分、图片和导航信息；百度只对重点点位做补充核验。坐标统一按WGS84格式存储：</p>
       <pre><code>GET https://restapi.amap.com/v3/place/text
     ?key=YOUR_AMAP_KEY
     &keywords=点位名
@@ -343,12 +342,13 @@
     <div class="step">
       <div class="step-number api">7</div>
       <h3>图片搜索与补全 <span class="badge badge-new">高德photos优先</span></h3>
-      <p>按优先级获取图片：</p>
+      <p>按优先级获取图片：高德POI图片优先，百度图片补充，公开搜索结果仅作为兜底；没有可靠图片时明确显示占位状态。</p>
       <table>
         <tr><th>优先级</th><th>方式</th><th>命中率</th></tr>
         <tr><td>1</td><td><strong>高德POI API <code>photos</code>字段</strong>（<code>extensions=all</code>返回）</td><td>~81%</td></tr>
-        <tr><td>2</td><td>在线搜索（携程/马蜂窝/大众点评图片）</td><td>~15%</td></tr>
-        <tr><td>3</td><td>留空显示📷占位图</td><td>&mdash;</td></tr>
+        <tr><td>2</td><td>百度图片字段（重点点位补充）</td><td>按配额使用</td></tr>
+        <tr><td>3</td><td>公开搜索结果辅助</td><td>仅作补充</td></tr>
+        <tr><td>4</td><td>留空显示📷占位图</td><td>&mdash;</td></tr>
       </table>
       <div class="tip tip-success"><strong>实战经验</strong>：高德POI API一步获取坐标+图片，效率最高。64个缺图点位测试：52个找到图片(81%)，无防盗链限制，图片可正常加载。找不到的主要是小型经济宾馆和偏远景点。</div>
       <div class="tip tip-info"><strong>批量补全模式</strong>：先运行脚本生成初版三件套&rarr;用高德POI API批量查询缺图点位&rarr;注入图片URL&rarr;重新生成</div>
@@ -358,11 +358,12 @@
     <div class="step">
       <div class="step-number">8</div>
       <h3>生成三件套</h3>
-      <pre><code>python gen_travel_guide.py \
+      <pre><code>python travel-scope/scripts/gen_travel_scope.py \
     --output-dir "输出目录" \
     --map-platform all \
-    --country 大兴安岭 \
-    --amap-js-key YOUR_AMAP_KEY  # 启用地图路线视图</code></pre>
+    --mode demo \
+    --fixture travel-scope/fixtures/demo.json \
+    --language both</code></pre>
       <div class="card-grid">
         <div class="card">
           <h4>Excel (11个Sheet)</h4>
@@ -374,7 +375,7 @@
         </div>
         <div class="card">
           <h4>HTML地图标记</h4>
-          <p>双视图Tab：卡片列表+地图路线(高德JS API)<br>Marker着色+按天连线+InfoWindow+导航按钮</p>
+          <p>双视图Tab：卡片列表+地图路线。国内默认高德，海外按配置使用Google Maps；各点位保留可用的外部导航按钮。</p>
         </div>
       </div>
     </div>
@@ -387,11 +388,11 @@
   <h2>数据源分流</h2>
   <table>
     <tr><th>数据类型</th><th>国内（中国大陆）</th><th>海外</th></tr>
-    <tr><td>酒店/住宿</td><td>小红书攻略 + 携程</td><td>Google Maps + TripAdvisor</td></tr>
-    <tr><td>餐厅/美食</td><td>小红书攻略 + 大众点评</td><td>Google Maps + TripAdvisor</td></tr>
-    <tr><td>景点/活动</td><td>小红书攻略 + 携程</td><td>Google Maps + TripAdvisor</td></tr>
-    <tr><td>坐标来源</td><td>高德地图POI搜索</td><td>Google Maps</td></tr>
-    <tr><td>图片来源</td><td>高德POI photos + 在线搜索</td><td>在线搜索(Google/TripAdvisor)</td></tr>
+    <tr><td>酒店/住宿</td><td>高德POI主数据；百度重点核验；搜索引擎补充背景</td><td>Google Maps主数据；搜索结果辅助</td></tr>
+    <tr><td>餐厅/美食</td><td>高德POI主数据；百度重点核验；搜索引擎补充特色</td><td>Google Maps主数据；搜索结果辅助</td></tr>
+    <tr><td>景点/活动</td><td>高德POI主数据；百度重点核验；搜索引擎补充热度</td><td>Google Maps主数据；搜索结果辅助</td></tr>
+    <tr><td>坐标与评分</td><td>高德主接口；百度用于重点验证</td><td>Google Maps</td></tr>
+    <tr><td>图片来源</td><td>高德图片优先；百度补图；搜索兜底</td><td>Google/公开搜索结果，缺失时标记</td></tr>
   </table>
 </div>
 
@@ -402,7 +403,7 @@
     <div class="card">
       <h4>Tab 1: 卡片列表视图</h4>
       <p>目的地城市(一级) &rarr; 住宿/美食/景点/潜水/交通(二级) &rarr; 具体点位<br>
-      每个点位含2张缩略图+lightbox大图+三平台导航按钮</p>
+      每个点位含双图字段（若可用）+lightbox大图+按地区配置的导航按钮</p>
     </div>
     <div class="card">
       <h4>Tab 2: 地图路线视图</h4>
@@ -412,20 +413,17 @@
       InfoWindow含图片+导航 &bull; 左侧行程面板flyTo &bull; 路线选择器</p>
     </div>
   </div>
-  <div class="tip tip-info"><strong>禁用条件</strong>：无<code>--amap-js-key</code> / 海外目的地 / ITINERARY为空 &rarr; 地图Tab灰色禁用</div>
+  <div class="tip tip-info"><strong>禁用条件</strong>：缺少对应地图JS Key或ITINERARY为空时，地图Tab灰色禁用；外部导航按钮不依赖JS Key。</div>
 </div>
 
 <!-- Extend Pattern -->
 <div class="section">
-  <h2>扩展城市数据模式</h2>
-  <p>当追加新城市POI数据时（如方案B/C涉及新城市），使用<code>.extend()</code>追加：</p>
-  <pre><code># 在合并脚本中追加新城市数据
-HOTELS.extend([
-    ["满洲里", "满洲里大饭店", "Manzhouli Grand Hotel", ...],
-])
-RESTAURANTS.extend([...])
-ATTRACTIONS.extend([...])</code></pre>
-  <div class="tip tip-warn"><strong>先追加数据再编排行程</strong>：新城市的点位数据必须先<code>.extend()</code>到数组中，才能在ITINERARY中引用这些点位名称</div>
+  <h2>扩展目的地数据模式</h2>
+  <p>正式流程先完成全国或指定区域的目的地发现，再把通过路线筛选的点位写入统一数据模型；不要用临时脚本绕过生成器。</p>
+  <pre><code>python travel-scope/scripts/gen_travel_scope.py \
+    --mode live --output-dir outputs \
+    --map-platform amap --language both</code></pre>
+  <div class="tip tip-warn"><strong>先补齐数据再编排行程</strong>：路线中的每个点位必须存在于对应POI表，所有方案和每日交通节点都要通过QA门禁。</div>
 </div>
 
 <!-- Verification Checklist -->
@@ -435,11 +433,11 @@ ATTRACTIONS.extend([...])</code></pre>
     <tr><th>检查项</th><th>要求</th></tr>
     <tr><td>Excel工作表</td><td>11个（含"每日行程"Sheet）</td></tr>
     <tr><td>数据深度</td><td>每个目的地达到深度标准(8+6+6)</td></tr>
-    <tr><td>评分格式</td><td>国内: <code>小红书热度:X|携程:X.X</code> / 海外: <code>Google:X.X</code></td></tr>
+    <tr><td>评分格式</td><td>平台评分与评价数按来源分别呈现；AI推荐分单独标注“AI提供，仅供参考；非平台评分”</td></tr>
     <tr><td>ITINERARY名称</td><td>与HOTELS/RESTAURANTS/ATTRACTIONS中文名完全一致</td></tr>
     <tr><td>所有方案allRouteNames</td><td>在itineraryData中都有对应数据</td></tr>
     <tr><td>下拉选择器</td><td>切换每条方案都能显示完整地图路线</td></tr>
-    <tr><td>图片覆盖率</td><td>&gt; 85%（低于则补充搜索）</td></tr>
+    <tr><td>图片字段</td><td>每个卡片双图或明确缺图状态；禁止错误复用、占位链接冒充真实图片</td></tr>
     <tr><td>坐标格式</td><td>"纬度,经度"（WGS84格式）</td></tr>
   </table>
 </div>
@@ -448,11 +446,11 @@ ATTRACTIONS.extend([...])</code></pre>
 <div class="section">
   <h2>跨平台适配</h2>
   <table>
-    <tr><th>能力</th><th>TeleAgent</th><th>OpenAI Codex</th><th>Google Astra</th></tr>
-    <tr><td>联网搜索</td><td><code>online_search</code></td><td>Web搜索工具</td><td>Grounding搜索</td></tr>
-    <tr><td>交互问答</td><td><code>question</code></td><td>函数调用</td><td>函数调用</td></tr>
-    <tr><td>运行脚本</td><td><code>powershell</code></td><td>沙箱执行</td><td>代码执行</td></tr>
-    <tr><td>脚本本身</td><td colspan="3">纯Python+openpyxl，跨平台通用，无需修改</td></tr>
+    <tr><th>能力</th><th>技能运行环境</th><th>本地脚本</th></tr>
+    <tr><td>联网搜索</td><td>由宿主AI或用户提供</td><td>不在脚本中硬编码供应商</td></tr>
+    <tr><td>交互问答</td><td>按Q0-Q9标准化收集参数</td><td>读取统一数据模型</td></tr>
+    <tr><td>运行脚本</td><td>执行正式生成器和QA</td><td>Python + openpyxl</td></tr>
+    <tr><td>脚本本身</td><td colspan="2">配置驱动、可审计；Demo模式无需API Key</td></tr>
   </table>
   <div class="tip tip-info"><strong>适配核心</strong>：只需将 <code>online_search</code> 替换为对应平台的搜索API，脚本生成/坐标转换/Excel/HTML/Markdown渲染全部在脚本内部完成。</div>
 </div>
@@ -462,7 +460,7 @@ ATTRACTIONS.extend([...])</code></pre>
   <h2>交付文件</h2>
   <div class="field-list">
     <div class="field-item"><span>SKILL.md</span> 技能提示词(755行)</div>
-    <div class="field-item"><span>gen_travel_guide.py</span> 生成脚本(2000+行)</div>
+    <div class="field-item"><span>gen_travel_scope.py</span> 正式生成器（CN/EN、Demo/Live）</div>
     <div class="field-item"><span>destinations.md</span> 目的地参考数据</div>
     <div class="field-item"><span>.xlsx</span> Excel攻略(11个Sheet)</div>
     <div class="field-item"><span>.md</span> Markdown攻略</div>
@@ -471,7 +469,7 @@ ATTRACTIONS.extend([...])</code></pre>
 </div>
 
 <div style="text-align:center; padding:32px 0; color:var(--gray-500); font-size:12px;">
-  Travel-Scope v7 &bull; 2026-08-13 &bull; 基于大兴安岭150+点位实战验证
+  Travel-Scope v2.9.1 &bull; 2026-08-20 &bull; Bilingual release candidate
 </div>
 
 </div>

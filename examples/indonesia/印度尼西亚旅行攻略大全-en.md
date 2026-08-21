@@ -437,92 +437,92 @@ Total: **61**  attractions/activities:
 
 | Attraction | Type | Ticket (CNY) | Rating | Suggested Time | Description |
 |---|---|---|---|---|---|
-| Sacred Monkey Forest Sanctuary | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.5|59487条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Tegenungan Waterfall | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.4|38182条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Pura Tirta Empul | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.6|30537条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Tegallalang Rice Terrace | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.4|54422条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Ubud Palace | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.3|20022条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Ubud Water Palace | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:3.9|1444条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Suwat Waterfall | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.6|2044条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Bali Soul Painting – Meditation Art Experience Ubud | 自然/文化体验 | 价格待出发前核验 | ⭐Google:5|86条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Ubud Art Market | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4|3476条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Goa Gajah | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.2|10303条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Museum Puri Lukisan | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.4|2612条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Ubud Dalem Temple | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.5|872条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Sacred Monkey Forest Sanctuary | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.5|59487条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Tegenungan Waterfall | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.4|38182条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Pura Tirta Empul | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.6|30537条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Tegallalang Rice Terrace | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.4|54422条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Ubud Palace | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.3|20022条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Ubud Water Palace | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:3.9|1444条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Suwat Waterfall | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.6|2044条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Bali Soul Painting – Meditation Art Experience Ubud | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:5|86条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Ubud Art Market | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4|3476条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Goa Gajah | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.2|10303条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Museum Puri Lukisan | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.4|2612条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Ubud Dalem Temple | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.5|872条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
 
 ### Southeast Bali Coast (巴厘岛东南海岸)
 
 | Attraction | Type | Ticket (CNY) | Rating | Suggested Time | Description |
 |---|---|---|---|---|---|
-| Sanur | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.5|6449条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Sanur | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.5|6449条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
 
 ### Nusa Lembongan-Nusa Penida (蓝梦岛—佩尼达岛)
 
 | Attraction | Type | Ticket (CNY) | Rating | Suggested Time | Description |
 |---|---|---|---|---|---|
-| Mangrove Point | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.3|1367条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Devil's Tears | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.6|7101条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Diamond Beach | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.7|9585条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Broken Beach | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.6|8064条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Nusa Lembongan | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.5|1049条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Blue Lagoon Nusa Ceningan | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.7|4083条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Gala-Gala Underground House | 自然/文化体验 | 价格待出发前核验 | ⭐Google:3.7|457条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Lembongan Trip | 自然/文化体验 | 活动价格待出发前核验 | ⭐Google:4.9|2226条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Panorama point | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4|176条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Marta lembongan Snorkeling , fishing and activities | 自然/文化体验 | 活动价格待出发前核验 | ⭐Google:5|171条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Secret Point Beach | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.6|385条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Tembeling Beach and Forest | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.5|2015条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Mangrove Point | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.3|1367条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Devil's Tears | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.6|7101条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Diamond Beach | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.7|9585条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Broken Beach | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.6|8064条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Nusa Lembongan | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.5|1049条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Blue Lagoon Nusa Ceningan | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.7|4083条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Gala-Gala Underground House | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:3.7|457条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Lembongan Trip | Nature / Culture Experience | 活动价格待出发前核验 | ⭐Google:4.9|2226条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Panorama point | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4|176条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Marta lembongan Snorkeling , fishing and activities | Nature / Culture Experience | 活动价格待出发前核验 | ⭐Google:5|171条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Secret Point Beach | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.6|385条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Tembeling Beach and Forest | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.5|2015条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
 
 ### West/North Bali (西北巴厘岛—门姜岸—罗威那)
 
 | Attraction | Type | Ticket (CNY) | Rating | Suggested Time | Description |
 |---|---|---|---|---|---|
-| West Bali National Park | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.4|3147条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Menjangan Island | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.9|36条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Lovina Dolphin Watching | 自然/文化体验 | 活动价格待出发前核验 | ⭐Google:4.7|813条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Banyumala Waterfall | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.8|5523条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Menjangan Adventure | 自然/文化体验 | 价格待出发前核验 | ⭐Google:5|38条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Awan Menjangan West Bali Tour & Activity | 自然/文化体验 | 活动价格待出发前核验 | ⭐Google:5|55条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Menjangan Tour Snorkeling & Diving | 自然/文化体验 | 活动价格待出发前核验 | ⭐Google:5|760条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Menjangan Snorkeling Trip & Diving | 自然/文化体验 | 活动价格待出发前核验 | ⭐Google:5|963条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Dermaga Nusa Menjangan | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.6|142条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Anchor Wreck Menjangan | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.5|38条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Menjangan Tour Activity | 自然/文化体验 | 活动价格待出发前核验 | ⭐Google:5|20条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| West Bali Explorer | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.8|346条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| West Bali National Park | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.4|3147条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Menjangan Island | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.9|36条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Lovina Dolphin Watching | Nature / Culture Experience | 活动价格待出发前核验 | ⭐Google:4.7|813条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Banyumala Waterfall | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.8|5523条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Menjangan Adventure | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:5|38条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Awan Menjangan West Bali Tour & Activity | Nature / Culture Experience | 活动价格待出发前核验 | ⭐Google:5|55条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Menjangan Tour Snorkeling & Diving | Nature / Culture Experience | 活动价格待出发前核验 | ⭐Google:5|760条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Menjangan Snorkeling Trip & Diving | Nature / Culture Experience | 活动价格待出发前核验 | ⭐Google:5|963条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Dermaga Nusa Menjangan | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.6|142条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Anchor Wreck Menjangan | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.5|38条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Menjangan Tour Activity | Nature / Culture Experience | 活动价格待出发前核验 | ⭐Google:5|20条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| West Bali Explorer | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.8|346条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
 
 ### Surabaya-Bromo (泗水—布罗莫)
 
 | Attraction | Type | Ticket (CNY) | Rating | Suggested Time | Description |
 |---|---|---|---|---|---|
-| Bromo Tengger Semeru National Park | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.8|47148条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Mount Bromo | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.7|13650条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Penanjakan Bromo | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.8|8487条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Pasir Berbisik | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.8|1849条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Monumen Kapal Selam Surabaya | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.5|16886条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Surabaya Zoo | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.4|56399条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Surabaya North Quay | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.4|23504条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Statue of Gubernur Suryo | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.5|216条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Apsari Park | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.7|9034条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Bungkul Park | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.6|58532条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Siola Surabaya Museum | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.6|8299条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Rumah Besar Pecinan Tambak Bayan Surabaya | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.7|236条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Bromo Tengger Semeru National Park | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.8|47148条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Mount Bromo | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.7|13650条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Penanjakan Bromo | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.8|8487条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Pasir Berbisik | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.8|1849条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Monumen Kapal Selam Surabaya | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.5|16886条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Surabaya Zoo | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.4|56399条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Surabaya North Quay | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.4|23504条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Statue of Gubernur Suryo | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.5|216条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Apsari Park | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.7|9034条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Bungkul Park | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.6|58532条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Siola Surabaya Museum | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.6|8299条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Rumah Besar Pecinan Tambak Bayan Surabaya | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.7|236条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
 
 ### Banyuwangi-Ijen (外南梦—伊真)
 
 | Attraction | Type | Ticket (CNY) | Rating | Suggested Time | Description |
 |---|---|---|---|---|---|
-| Blue Flames Ijen | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.4|323条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Kawah Ijen | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.8|137条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Wisata Kawah Ijen | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.8|2871条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Kawah Ijen Blue Fire Tour | 自然/文化体验 | 活动价格待出发前核验 | ⭐Google:4.8|639条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Ijen Crater | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.8|38条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Ijen Crater Sunrise Point | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.8|301条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Ijen Crater Indonesia - Tour Organizer | 自然/文化体验 | 活动价格待出发前核验 | ⭐Google:5|54条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Ijen Geopark, Blue Fire | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.5|107条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Ijen Geopark Wilayah Bondowoso | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.8|137条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| IJEN GEOPARK TUGU | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:5|4条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| De Djawatan Forest | 自然/文化体验 | 门票/现场规则待出发前核验 | ⭐Google:4.6|9561条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
-| Pantai Cacalan | 自然/文化体验 | 价格待出发前核验 | ⭐Google:4.4|5394条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Blue Flames Ijen | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.4|323条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Kawah Ijen | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.8|137条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Wisata Kawah Ijen | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.8|2871条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Kawah Ijen Blue Fire Tour | Nature / Culture Experience | 活动价格待出发前核验 | ⭐Google:4.8|639条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Ijen Crater | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.8|38条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Ijen Crater Sunrise Point | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.8|301条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Ijen Crater Indonesia - Tour Organizer | Nature / Culture Experience | 活动价格待出发前核验 | ⭐Google:5|54条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Ijen Geopark, Blue Fire | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.5|107条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Ijen Geopark Wilayah Bondowoso | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.8|137条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| IJEN GEOPARK TUGU | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:5|4条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| De Djawatan Forest | Nature / Culture Experience | 门票/现场规则待出发前核验 | ⭐Google:4.6|9561条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
+| Pantai Cacalan | Nature / Culture Experience | 价格待出发前核验 | ⭐Google:4.4|5394条 | 2-4小时 | Google Maps候选；开放、票价和天气出发前复核 |
 
 ---
 

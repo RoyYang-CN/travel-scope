@@ -4,7 +4,7 @@
 Travel Guide Builder - Generate Excel + HTML + Markdown travel guide files.
 
 Usage:
-    python gen_travel_guide.py --output-dir <dir> --map-platform <google|amap|baidu|all> --country <name>
+    python gen_travel_scope.py --output-dir <dir> --map-platform <google|amap|baidu|all> --country <name>
 
 The DATA section below must be edited by LLM before running.
 Replace DESTINATIONS, HOTELS, RESTAURANTS, ATTRACTIONS, TRANSPORT, PRACTICAL, etc.
@@ -287,7 +287,7 @@ ROUTES = [
 
 # Sheet: 住宿推荐
 # [目的地, 酒店名称(中文), 酒店名称(英文), 类型, 参考价(元/晚), 评分, 评价数, 经纬度, 图片URL1, 图片URL2, 特色描述]
-# 评分格式(国内): "小红书热度:高|携程:4.5"
+# 评分格式(国内): 高德结构化评分；百度/搜索/AI字段独立保存
 # 评分格式(海外): "Google:4.3"
 # 标准深度: 每个目的地8家; 精简: 5家; 深度: 10家
 HOTELS = [
@@ -1542,6 +1542,11 @@ function transformLng(lng, lat) {{
             "点击地点右侧": "Use the map buttons to navigate; click destination or category headers to expand/collapse",
             "按钮可一键导航；点击目的地标题可展开/收起": "",
             ">住宿<": ">Accommodation<", ">美食<": ">Food<", ">景点<": ">Attractions<", ">潜水<": ">Diving<", ">交通<": ">Transport<",
+            "🏨 住宿 ": "🏨 Accommodation ", "🍽 美食 ": "🍽 Food ", "📍 景点 ": "📍 Attractions ", "🤿 潜水 ": "🤿 Diving ", "🚌 交通 ": "🚌 Transport ",
+            "目的地</div>": "Destinations</div>", "目的地总览": "Destinations", "自然/文化体验": "Nature / Culture Experience",
+            "Google评分：": "Google rating: ", "搜索补充：": "Search supplement: ", "条": " reviews",
+            "互动探索": "Interactive guide", "一键导航": "navigation", "按目的地分类": "by destination",
+            "元/晚": " CNY/night", "人均": "Avg. CNY ", "元": " CNY",
             "个地点": " places", "个景点": " attractions", "家酒店": " hotels", "家餐厅": " restaurants",
             "行程路线": "Itinerary", "方案": "Option", "数据仅供参考": "Data for reference only",
             "导航平台": "Navigation platforms", "高德地图": "Amap", "百度地图": "Baidu Maps", "Google Maps": "Google Maps",
