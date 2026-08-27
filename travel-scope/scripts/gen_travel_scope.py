@@ -98,9 +98,13 @@ def parse_coords(coord_str):
         return None, None
 
 
-def gen_google_maps_uri(lat, lng, name=""):
-    """Generate Google Maps search URI."""
-    return f"https://www.google.com/maps/search/?api=1&query={lat},{lng}"
+def gen_google_maps_uri(lat, lng, name="", place_id=""):
+    """Generate a Google Maps URI using the POI identity before coordinates."""
+    query = url_quote(name) if name else f"{lat},{lng}"
+    uri = f"https://www.google.com/maps/search/?api=1&query={query}"
+    if place_id:
+        uri += f"&query_place_id={url_quote(place_id)}"
+    return uri
 
 
 def gen_amap_uri(lat, lng, name=""):
@@ -127,10 +131,10 @@ def gen_baidu_maps_uri(lat, lng, name="", content=""):
     return f"https://api.map.baidu.com/marker?location={bd_lat},{bd_lng}&title={title}&content={content_enc}&output=html&src=webapp.travelGuide"
 
 
-def gen_map_uri(platform, lat, lng, name="", content=""):
+def gen_map_uri(platform, lat, lng, name="", content="", place_id=""):
     """Generate map URI for the specified platform."""
     if platform == "google":
-        return gen_google_maps_uri(lat, lng, name)
+        return gen_google_maps_uri(lat, lng, name, place_id)
     elif platform == "amap":
         return gen_amap_uri(lat, lng, name)
     elif platform == "baidu":
@@ -150,13 +154,32 @@ DOMESTIC_DESTINATION = False  # Set by domestic builders; overseas always audits
 OUTPUT_LANG = "cn"  # cn / en; the --language=both mode generates both artifacts
 DEMO_MODE = False
 
+# Provider-verified identity/media supplied by the upstream Live data builder.
+GOOGLE_PLACE_IDS = {}
+GOOGLE_IMAGES = {}
+
+
+def google_place_id_for(name):
+    value = GOOGLE_PLACE_IDS.get(str(name or "").strip(), "")
+    return str(value).strip() if value else ""
+
+
+def google_images_for(name, row, img1_idx, img2_idx):
+    """Return POI-level Google images, never a global template fallback."""
+    mapped = GOOGLE_IMAGES.get(str(name or "").strip(), [])
+    if isinstance(mapped, (list, tuple)) and len(mapped) >= 2:
+        return str(mapped[0] or ""), str(mapped[1] or "")
+    if len(row) > max(img1_idx, img2_idx):
+        return str(row[img1_idx] or ""), str(row[img2_idx] or "")
+    return "", ""
+
 
 def load_demo_fixture(path):
     """Load a sanitized, offline fixture without touching provider APIs."""
     global COUNTRY, COUNTRY_EN, TRAVEL_MODE, DOMESTIC_DESTINATION
     global DESTINATIONS, DESTINATION_COVERAGE, SOURCE_EVIDENCE, DYNAMIC_INFO
     global ROUTES, HOTELS, RESTAURANTS, TRANSPORT, ATTRACTIONS, DIVE_SITES
-    global BUDGET, PRACTICAL, ITINERARY
+    global BUDGET, PRACTICAL, ITINERARY, GOOGLE_PLACE_IDS, GOOGLE_IMAGES
     with open(path, "r", encoding="utf-8") as fixture_file:
         payload = json.load(fixture_file)
     if not isinstance(payload, dict):
@@ -165,6 +188,8 @@ def load_demo_fixture(path):
     COUNTRY_EN = payload.get("country_en", COUNTRY_EN)
     TRAVEL_MODE = payload.get("travel_mode", "非自驾")
     DOMESTIC_DESTINATION = bool(payload.get("domestic_destination", False))
+    GOOGLE_PLACE_IDS = payload.get("google_place_ids", {}) or {}
+    GOOGLE_IMAGES = payload.get("google_images", {}) or {}
     for key in (
         "destinations", "destination_coverage", "source_evidence", "dynamic_info",
         "routes", "hotels", "restaurants", "transport", "attractions",
@@ -202,6 +227,7 @@ HEADER_EN = {
     "酒店名称(中文)": "Hotel (Chinese)", "酒店名称(英文)": "Hotel (English)", "类型": "Type",
     "参考价(元/晚)": "Reference Price (CNY/night)", "评分(搜索补充)": "Rating (search supplement)",
     "评价数(旧字段)": "Review Count (legacy)", "经纬度(WGS84)": "Coordinates (WGS84)",
+    "Google图片1": "Google Image 1", "Google图片2": "Google Image 2", "Google Place ID": "Google Place ID",
     "特色描述": "Highlights", "餐厅名称(中文)": "Restaurant (Chinese)", "餐厅名称(英文)": "Restaurant (English)",
     "特色菜品": "Signature Dishes", "人均(元)": "Average Spend (CNY)", "地址/位置": "Address / Location",
     "景点名称(中文)": "Attraction (Chinese)", "景点名称(英文)": "Attraction (English)",
@@ -460,6 +486,21 @@ def generate_excel(output_path, include_research=True):
                 ws.column_dimensions[get_column_letter(col_idx)].width = width
         ws.freeze_panes = 'A2'
 
+    overseas_output = _is_overseas()
+
+    def provider_rows(rows, img1_idx, img2_idx):
+        if not overseas_output:
+            return rows
+        enriched = []
+        for row in rows:
+            name = row[1] if len(row) > 1 else ""
+            img1, img2 = google_images_for(name, row, img1_idx, img2_idx)
+            enriched.append(list(row) + [img1, img2, google_place_id_for(name)])
+        return enriched
+
+    def provider_headers(headers):
+        return list(headers) + (["Google图片1", "Google图片2", "Google Place ID"] if overseas_output else [])
+
     # Sheet 1: 目的地总览
     ws1 = wb.active
     ws1.title = '目的地总览'
@@ -494,15 +535,13 @@ def generate_excel(output_path, include_research=True):
 
     # Sheet 6: 住宿推荐
     ws6 = wb.create_sheet('住宿推荐')
-    write_sheet(ws6,
-        ['目的地', '酒店名称(中文)', '酒店名称(英文)', '类型', '参考价(元/晚)', '评分(搜索补充)', '评价数(旧字段)', '经纬度(WGS84)', '高德图片1', '高德图片2', '特色描述', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分'],
-        HOTELS, [12, 22, 30, 12, 14, 22, 12, 18, 30, 30, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12])
+    hotel_headers = ['目的地', '酒店名称(中文)', '酒店名称(英文)', '类型', '参考价(元/晚)', '评分(搜索补充)', '评价数(旧字段)', '经纬度(WGS84)', '高德图片1', '高德图片2', '特色描述', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分']
+    write_sheet(ws6, provider_headers(hotel_headers), provider_rows(HOTELS, 8, 9), [12, 22, 30, 12, 14, 22, 12, 18, 30, 30, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
 
     # Sheet 7: 美食推荐
     ws7 = wb.create_sheet('美食推荐')
-    write_sheet(ws7,
-        ['目的地', '餐厅名称(中文)', '餐厅名称(英文)', '特色菜品', '人均(元)', '评分(搜索补充)', '评价数(旧字段)', '经纬度(WGS84)', '高德图片1', '高德图片2', '地址/位置', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分'],
-        RESTAURANTS, [12, 20, 30, 22, 10, 22, 12, 18, 30, 30, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12])
+    restaurant_headers = ['目的地', '餐厅名称(中文)', '餐厅名称(英文)', '特色菜品', '人均(元)', '评分(搜索补充)', '评价数(旧字段)', '经纬度(WGS84)', '高德图片1', '高德图片2', '地址/位置', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分']
+    write_sheet(ws7, provider_headers(restaurant_headers), provider_rows(RESTAURANTS, 8, 9), [12, 20, 30, 22, 10, 22, 12, 18, 30, 30, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
 
     # Sheet 8: 交通信息
     ws8 = wb.create_sheet('交通信息')
@@ -512,9 +551,8 @@ def generate_excel(output_path, include_research=True):
 
     # Sheet 9: 景点活动
     ws9 = wb.create_sheet('景点活动')
-    write_sheet(ws9,
-        ['目的地', '景点名称(中文)', '景点名称(英文)', '类型', '门票/价格(元)', '评分(搜索补充)', '经纬度(WGS84)', '高德图片1', '高德图片2', '推荐游玩时间', '描述', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分'],
-        ATTRACTIONS, [12, 22, 30, 12, 14, 22, 18, 30, 30, 12, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12])
+    attraction_headers = ['目的地', '景点名称(中文)', '景点名称(英文)', '类型', '门票/价格(元)', '评分(搜索补充)', '经纬度(WGS84)', '高德图片1', '高德图片2', '推荐游玩时间', '描述', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分']
+    write_sheet(ws9, provider_headers(attraction_headers), provider_rows(ATTRACTIONS, 7, 8), [12, 22, 30, 12, 14, 22, 18, 30, 30, 12, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
 
     # Sheet 10: 潜水活动
     ws10 = wb.create_sheet('潜水活动')
@@ -535,11 +573,11 @@ def generate_excel(output_path, include_research=True):
     # Sheet 13: 坐标汇总
     coords = []
     for h in HOTELS:
-        coords.append(["住宿", h[0], h[1], h[2], h[7], gen_google_maps_uri(*parse_coords(h[7]))])
+        coords.append(["住宿", h[0], h[1], h[2], h[7], gen_google_maps_uri(*parse_coords(h[7]), h[1], google_place_id_for(h[1]))])
     for r in RESTAURANTS:
-        coords.append(["美食", r[0], r[1], r[2], r[7], gen_google_maps_uri(*parse_coords(r[7]))])
+        coords.append(["美食", r[0], r[1], r[2], r[7], gen_google_maps_uri(*parse_coords(r[7]), r[1], google_place_id_for(r[1]))])
     for a in ATTRACTIONS:
-        coords.append(["景点", a[0], a[1], a[2], a[6], gen_google_maps_uri(*parse_coords(a[6]))])
+        coords.append(["景点", a[0], a[1], a[2], a[6], gen_google_maps_uri(*parse_coords(a[6]), a[1], google_place_id_for(a[1]))])
     for t in TRANSPORT:
         dep = t[0].split('→')[0] if '→' in t[0] else t[0]
         arr = t[0].split('→')[1] if '→' in t[0] else ''
@@ -742,7 +780,7 @@ def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', 
             return ""
         buttons = []
         for platform in map_platforms:
-            uri = gen_map_uri(platform, lat, lng, name_cn)
+            uri = gen_map_uri(platform, lat, lng, name_cn, "", google_place_id_for(name_cn))
             btn_text = MAP_PLATFORM_NAMES[platform]
             btn_color = MAP_BTN_COLORS[platform]
             icon = {
@@ -1077,6 +1115,7 @@ var TYPE_ICONS = {{'景点': '📍', '餐厅': '🍽️', '酒店': '🏨', '交
 
 var IS_OVERSEAS = {_is_overseas_str};
 var GOOGLE_MAPS_KEY = "{google_maps_key}";
+var GOOGLE_PLACE_IDS = {json.dumps(GOOGLE_PLACE_IDS, ensure_ascii=False)};
 var MAP_ENGINE = IS_OVERSEAS && GOOGLE_MAPS_KEY ? "google" : "amap";
 
 function initMap() {{
@@ -1517,7 +1556,11 @@ function typeIconHtml(item) {{
 
 function genNavUri(platform, lat, lng, name) {{
   if (platform === 'google') {{
-    return 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
+    var query = encodeURIComponent(name || (lat + ',' + lng));
+    var uri = 'https://www.google.com/maps/search/?api=1&query=' + query;
+    var placeId = GOOGLE_PLACE_IDS[name] || '';
+    if (placeId) uri += '&query_place_id=' + encodeURIComponent(placeId);
+    return uri;
   }} else if (platform === 'amap') {{
     var gcj = wgs84ToGcj02(lat, lng);
     return 'https://uri.amap.com/marker?position=' + gcj.lng + ',' + gcj.lat + '&name=' + encodeURIComponent(name);

@@ -1,5 +1,7 @@
 # Travel-Scope
 
+Current baseline: **v3.0.1**. See [VERSION.md](VERSION.md) for the POI identity, coordinate, image, and regression acceptance criteria.
+
 Travel-Scope is an evidence-aware travel research and itinerary generation skill. It produces HTML, Markdown, and Excel outputs from one structured travel dataset, with Chinese and English output modes.
 
 ## Offline demo

@@ -13,6 +13,14 @@ description: >
 
 # Travel-Scope
 
+## v3.0.1 POI 身份与国内/国际分支闭环门禁（强制）
+
+- 国际 Live 数据必须为每个酒店、餐厅、景点提供已验证的 Google Place ID 和两张 POI 级 Google 图片；没有实体 ID 时不得依赖坐标生成看似正确的导航链接。
+- Google Maps 链接统一采用 Place ID/名称优先、坐标备用；HTML 卡片、路线面板和 Excel 坐标汇总必须调用同一规则。
+- 国际 Excel 必须包含 Google 图片1、Google 图片2、Google Place ID，并与 HTML 使用同一份 POI 数据。
+- 国内不改变高德主接口、百度验证/补图/导航的既定逻辑；正式 Live POI 必须保留高德 POI ID，用于审计名称与 WGS84 坐标一致性。
+- 国内/国际均阻断跨 POI 图片 URL 复用；Demo 夹具不代表真实数据质量。
+
 ## v2.6 交付门禁（强制）
 
 使用 `scripts/gen_travel_scope.py` 生成交付物时，默认执行严格数据校验；不要用 `--no-strict-qa` 生成正式交付。严格校验会在生成前阻断以下问题：
@@ -396,7 +404,9 @@ python travel-scope/scripts/validate_output.py --html outputs/<country>旅行攻
 
 ### Google Maps
 ```
-https://www.google.com/maps/search/?api=1&query={lat},{lng}
+https://www.google.com/maps/search/?api=1&query={encoded_name}&query_place_id={place_id}
+
+海外 Google Maps 导航必须优先使用已验证的 Place ID；仅在没有 Place ID 的明确非 Live/演示场景下才退回名称或坐标搜索。坐标本身不能证明 POI 实体匹配正确。
 ```
 - 使用 WGS84 坐标系（原始经纬度）
 - 全球通用

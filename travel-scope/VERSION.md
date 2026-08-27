@@ -1,4 +1,12 @@
-# Travel-Scope v2.9.1
+# Travel-Scope v3.0.1
+
+## v3.0.1 POI 身份、坐标与输出闭环修复
+
+- Google Maps 导航改为 Place ID/POI 名称优先，坐标仅作备用，避免错误源坐标把导航带到海里。
+- 国际 Excel 增加 Google 图片1、Google 图片2 和 Google Place ID，并与 HTML 使用同一 POI 数据对象。
+- 国际 Live 缺少已验证 Google Place ID 或 Google 图片时阻断正式生成。
+- 国内保持高德主接口、百度验证/补图/导航；Live 国内 POI 缺少高德 POI ID 或发生跨 POI 图片复用时阻断。
+- Demo 模式仍不调用供应商 API；旧攻略与运行输出不进入开源源包。
 
 ## 本版本基线
 

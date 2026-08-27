@@ -40,6 +40,8 @@ def main():
         fail(errors, f"图片数量不完整: poi_cards={poi_cards}, image_tags={len(image_tags)}, expected={poi_cards * 2}")
     if any(not u.startswith(("http://", "https://")) for u in image_tags):
         fail(errors, "存在非 HTTP(S) 图片URL")
+    if len(image_tags) != len(set(image_tags)):
+        fail(errors, "卡片图片存在跨 POI URL 复用，疑似模板图或映射错位")
     detail_blocks = re.findall(r'<div class="loc-detail">(.*?)</div>', html, re.S)
     # 国内评分可能因来源访问限制而明确标记为“待核验”，这不等于价格占位。
     # 卡片结构为“类型 | 价格 | 评分”，门禁只阻断价格字段的占位值。
@@ -49,6 +51,9 @@ def main():
 
     destination_names = set(re.findall(r'<div class="dest-section" data-dest="([^"]+)"', html))
     is_english = bool(re.search(r'<html[^>]+lang=["\']en["\']', html, re.I))
+    is_overseas = bool(re.search(r'var IS_OVERSEAS = true;', html))
+    if is_overseas and "var GOOGLE_PLACE_IDS =" not in html:
+        fail(errors, "海外 HTML 缺少 Google Place ID 映射")
     if is_english:
         destination_headers = re.findall(r'<div class="dest-header"[^>]*>(.*?)<span class="dest-count">', html, re.S)
         for header in destination_headers:
@@ -167,6 +172,13 @@ def main():
                 wb = openpyxl.load_workbook(args.delivery_xlsx, read_only=True)
                 if len(wb.sheetnames) != 11:
                     fail(errors, f"交付版工作表数量错误: {len(wb.sheetnames)}")
+                if is_overseas:
+                    for sheet_name in ("Accommodation", "Food & Restaurants", "Attractions & Activities"):
+                        if sheet_name in wb.sheetnames:
+                            headers = {str(cell.value).strip() for cell in next(wb[sheet_name].iter_rows(max_row=1)) if cell.value is not None}
+                            for required in ("Google Image 1", "Google Image 2", "Google Place ID"):
+                                if required not in headers:
+                                    fail(errors, f"海外 Excel 工作表 {sheet_name} 缺少字段: {required}")
             if args.research_xlsx:
                 wb = openpyxl.load_workbook(args.research_xlsx, read_only=True)
                 if len(wb.sheetnames) != 14:
