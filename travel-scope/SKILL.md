@@ -13,7 +13,7 @@ description: >
 
 # Travel-Scope
 
-## v3.0.1 POI 身份与国内/国际分支闭环门禁（强制）
+## v3.0.2 Excel-EN 语言化与 v3.0.1 POI 身份闭环门禁（强制）
 
 - 国际 Live 数据必须为每个酒店、餐厅、景点提供已验证的 Google Place ID 和两张 POI 级 Google 图片；没有实体 ID 时不得依赖坐标生成看似正确的导航链接。
 - Google Maps 链接统一采用 Place ID/名称优先、坐标备用；HTML 卡片、路线面板和 Excel 坐标汇总必须调用同一规则。

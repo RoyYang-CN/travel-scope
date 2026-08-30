@@ -16,6 +16,7 @@ import html as html_mod
 import json
 import math
 import os
+import re
 import sys
 from urllib.parse import quote as url_quote
 
@@ -239,6 +240,18 @@ HEADER_EN = {
     "序号": "Sequence", "类型": "Type", "地点名称": "Place Name", "日期": "Date", "行程": "Plan",
     "住宿(元)": "Lodging (CNY)", "餐饮(元)": "Food (CNY)", "交通(元)": "Transport (CNY)",
     "活动/门票(元)": "Activities / Tickets (CNY)", "其他(元)": "Other (CNY)", "日合计(元)": "Daily Total (CNY)",
+    "点位ID": "Place ID", "点位名称": "Place Name", "来源URL": "Source URL", "来源类型": "Source Type",
+    "支持事实": "Supported Facts", "是否独立来源": "Independent Source", "冲突或疑问": "Conflict / Question",
+    "信息ID": "Information ID", "目的地/路线": "Destination / Route", "最后核验日期": "Last Verified Date",
+    "动态等级": "Change Level", "出发前复核": "Recheck Before Departure",
+    "高德POI ID": "Amap POI ID", "高德评分": "Amap Rating", "高德评价数": "Amap Review Count",
+    "百度UID": "Baidu UID", "百度匹配名称": "Baidu Matched Name", "百度地址": "Baidu Address",
+    "百度纬度": "Baidu Latitude", "百度经度": "Baidu Longitude", "百度评分": "Baidu Rating",
+    "百度评价数": "Baidu Review Count", "百度价格": "Baidu Price", "百度图片1": "Baidu Image 1",
+    "百度图片2": "Baidu Image 2", "百度匹配状态": "Baidu Match Status", "高德图片1": "Amap Image 1",
+    "高德图片2": "Amap Image 2", "AI推荐分": "AI Recommendation Score",
+    "评价数": "Review Count", "评分": "Rating", "图片1": "Image 1", "图片2": "Image 2",
+    "适合等级": "Suitable Level", "预算": "Budget", "全程": "Full Trip",
 }
 
 SHEET_EN = {
@@ -257,6 +270,148 @@ def localize_headers(headers):
 def localize_sheet_name(name):
     return SHEET_EN.get(name, name) if OUTPUT_LANG == "en" else name
 
+
+# Stable labels used by the structured data layer.  These are deliberately
+# explicit rather than an online machine-translation dependency so EN exports
+# remain reproducible and do not silently invent factual translations.
+EN_TEXT_REPLACEMENTS = {
+    "全年示例": "Year-round demo",
+    "维萨亚斯": "Visayas", "北宿务外岛": "Northern Cebu outer islands",
+    "宿务西南部": "Southwestern Cebu", "北宿务": "Northern Cebu",
+    "棉兰老东北外岛": "Northeastern Mindanao outer islands",
+    "政府机构及社会团体": "Government and social organizations",
+    "政府机关": "Government office", "政府机关相关": "Government-related",
+    "自然/文化体验": "Nature / Culture experience", "自然/文化": "Nature / Culture",
+    "历史文化": "History & culture", "历史遗迹": "Historic site",
+    "风景名胜": "Scenic attraction", "旅游景点": "Tourist attraction",
+    "国际/印尼菜": "International / Indonesian cuisine", "印尼/国际料理": "Indonesian / international cuisine",
+    "特色菜": "Signature dish", "特色描述": "Highlights", "描述": "Description",
+    "购物": "Shopping", "潜水": "Diving", "景点": "Attraction", "美食": "Food", "餐厅": "Restaurant",
+    "酒店": "Hotel", "住宿": "Accommodation", "交通": "Transport",
+    "航班": "Flight", "轮船": "Ferry", "快艇": "Speedboat", "公交": "Bus", "出发": "Departure", "到达": "Arrival",
+    "直飞": "Direct flight", "免签入境口岸": "Visa-free entry port",
+    "入境口岸": "Entry port", "每天": "Daily", "班": "services",
+    "正式纳入": "Included", "候选但排除": "Candidate but excluded", "待验证": "Pending verification",
+    "待复核": "Pending review", "是": "Yes", "否": "No", "自驾": "Self-drive", "非自驾": "Non-self-drive",
+    "高": "High", "中": "Medium", "低": "Low", "免费": "Free",
+    "价格待出发前核验": "Price to be verified before departure",
+    "门票/现场规则待出发前核验": "Ticket / on-site rules to be verified before departure",
+    "日期": "Date", "行程": "Itinerary", "行程时间": "Travel time", "备注": "Notes",
+    "示例": "Demo", "示范": "Demo", "演示": "Demo", "城市": "City", "全程": "Full trip", "小时": "hours", "天": "days",
+    "元/晚": "CNY/night", "元": "CNY", "人均": "per person", "次": "times",
+}
+
+
+def translate_excel_text(value):
+    """Translate controlled labels in an EN workbook without touching URLs/numbers."""
+    if OUTPUT_LANG != "en" or not isinstance(value, str) or not value.strip():
+        return value
+    translated = value
+    for source, target in sorted(EN_TEXT_REPLACEMENTS.items(), key=lambda item: len(item[0]), reverse=True):
+        translated = translated.replace(source, target)
+    return translated.replace("→", " -> ").replace("至", " to ")
+
+
+def destination_name_en(name):
+    for row in DESTINATIONS:
+        if isinstance(row, dict) and row.get("name") == name:
+            return row.get("name_en") or name
+        if row and row[0] == name:
+            return row[1] if len(row) > 1 and row[1] else name
+    return translate_excel_text(name)
+
+
+def poi_name_en(name):
+    for rows in (HOTELS, RESTAURANTS, ATTRACTIONS, DIVE_SITES):
+        for row in rows:
+            if len(row) > 2 and row[1] == name:
+                return row[2] or name
+    return translate_excel_text(name)
+
+
+def route_name_en(name):
+    for row in ROUTES:
+        if isinstance(row, dict) and row.get("name") == name:
+            return row.get("name_en") or name
+        if row and row[0] == name:
+            return row[7] if len(row) > 7 and row[7] else translate_excel_text(name)
+    return translate_excel_text(name)
+
+
+def localize_excel_rows(kind, rows):
+    """Return EN Excel rows; Chinese-name columns remain intentionally available for wayfinding."""
+    if OUTPUT_LANG != "en":
+        return rows
+    result = []
+    for source in rows:
+        row = list(source)
+        if kind == "destinations":
+            row[2:] = [translate_excel_text(v) for v in row[2:]]
+        elif kind == "coverage":
+            if row: row[0] = destination_name_en(row[0])
+            row[1:] = [translate_excel_text(v) for v in row[1:]]
+        elif kind == "evidence":
+            if len(row) > 1: row[1] = destination_name_en(row[1])
+            if len(row) > 2: row[2] = poi_name_en(row[2])
+            for index in (4, 6, 7, 8, 9):
+                if len(row) > index: row[index] = translate_excel_text(row[index])
+        elif kind == "dynamic":
+            if len(row) > 1: row[1] = destination_name_en(row[1])
+            for index in range(2, len(row)):
+                row[index] = translate_excel_text(row[index])
+        elif kind == "routes":
+            if row: row[0] = route_name_en(row[0])
+            row[2:] = [translate_excel_text(v) for v in row[2:]]
+        elif kind in {"hotels", "restaurants", "attractions", "dives"}:
+            if row: row[0] = destination_name_en(row[0])
+            if len(row) > 2: row[2] = row[2] or poi_name_en(row[1])
+            # Index 1 is the deliberate Chinese wayfinding field.  Provider
+            # IDs, coordinates, URLs, prices and ratings are not language data.
+            skip = {1, 2, 4, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}
+            for index, value in enumerate(row):
+                if index not in skip: row[index] = translate_excel_text(value)
+        elif kind == "transport":
+            if row: row[0] = translate_excel_text(row[0])
+            for index in range(1, len(row)):
+                row[index] = translate_excel_text(row[index])
+        elif kind == "budget":
+            for index in (0, 1, 2):
+                if len(row) > index: row[index] = translate_excel_text(row[index])
+        elif kind == "practical":
+            row = [translate_excel_text(value) for value in row]
+        elif kind == "coords":
+            if row: row[0] = translate_excel_text(row[0])
+            if len(row) > 1: row[1] = destination_name_en(row[1])
+            if len(row) > 3: row[3] = row[3] or poi_name_en(row[2])
+        elif kind == "itinerary":
+            if row: row[0] = route_name_en(row[0])
+            if len(row) > 3: row[3] = translate_excel_text(row[3])
+            if len(row) > 4: row[4] = poi_name_en(row[4])
+        result.append(row)
+    return result
+
+
+def assert_english_excel_rows(rows_by_kind):
+    """Fail the EN build if a non-Chinese-name delivery cell still contains CJK."""
+    if OUTPUT_LANG != "en":
+        return
+    cjk = re.compile(r"[\u3400-\u9fff]")
+    problems = []
+    for kind, rows in rows_by_kind.items():
+        for row_number, row in enumerate(rows, 2):
+            for index, value in enumerate(row):
+                if kind == "destinations" and index == 0:
+                    continue
+                if kind in {"hotels", "restaurants", "attractions", "dives"} and index == 1:
+                    continue
+                if kind in {"hotels", "restaurants", "attractions", "dives"} and index == 2:
+                    continue
+                if kind == "coords" and index == 2:
+                    continue
+                if isinstance(value, str) and not value.startswith("http") and cjk.search(value):
+                    problems.append(f"{kind}!{row_number}:{index + 1}")
+    if problems:
+        raise ValueError("English Excel output blocked; untranslated dynamic cells: " + ", ".join(problems[:20]))
 
 def destination_display(name):
     for row in DESTINATIONS:
@@ -454,6 +609,7 @@ ITINERARY = [
 def generate_excel(output_path, include_research=True):
     """Generate a research or delivery workbook from the shared data section."""
     wb = openpyxl.Workbook()
+    excel_rows = {}
 
     header_font = Font(name='Microsoft YaHei', bold=True, size=11, color='FFFFFF')
     header_fill = PatternFill(start_color='1A73E8', end_color='1A73E8', fill_type='solid')
@@ -504,71 +660,83 @@ def generate_excel(output_path, include_research=True):
     # Sheet 1: 目的地总览
     ws1 = wb.active
     ws1.title = '目的地总览'
+    excel_rows['destinations'] = localize_excel_rows('destinations', DESTINATIONS)
     write_sheet(ws1,
         ['中文名', '英文名', '区域', '核心体验', '建议天数', '最佳季节', '到达方式', '是否纳入环线'],
-        DESTINATIONS, [12, 18, 12, 30, 8, 14, 22, 12])
+        excel_rows['destinations'], [12, 18, 12, 30, 8, 14, 22, 12])
 
     if include_research:
         # Research Sheet 2: 目的地覆盖
         ws2 = wb.create_sheet('目的地覆盖')
+        excel_rows['coverage'] = localize_excel_rows('coverage', DESTINATION_COVERAGE)
         write_sheet(ws2,
             ['目的地', '状态', '是否进路线', '排除/待验证原因', '后续动作', '核验日期'],
-            DESTINATION_COVERAGE, [20, 16, 12, 36, 28, 14])
+            excel_rows['coverage'], [20, 16, 12, 36, 28, 14])
 
         # Research Sheet 3: 来源证据
         ws3 = wb.create_sheet('来源证据')
+        excel_rows['evidence'] = localize_excel_rows('evidence', SOURCE_EVIDENCE)
         write_sheet(ws3,
             ['点位ID', '目的地', '点位名称', '来源URL', '来源类型', '核验日期', '支持事实', '是否独立来源', '冲突或疑问', '状态'],
-            SOURCE_EVIDENCE, [16, 16, 24, 60, 18, 14, 26, 14, 30, 14])
+            excel_rows['evidence'], [16, 16, 24, 60, 18, 14, 26, 14, 30, 14])
 
         # Research Sheet 4: 动态信息
         ws4 = wb.create_sheet('动态信息')
+        excel_rows['dynamic'] = localize_excel_rows('dynamic', DYNAMIC_INFO)
         write_sheet(ws4,
             ['信息ID', '目的地/路线', '项目', '内容', '最后核验日期', '动态等级', '出发前复核', '来源URL', '状态'],
-            DYNAMIC_INFO, [16, 20, 22, 42, 16, 12, 14, 60, 14])
+            excel_rows['dynamic'], [16, 20, 22, 42, 16, 12, 14, 60, 14])
 
     # Delivery/Research next sheet: 路线方案
     ws5 = wb.create_sheet('路线方案')
+    excel_rows['routes'] = localize_excel_rows('routes', ROUTES)
     write_sheet(ws5,
         ['方案名称', '天数', '路线', '特色', '适合人群', '预算(元,不含机票)', '交通方式'],
-        ROUTES, [20, 6, 40, 28, 18, 16, 14])
+        excel_rows['routes'], [20, 6, 40, 28, 18, 16, 14])
 
     # Sheet 6: 住宿推荐
     ws6 = wb.create_sheet('住宿推荐')
     hotel_headers = ['目的地', '酒店名称(中文)', '酒店名称(英文)', '类型', '参考价(元/晚)', '评分(搜索补充)', '评价数(旧字段)', '经纬度(WGS84)', '高德图片1', '高德图片2', '特色描述', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分']
-    write_sheet(ws6, provider_headers(hotel_headers), provider_rows(HOTELS, 8, 9), [12, 22, 30, 12, 14, 22, 12, 18, 30, 30, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
+    excel_rows['hotels'] = localize_excel_rows('hotels', provider_rows(HOTELS, 8, 9))
+    write_sheet(ws6, provider_headers(hotel_headers), excel_rows['hotels'], [12, 22, 30, 12, 14, 22, 12, 18, 30, 30, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
 
     # Sheet 7: 美食推荐
     ws7 = wb.create_sheet('美食推荐')
     restaurant_headers = ['目的地', '餐厅名称(中文)', '餐厅名称(英文)', '特色菜品', '人均(元)', '评分(搜索补充)', '评价数(旧字段)', '经纬度(WGS84)', '高德图片1', '高德图片2', '地址/位置', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分']
-    write_sheet(ws7, provider_headers(restaurant_headers), provider_rows(RESTAURANTS, 8, 9), [12, 20, 30, 22, 10, 22, 12, 18, 30, 30, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
+    excel_rows['restaurants'] = localize_excel_rows('restaurants', provider_rows(RESTAURANTS, 8, 9))
+    write_sheet(ws7, provider_headers(restaurant_headers), excel_rows['restaurants'], [12, 20, 30, 22, 10, 22, 12, 18, 30, 30, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
 
     # Sheet 8: 交通信息
     ws8 = wb.create_sheet('交通信息')
+    excel_rows['transport'] = localize_excel_rows('transport', TRANSPORT)
     write_sheet(ws8,
         ['路线', '交通方式', '运营公司', '参考票价(元)', '行程时间', '班次频率', '出发地坐标', '目的地坐标', '备注'],
-        TRANSPORT, [22, 12, 28, 16, 14, 14, 16, 16, 28])
+        excel_rows['transport'], [22, 12, 28, 16, 14, 14, 16, 16, 28])
 
     # Sheet 9: 景点活动
     ws9 = wb.create_sheet('景点活动')
     attraction_headers = ['目的地', '景点名称(中文)', '景点名称(英文)', '类型', '门票/价格(元)', '评分(搜索补充)', '经纬度(WGS84)', '高德图片1', '高德图片2', '推荐游玩时间', '描述', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分']
-    write_sheet(ws9, provider_headers(attraction_headers), provider_rows(ATTRACTIONS, 7, 8), [12, 22, 30, 12, 14, 22, 18, 30, 30, 12, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
+    excel_rows['attractions'] = localize_excel_rows('attractions', provider_rows(ATTRACTIONS, 7, 8))
+    write_sheet(ws9, provider_headers(attraction_headers), excel_rows['attractions'], [12, 22, 30, 12, 14, 22, 18, 30, 30, 12, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
 
     # Sheet 10: 潜水活动
     ws10 = wb.create_sheet('潜水活动')
+    excel_rows['dives'] = localize_excel_rows('dives', DIVE_SITES)
     write_sheet(ws10,
         ['目的地', '潜点名称(中文)', '潜点名称(英文)', '类型', '价格(元)', '评分', '经纬度', '图片1', '图片2', '适合等级', '描述'],
-        DIVE_SITES, [12, 20, 28, 14, 14, 18, 16, 30, 30, 14, 30])
+        excel_rows['dives'], [12, 20, 28, 14, 14, 18, 16, 30, 30, 14, 30])
 
     # Sheet 11: 预算汇总
     ws11 = wb.create_sheet('预算汇总')
+    excel_rows['budget'] = localize_excel_rows('budget', BUDGET)
     write_sheet(ws11,
         ['天数', '日期', '行程', '住宿(元)', '餐饮(元)', '交通(元)', '活动/门票(元)', '其他(元)', '日合计(元)'],
-        BUDGET, [8, 8, 22, 10, 10, 10, 14, 10, 10])
+        excel_rows['budget'], [8, 8, 22, 10, 10, 10, 14, 10, 10])
 
     # Sheet 12: 实用信息
     ws12 = wb.create_sheet('实用信息')
-    write_sheet(ws12, ['项目', '内容'], PRACTICAL, [14, 80])
+    excel_rows['practical'] = localize_excel_rows('practical', PRACTICAL)
+    write_sheet(ws12, ['项目', '内容'], excel_rows['practical'], [14, 80])
 
     # Sheet 13: 坐标汇总
     coords = []
@@ -586,15 +754,19 @@ def generate_excel(output_path, include_research=True):
             coords.append(["交通-到达", arr, arr, "", t[7], gen_google_maps_uri(*parse_coords(t[7]))])
 
     ws13 = wb.create_sheet('坐标汇总')
+    excel_rows['coords'] = localize_excel_rows('coords', coords)
     write_sheet(ws13,
         ['类别', '目的地', '名称(中文)', '名称(英文)', '经纬度', '地图链接'],
-        coords, [10, 12, 22, 30, 18, 60])
+        excel_rows['coords'], [10, 12, 22, 30, 18, 60])
 
     # Sheet 14: 每日行程
     ws14 = wb.create_sheet('每日行程')
+    excel_rows['itinerary'] = localize_excel_rows('itinerary', ITINERARY)
     write_sheet(ws14,
         ['路线方案', '日序', '序号', '类型', '地点名称', '经纬度'],
-        ITINERARY, [22, 8, 6, 8, 22, 18])
+        excel_rows['itinerary'], [22, 8, 6, 8, 22, 18])
+
+    assert_english_excel_rows(excel_rows)
 
     wb.save(output_path)
     print(f"Excel saved: {output_path}")
