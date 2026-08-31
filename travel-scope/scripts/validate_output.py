@@ -170,7 +170,8 @@ def main():
             import openpyxl
             if args.delivery_xlsx:
                 wb = openpyxl.load_workbook(args.delivery_xlsx, read_only=True)
-                if len(wb.sheetnames) != 11:
+                expected_sheets = 10 + int('潜水活动' in wb.sheetnames)
+                if len(wb.sheetnames) != expected_sheets:
                     fail(errors, f"交付版工作表数量错误: {len(wb.sheetnames)}")
                 if is_overseas:
                     for sheet_name in ("Accommodation", "Food & Restaurants", "Attractions & Activities"):
@@ -181,7 +182,8 @@ def main():
                                     fail(errors, f"海外 Excel 工作表 {sheet_name} 缺少字段: {required}")
             if args.research_xlsx:
                 wb = openpyxl.load_workbook(args.research_xlsx, read_only=True)
-                if len(wb.sheetnames) != 14:
+                expected_sheets = 13 + int('潜水活动' in wb.sheetnames)
+                if len(wb.sheetnames) != expected_sheets:
                     fail(errors, f"研究版工作表数量错误: {len(wb.sheetnames)}")
         except ImportError:
             fail(errors, "缺少 openpyxl，无法验证 Excel")

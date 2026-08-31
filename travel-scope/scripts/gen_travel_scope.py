@@ -553,6 +553,55 @@ DIVE_SITES = [
     # ... (LLM: add dive sites if applicable)
 ]
 
+
+TRUE_DIVE_TERMS = (
+    "潜水", "浮潜", "水肺", "潜点", "scuba", "snorkel", "diving", "dive site"
+)
+
+
+def is_true_dive(row):
+    """Return True only for actual diving/snorkelling records, not generic water activities."""
+    if not row:
+        return False
+    text = " ".join(str(value or "") for value in row[:4] + row[9:])
+    lowered = text.casefold()
+    return any(term in lowered for term in TRUE_DIVE_TERMS)
+
+
+def effective_dive_sites():
+    return [row for row in DIVE_SITES if is_true_dive(row)]
+
+
+def effective_attractions():
+    """Merge non-diving records mistakenly supplied in DIVE_SITES into attractions."""
+    moved = []
+    for row in DIVE_SITES:
+        if is_true_dive(row):
+            continue
+        if len(row) >= 12:
+            suggested_time = row[9]
+            description = f"{row[10]} | {row[11]}"
+        else:
+            suggested_time = ""
+            description = f"{row[9]} | {row[10]}"
+        moved.append([
+            row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8],
+            suggested_time, description
+        ])
+    return list(ATTRACTIONS) + moved
+
+
+def effective_itinerary():
+    """Reclassify water activities in routes when they are not actual dives."""
+    non_dive_names = {row[1] for row in DIVE_SITES if not is_true_dive(row)}
+    normalized = []
+    for item in ITINERARY:
+        row = list(item)
+        if len(row) > 4 and row[4] in non_dive_names and str(row[3]).strip() == "潜水":
+            row[3] = "景点"
+        normalized.append(row)
+    return normalized
+
 # Sheet: 预算汇总 (示例路线)
 # [天数, 日期, 行程, 住宿(元), 餐饮(元), 交通(元), 活动/门票(元), 其他(元), 日合计(元)]
 BUDGET = [
@@ -716,15 +765,17 @@ def generate_excel(output_path, include_research=True):
     # Sheet 9: 景点活动
     ws9 = wb.create_sheet('景点活动')
     attraction_headers = ['目的地', '景点名称(中文)', '景点名称(英文)', '类型', '门票/价格(元)', '评分(搜索补充)', '经纬度(WGS84)', '高德图片1', '高德图片2', '推荐游玩时间', '描述', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分']
-    excel_rows['attractions'] = localize_excel_rows('attractions', provider_rows(ATTRACTIONS, 7, 8))
+    excel_rows['attractions'] = localize_excel_rows('attractions', provider_rows(effective_attractions(), 7, 8))
     write_sheet(ws9, provider_headers(attraction_headers), excel_rows['attractions'], [12, 22, 30, 12, 14, 22, 18, 30, 30, 12, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
 
-    # Sheet 10: 潜水活动
-    ws10 = wb.create_sheet('潜水活动')
-    excel_rows['dives'] = localize_excel_rows('dives', DIVE_SITES)
-    write_sheet(ws10,
-        ['目的地', '潜点名称(中文)', '潜点名称(英文)', '类型', '价格(元)', '评分', '经纬度', '图片1', '图片2', '适合等级', '描述'],
-        excel_rows['dives'], [12, 20, 28, 14, 14, 18, 16, 30, 30, 14, 30])
+    # Sheet 10: 潜水活动（仅在存在真实潜水记录时生成）
+    effective_dives = effective_dive_sites()
+    if effective_dives:
+        ws10 = wb.create_sheet('潜水活动')
+        excel_rows['dives'] = localize_excel_rows('dives', effective_dives)
+        write_sheet(ws10,
+            ['目的地', '潜点名称(中文)', '潜点名称(英文)', '类型', '价格(元)', '评分', '经纬度', '图片1', '图片2', '适合等级', '描述'],
+            excel_rows['dives'], [12, 20, 28, 14, 14, 18, 16, 30, 30, 14, 30])
 
     # Sheet 11: 预算汇总
     ws11 = wb.create_sheet('预算汇总')
@@ -744,7 +795,7 @@ def generate_excel(output_path, include_research=True):
         coords.append(["住宿", h[0], h[1], h[2], h[7], gen_google_maps_uri(*parse_coords(h[7]), h[1], google_place_id_for(h[1]))])
     for r in RESTAURANTS:
         coords.append(["美食", r[0], r[1], r[2], r[7], gen_google_maps_uri(*parse_coords(r[7]), r[1], google_place_id_for(r[1]))])
-    for a in ATTRACTIONS:
+    for a in effective_attractions():
         coords.append(["景点", a[0], a[1], a[2], a[6], gen_google_maps_uri(*parse_coords(a[6]), a[1], google_place_id_for(a[1]))])
     for t in TRANSPORT:
         dep = t[0].split('→')[0] if '→' in t[0] else t[0]
@@ -829,11 +880,11 @@ def _prepare_itinerary_json():
         img_lookup[h[1]] = {"img1": h[8], "img2": h[9]}
     for r in RESTAURANTS:
         img_lookup[r[1]] = {"img1": r[8], "img2": r[9]}
-    for a in ATTRACTIONS:
+    for a in effective_attractions():
         img_lookup[a[1]] = {"img1": a[7], "img2": a[8]}
 
     routes_data = {}
-    for item in ITINERARY:
+    for item in effective_itinerary():
         r_name, day, seq, ptype, pname, coords = item[0], item[1], item[2], item[3], item[4], item[5]
         if r_name not in routes_data:
             routes_data[r_name] = {}
@@ -889,7 +940,7 @@ def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', 
             "ai_score": r[25] if len(r) > 25 else "",
             "img1": r[8], "img2": r[9]
         })
-    for a in ATTRACTIONS:
+    for a in effective_attractions():
         d = a[0]
         dest_items.setdefault(d, {"住宿": [], "美食": [], "景点": [], "潜水": [], "交通": []})
         dest_items[d]["景点"].append({
@@ -903,7 +954,7 @@ def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', 
             "ai_score": a[25] if len(a) > 25 else "",
             "img1": a[7], "img2": a[8]
         })
-    for dv in DIVE_SITES:
+    for dv in effective_dive_sites():
         d = dv[0]
         dest_items.setdefault(d, {"住宿": [], "美食": [], "景点": [], "潜水": [], "交通": []})
         dest_items[d]["潜水"].append({
@@ -967,7 +1018,9 @@ def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', 
 
     parts = []
     platform_names = " / ".join(MAP_PLATFORM_NAMES[p] for p in map_platforms)
-    total_locations = len(HOTELS) + len(RESTAURANTS) + len(ATTRACTIONS) + len(DIVE_SITES)
+    effective_attrs = effective_attractions()
+    effective_dives = effective_dive_sites()
+    total_locations = len(HOTELS) + len(RESTAURANTS) + len(effective_attrs) + len(effective_dives)
 
     # Check map route availability
     overseas = _is_overseas()
@@ -1111,8 +1164,8 @@ footer {{ text-align: center; padding: 20px; color: #999; font-size: 13px; }}
 <div class="stats">
 <div class="stat"><strong>{len(HOTELS)}</strong>住宿</div>
 <div class="stat"><strong>{len(RESTAURANTS)}</strong>美食</div>
-<div class="stat"><strong>{len(ATTRACTIONS)}</strong>景点</div>
-<div class="stat"><strong>{len(DIVE_SITES)}</strong>潜水</div>
+<div class="stat"><strong>{len(effective_attrs)}</strong>景点</div>
+{f'<div class="stat"><strong>{len(effective_dives)}</strong>潜水</div>' if effective_dives else ''}
 <div class="stat"><strong>{len(dest_items)}</strong>目的地</div>
 </div>
 </header>
@@ -1886,7 +1939,7 @@ def generate_markdown(output_path):
         md.append("> 仅展示推荐路线的每日行程点位顺序")
         md.append("")
         routes_itin = {}
-        for item in ITINERARY:
+        for item in effective_itinerary():
             r_name = item[0]
             if r_name not in routes_itin:
                 routes_itin[r_name] = []
@@ -1954,10 +2007,11 @@ def generate_markdown(output_path):
     # 6. 景点活动
     md.append("## 6. 景点活动")
     md.append("")
-    md.append(f"共 **{len(ATTRACTIONS)}** 个景点/活动：")
+    effective_attrs = effective_attractions()
+    md.append(f"共 **{len(effective_attrs)}** 个景点/活动：")
     md.append("")
     for dest_name in [d[0] for d in DESTINATIONS]:
-        dest_attr = [a for a in ATTRACTIONS if a[0] == dest_name]
+        dest_attr = [a for a in effective_attrs if a[0] == dest_name]
         if not dest_attr:
             continue
         md.append(f"### {destination_display(dest_name)}")
@@ -1971,12 +2025,13 @@ def generate_markdown(output_path):
     md.append("")
 
     # 7. 潜水活动
-    if DIVE_SITES:
+    effective_dives = effective_dive_sites()
+    if effective_dives:
         md.append("## 7. 潜水活动")
         md.append("")
         md.append("| 目的地 | 潜点名称 | 类型 | 价格(元) | 评分 | 适合等级 | 描述 |")
         md.append("|---|---|---|---|---|---|---|")
-        for d in DIVE_SITES:
+        for d in effective_dives:
             md.append(f"| {d[0]} | {d[1]}({d[2]}) | {d[3]} | {d[4]} | ⭐{d[5]} | {d[9]} | {d[10]} |")
         md.append("")
         md.append("---")
@@ -2046,7 +2101,7 @@ def validate_data_integrity(expected_days=None, require_images=True):
             continue
         if any(not str(row[idx]).strip() for idx in range(6)):
             errors.append(f"TRANSPORT[{i}] 缺少路线/方式/运营方/票价/耗时/班次字段")
-    poi_rows = [("HOTELS", HOTELS, 8, 9, 4), ("RESTAURANTS", RESTAURANTS, 8, 9, 4), ("ATTRACTIONS", ATTRACTIONS, 7, 8, 4)]
+    poi_rows = [("HOTELS", HOTELS, 8, 9, 4), ("RESTAURANTS", RESTAURANTS, 8, 9, 4), ("ATTRACTIONS", effective_attractions(), 7, 8, 4), ("DIVE_SITES", effective_dive_sites(), 7, 8, 4)]
     poi_names = set()
     for label, rows, img1_idx, img2_idx, price_idx in poi_rows:
         for i, row in enumerate(rows, 1):
@@ -2065,7 +2120,7 @@ def validate_data_integrity(expected_days=None, require_images=True):
 
     route_names = [str(r[0]).strip() for r in ROUTES if r and r[0]]
     itinerary_routes = {}
-    for i, item in enumerate(ITINERARY, 1):
+    for i, item in enumerate(effective_itinerary(), 1):
         if len(item) < 6:
             errors.append(f"ITINERARY[{i}] 字段数量不足")
             continue
@@ -2105,7 +2160,7 @@ def validate_data_integrity(expected_days=None, require_images=True):
     # explain how the traveller actually moves between destinations.
     transport_names = {str(row[0]).strip() for row in TRANSPORT if row and row[0]}
     itinerary_transport_names = {
-        str(item[4]).strip() for item in ITINERARY
+        str(item[4]).strip() for item in effective_itinerary()
         if len(item) >= 6 and str(item[3]).strip() == "交通"
     }
     missing_transport = sorted(transport_names - itinerary_transport_names)
@@ -2114,7 +2169,7 @@ def validate_data_integrity(expected_days=None, require_images=True):
     if require_itinerary_transport and transport_names:
         for route in route_names:
             route_transport_count = sum(
-                1 for item in ITINERARY
+                1 for item in effective_itinerary()
                 if len(item) >= 6 and str(item[0]).strip() == route and str(item[3]).strip() == "交通"
             )
             if route_transport_count == 0:
@@ -2234,8 +2289,8 @@ def main():
     print(f"Destinations: {len(DESTINATIONS)}")
     print(f"Hotels: {len(HOTELS)}")
     print(f"Restaurants: {len(RESTAURANTS)}")
-    print(f"Attractions: {len(ATTRACTIONS)}")
-    print(f"Dive Sites: {len(DIVE_SITES)}")
+    print(f"Attractions: {len(effective_attractions())}")
+    print(f"Dive Sites: {len(effective_dive_sites())}")
     print(f"Transport: {len(TRANSPORT)}")
     print(f"Practical Info: {len(PRACTICAL)}")
     print(f"Itinerary Items: {len(ITINERARY)}")
