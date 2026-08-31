@@ -757,10 +757,29 @@ def generate_excel(output_path, include_research=True):
 
     # Sheet 8: 交通信息
     ws8 = wb.create_sheet('交通信息')
-    excel_rows['transport'] = localize_excel_rows('transport', TRANSPORT)
+    transport_rows = []
+    for row in TRANSPORT:
+        route = str(row[0]) if row else ''
+        origin, separator, destination = route.partition('→')
+        transport_rows.append([
+            origin.strip() if separator else route,
+            destination.strip() if separator else '',
+            row[1] if len(row) > 1 else '',
+            row[2] if len(row) > 2 else '',
+            row[3] if len(row) > 3 else '',
+            row[4] if len(row) > 4 else '',
+            row[9] if len(row) > 9 else '',
+            row[5] if len(row) > 5 else '',
+            row[6] if len(row) > 6 else '',
+            row[7] if len(row) > 7 else '',
+            row[10] if len(row) > 10 else '',
+            row[8] if len(row) > 8 else '',
+            row[11] if len(row) > 11 else '',
+        ])
+    excel_rows['transport'] = localize_excel_rows('transport', transport_rows)
     write_sheet(ws8,
-        ['路线', '交通方式', '运营公司', '参考票价(元)', '行程时间', '班次频率', '出发地坐标', '目的地坐标', '备注'],
-        excel_rows['transport'], [22, 12, 28, 16, 14, 14, 16, 16, 28])
+        ['出发地', '目的地', '交通方式', '运营公司', '参考票价(元)', '预计耗时', '距离', '班次频率', '出发地坐标', '目的地坐标', '是否需预约', '注意事项', '来源/核验状态'],
+        excel_rows['transport'], [18, 18, 18, 24, 16, 16, 14, 22, 18, 18, 16, 38, 28])
 
     # Sheet 9: 景点活动
     ws9 = wb.create_sheet('景点活动')
