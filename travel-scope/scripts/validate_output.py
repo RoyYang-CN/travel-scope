@@ -6,11 +6,17 @@ import argparse
 import json
 import re
 import sys
+import urllib.parse
 from pathlib import Path
 
 
 def fail(errors, message):
     errors.append(message)
+
+
+def image_identity(url):
+    parsed = urllib.parse.urlsplit(str(url or "").strip())
+    return f"{parsed.scheme.lower()}://{parsed.netloc.lower()}{parsed.path}" if parsed.scheme and parsed.netloc else str(url or "").strip()
 
 
 def main():
@@ -42,6 +48,9 @@ def main():
         fail(errors, "存在非 HTTP(S) 图片URL")
     if len(image_tags) != len(set(image_tags)):
         fail(errors, "卡片图片存在跨 POI URL 复用，疑似模板图或映射错位")
+    image_ids = [image_identity(u) for u in image_tags]
+    if len(image_ids) != len(set(image_ids)):
+        fail(errors, "卡片图片去除查询参数后存在真实资源复用，疑似模板图或跨类别映射错位")
     detail_blocks = re.findall(r'<div class="loc-detail">(.*?)</div>', html, re.S)
     # 国内评分可能因来源访问限制而明确标记为“待核验”，这不等于价格占位。
     # 卡片结构为“类型 | 价格 | 评分”，门禁只阻断价格字段的占位值。

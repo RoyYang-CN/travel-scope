@@ -18,7 +18,7 @@ import math
 import os
 import re
 import sys
-from urllib.parse import quote as url_quote
+from urllib.parse import quote as url_quote, urlsplit
 
 try:
     import openpyxl
@@ -173,6 +173,49 @@ def google_images_for(name, row, img1_idx, img2_idx):
     if len(row) > max(img1_idx, img2_idx):
         return str(row[img1_idx] or ""), str(row[img2_idx] or "")
     return "", ""
+
+
+def image_identity(url):
+    """Compare the actual image resource, ignoring cache-busting query strings."""
+    value = str(url or "").strip()
+    if not value:
+        return ""
+    parsed = urlsplit(value)
+    return f"{parsed.scheme.lower()}://{parsed.netloc.lower()}{parsed.path}" if parsed.scheme and parsed.netloc else value
+
+
+def validate_image_integrity(require_images=True):
+    """Reject template/media reuse before any HTML or Excel is written."""
+    categories = [
+        ("HOTELS", HOTELS, 8, 9),
+        ("RESTAURANTS", RESTAURANTS, 8, 9),
+        ("ATTRACTIONS", effective_attractions(), 7, 8),
+        ("DIVE_SITES", effective_dive_sites(), 7, 8),
+    ]
+    seen = {}
+    errors = []
+    for label, rows, img1_idx, img2_idx in categories:
+        for row_number, row in enumerate(rows, 1):
+            name = str(row[1] if len(row) > 1 else "").strip()
+            mapped = GOOGLE_IMAGES.get(name, [])
+            if _is_overseas() and not DEMO_MODE and not (isinstance(mapped, (list, tuple)) and len(mapped) >= 2):
+                errors.append(f"{label}[{row_number}] {name} 缺少Google独立图片映射")
+            urls = [row[img1_idx] if len(row) > img1_idx else "", row[img2_idx] if len(row) > img2_idx else ""]
+            if isinstance(mapped, (list, tuple)) and len(mapped) >= 2:
+                urls = [mapped[0], mapped[1]]
+            identities = [image_identity(url) for url in urls]
+            if require_images and any(not identity for identity in identities):
+                continue
+            if len(set(identities)) < len(identities):
+                errors.append(f"{label}[{row_number}] {name} 的两张图片实际为同一资源")
+            for identity in identities:
+                previous = seen.get(identity)
+                if previous and previous != (label, name):
+                    errors.append(f"图片跨点位/类别复用: {previous[0]}:{previous[1]} 与 {label}:{name}")
+                else:
+                    seen[identity] = (label, name)
+    if errors:
+        raise ValueError("图片完整性校验失败（已阻断错误HTML/Excel输出）：\n- " + "\n- ".join(errors[:40]) + (f"\n- ...另有 {len(errors)-40} 项" if len(errors) > 40 else ""))
 
 
 def load_demo_fixture(path):
@@ -2204,6 +2247,7 @@ def validate_data_integrity(expected_days=None, require_images=True):
     _require_formal_run_manifest()
     errors = []
     allowed_categories = {"景点", "餐厅", "酒店", "潜水", "交通"}
+    validate_image_integrity(require_images=require_images)
     for i, row in enumerate(TRANSPORT, 1):
         if len(row) < 9:
             errors.append(f"TRANSPORT[{i}] 字段数量不足，必须包含9个字段")
@@ -2361,6 +2405,14 @@ def main():
     if DEMO_MODE:
         print("[DEMO] Offline fixture mode: no provider APIs or API keys are used.")
         print("[DEMO] Formal production source-audit gate is not applicable to fixture output.")
+        # Demo skips the formal source-audit gate, but never skips structural
+        # media QA; bad category reuse must not be rendered as a valid sample.
+        try:
+            validate_image_integrity(require_images=True)
+        except ValueError as exc:
+            print(f"ERROR: {exc}")
+            print("修复 fixtures 或上游数据中的图片映射后再生成；不能用 --no-strict-qa 绕过图片门禁。")
+            sys.exit(2)
     elif not args.no_strict_qa:
         try:
             validate_data_integrity(expected_days=args.expected_days)
