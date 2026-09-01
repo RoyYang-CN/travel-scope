@@ -74,9 +74,11 @@ Chinese card view and product output:
 
 ## Current release
 
-`v2.9.1` — internationalized CN/EN output and offline Demo/Live separation.
+`v3.0.5` — independent transport nodes with detailed Excel transport edges.
 
 The EN delivery gate now checks dynamic destination and route labels as well as the fixed interface text. English output uses `English Name (中文名)` for places and blocks incomplete route/destination translations before release.
+
+HTML transport cards show only map-ready nodes, such as a bus station or port. Excel keeps both the node sheet and the detailed point-to-point transport sheet, so one destination can correctly contain multiple transport locations.
 
 ## Status
 

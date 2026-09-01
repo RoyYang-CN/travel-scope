@@ -179,7 +179,7 @@ def load_demo_fixture(path):
     """Load a sanitized, offline fixture without touching provider APIs."""
     global COUNTRY, COUNTRY_EN, TRAVEL_MODE, DOMESTIC_DESTINATION
     global DESTINATIONS, DESTINATION_COVERAGE, SOURCE_EVIDENCE, DYNAMIC_INFO
-    global ROUTES, HOTELS, RESTAURANTS, TRANSPORT, ATTRACTIONS, DIVE_SITES
+    global ROUTES, HOTELS, RESTAURANTS, TRANSPORT, TRANSPORT_NODES, ATTRACTIONS, DIVE_SITES
     global BUDGET, PRACTICAL, ITINERARY, GOOGLE_PLACE_IDS, GOOGLE_IMAGES
     with open(path, "r", encoding="utf-8") as fixture_file:
         payload = json.load(fixture_file)
@@ -193,7 +193,7 @@ def load_demo_fixture(path):
     GOOGLE_IMAGES = payload.get("google_images", {}) or {}
     for key in (
         "destinations", "destination_coverage", "source_evidence", "dynamic_info",
-        "routes", "hotels", "restaurants", "transport", "attractions",
+        "routes", "hotels", "restaurants", "transport", "transport_nodes", "attractions",
         "dive_sites", "budget", "practical", "itinerary",
     ):
         if key in payload:
@@ -201,7 +201,7 @@ def load_demo_fixture(path):
                 "destinations": "DESTINATIONS", "destination_coverage": "DESTINATION_COVERAGE",
                 "source_evidence": "SOURCE_EVIDENCE", "dynamic_info": "DYNAMIC_INFO",
                 "routes": "ROUTES", "hotels": "HOTELS", "restaurants": "RESTAURANTS",
-                "transport": "TRANSPORT", "attractions": "ATTRACTIONS", "dive_sites": "DIVE_SITES",
+                "transport": "TRANSPORT", "transport_nodes": "TRANSPORT_NODES", "attractions": "ATTRACTIONS", "dive_sites": "DIVE_SITES",
                 "budget": "BUDGET", "practical": "PRACTICAL", "itinerary": "ITINERARY",
             }[key]] = payload[key]
 
@@ -338,6 +338,87 @@ def route_name_en(name):
     return translate_excel_text(name)
 
 
+def effective_transport_nodes():
+    """Return distinct, map-ready transport nodes with a backward-compatible fallback.
+
+    New live/demo payloads should provide named terminals in TRANSPORT_NODES.
+    Older edge-only payloads are still rendered, but their endpoint names are
+    explicitly marked as needing terminal-level verification.
+    """
+    nodes = []
+    source = TRANSPORT_NODES or []
+    for row in source:
+        if isinstance(row, dict):
+            node = {
+                "place": str(row.get("place", row.get("destination", ""))).strip(),
+                "name": str(row.get("name", row.get("name_cn", ""))).strip(),
+                "name_en": str(row.get("name_en", "")).strip(),
+                "type": str(row.get("type", "交通节点")).strip(),
+                "coords": str(row.get("coords", "")).strip(),
+                "source_status": str(row.get("source_status", row.get("status", "待核验"))).strip(),
+            }
+        else:
+            values = list(row or [])
+            node = {
+                "place": str(values[0] if len(values) > 0 else "").strip(),
+                "name": str(values[1] if len(values) > 1 else "").strip(),
+                "name_en": str(values[2] if len(values) > 2 else "").strip(),
+                "type": str(values[3] if len(values) > 3 else "交通节点").strip(),
+                "coords": str(values[4] if len(values) > 4 else "").strip(),
+                "source_status": str(values[5] if len(values) > 5 else "待核验").strip(),
+            }
+        if node["place"] and node["name"] and parse_coords(node["coords"])[0] is not None:
+            nodes.append(node)
+
+    if not nodes:
+        for row in TRANSPORT:
+            route = str(row[0] if row else "").strip()
+            origin, separator, destination = route.partition("→")
+            endpoints = [(origin.strip(), row[6] if len(row) > 6 else "", "出发地"),
+                         (destination.strip(), row[7] if len(row) > 7 else "", "目的地")] if separator else [(route, row[6] if len(row) > 6 else "", "交通节点")]
+            for place, coords, node_type in endpoints:
+                if place and parse_coords(str(coords))[0] is not None:
+                    nodes.append({"place": place, "name": place, "name_en": "", "type": node_type,
+                                  "coords": str(coords), "source_status": "待补充具体车站/港口"})
+
+    unique = {}
+    for node in nodes:
+        unique[(node["place"], node["name"], node["coords"])] = node
+    return list(unique.values())
+
+
+def transport_nodes_for_edge(route_name):
+    """Resolve one TRANSPORT edge to its separately mappable endpoint nodes."""
+    route = str(route_name or "").strip()
+    origin, separator, destination = route.partition("→")
+    if not separator:
+        return []
+    origin, destination = origin.strip(), destination.strip()
+    nodes = effective_transport_nodes()
+    linked_names = ("", "")
+    for row in TRANSPORT:
+        if str(row[0] if row else "").strip() == route:
+            linked_names = (str(row[13] if len(row) > 13 else "").strip(),
+                            str(row[14] if len(row) > 14 else "").strip())
+            break
+    resolved = []
+    for index, place in enumerate((origin, destination)):
+        linked_name = linked_names[index]
+        matches = [node for node in nodes if node["place"] == place and (not linked_name or node["name"] == linked_name)]
+        if matches:
+            resolved.append(matches[0])
+    if len(resolved) == 2:
+        return resolved
+    for row in TRANSPORT:
+        if str(row[0] if row else "").strip() != route:
+            continue
+        return [
+            {"place": origin, "name": origin, "name_en": "", "type": "出发地", "coords": str(row[6]), "source_status": "待补充具体车站/港口"},
+            {"place": destination, "name": destination, "name_en": "", "type": "目的地", "coords": str(row[7]), "source_status": "待补充具体车站/港口"},
+        ]
+    return []
+
+
 def localize_excel_rows(kind, rows):
     """Return EN Excel rows; Chinese-name columns remain intentionally available for wayfinding."""
     if OUTPUT_LANG != "en":
@@ -374,6 +455,11 @@ def localize_excel_rows(kind, rows):
             if row: row[0] = translate_excel_text(row[0])
             for index in range(1, len(row)):
                 row[index] = translate_excel_text(row[index])
+        elif kind == "transport_nodes":
+            if row: row[0] = destination_name_en(row[0])
+            if len(row) > 2: row[2] = row[2] or translate_excel_text(row[1])
+            for index in (3, 5):
+                if len(row) > index: row[index] = translate_excel_text(row[index])
         elif kind == "budget":
             for index in (0, 1, 2):
                 if len(row) > index: row[index] = translate_excel_text(row[index])
@@ -405,6 +491,8 @@ def assert_english_excel_rows(rows_by_kind):
                 if kind in {"hotels", "restaurants", "attractions", "dives"} and index == 1:
                     continue
                 if kind in {"hotels", "restaurants", "attractions", "dives"} and index == 2:
+                    continue
+                if kind == "transport_nodes" and index in {1, 2}:
                     continue
                 if kind == "coords" and index == 2:
                     continue
@@ -552,6 +640,11 @@ ATTRACTIONS = [
 DIVE_SITES = [
     # ... (LLM: add dive sites if applicable)
 ]
+
+# Optional transport-node layer.  Each node is independently searchable and
+# mappable; TRANSPORT above remains the detailed route-edge table.
+# [所属目的地, 节点名称(中文), 节点名称(英文), 节点类型, 经纬度, 来源/核验状态]
+TRANSPORT_NODES = []
 
 
 TRUE_DIVE_TERMS = (
@@ -775,19 +868,31 @@ def generate_excel(output_path, include_research=True):
             row[10] if len(row) > 10 else '',
             row[8] if len(row) > 8 else '',
             row[11] if len(row) > 11 else '',
+            row[13] if len(row) > 13 else '',
+            row[14] if len(row) > 14 else '',
         ])
     excel_rows['transport'] = localize_excel_rows('transport', transport_rows)
     write_sheet(ws8,
-        ['出发地', '目的地', '交通方式', '运营公司', '参考票价(元)', '预计耗时', '距离', '班次频率', '出发地坐标', '目的地坐标', '是否需预约', '注意事项', '来源/核验状态'],
-        excel_rows['transport'], [18, 18, 18, 24, 16, 16, 14, 22, 18, 18, 16, 38, 28])
+        ['出发地', '目的地', '交通方式', '运营公司', '参考票价(元)', '预计耗时', '距离', '班次频率', '出发地坐标', '目的地坐标', '是否需预约', '注意事项', '来源/核验状态', '出发节点', '到达节点'],
+        excel_rows['transport'], [18, 18, 18, 24, 16, 16, 14, 22, 18, 18, 16, 38, 28, 24, 24])
 
-    # Sheet 9: 景点活动
-    ws9 = wb.create_sheet('景点活动')
+    # Sheet 9: 交通节点（HTML仅展示这一层；Excel保留节点明细）
+    ws9 = wb.create_sheet('交通节点')
+    transport_node_rows = []
+    for node in effective_transport_nodes():
+        transport_node_rows.append([node['place'], node['name'], node['name_en'], node['type'], node['coords'], node['source_status']])
+    excel_rows['transport_nodes'] = localize_excel_rows('transport_nodes', transport_node_rows)
+    write_sheet(ws9,
+        ['所属目的地', '节点名称(中文)', '节点名称(英文)', '节点类型', '经纬度', '来源/核验状态'],
+        excel_rows['transport_nodes'], [18, 24, 30, 16, 18, 28])
+
+    # Sheet 10: 景点活动
+    ws10 = wb.create_sheet('景点活动')
     attraction_headers = ['目的地', '景点名称(中文)', '景点名称(英文)', '类型', '门票/价格(元)', '评分(搜索补充)', '经纬度(WGS84)', '高德图片1', '高德图片2', '推荐游玩时间', '描述', '高德POI ID', '高德评分', '高德评价数', '百度UID', '百度匹配名称', '百度地址', '百度纬度', '百度经度', '百度评分', '百度评价数', '百度价格', '百度图片1', '百度图片2', '百度匹配状态', 'AI推荐分']
     excel_rows['attractions'] = localize_excel_rows('attractions', provider_rows(effective_attractions(), 7, 8))
     write_sheet(ws9, provider_headers(attraction_headers), excel_rows['attractions'], [12, 22, 30, 12, 14, 22, 18, 30, 30, 12, 35, 18, 12, 12, 22, 22, 35, 12, 12, 12, 12, 12, 30, 30, 16, 12] + ([30, 30, 24] if overseas_output else []))
 
-    # Sheet 10: 潜水活动（仅在存在真实潜水记录时生成）
+    # Sheet 11: 潜水活动（仅在存在真实潜水记录时生成）
     effective_dives = effective_dive_sites()
     if effective_dives:
         ws10 = wb.create_sheet('潜水活动')
@@ -796,19 +901,19 @@ def generate_excel(output_path, include_research=True):
             ['目的地', '潜点名称(中文)', '潜点名称(英文)', '类型', '价格(元)', '评分', '经纬度', '图片1', '图片2', '适合等级', '描述'],
             excel_rows['dives'], [12, 20, 28, 14, 14, 18, 16, 30, 30, 14, 30])
 
-    # Sheet 11: 预算汇总
+    # Sheet 12: 预算汇总
     ws11 = wb.create_sheet('预算汇总')
     excel_rows['budget'] = localize_excel_rows('budget', BUDGET)
     write_sheet(ws11,
         ['天数', '日期', '行程', '住宿(元)', '餐饮(元)', '交通(元)', '活动/门票(元)', '其他(元)', '日合计(元)'],
         excel_rows['budget'], [8, 8, 22, 10, 10, 10, 14, 10, 10])
 
-    # Sheet 12: 实用信息
+    # Sheet 13: 实用信息
     ws12 = wb.create_sheet('实用信息')
     excel_rows['practical'] = localize_excel_rows('practical', PRACTICAL)
     write_sheet(ws12, ['项目', '内容'], excel_rows['practical'], [14, 80])
 
-    # Sheet 13: 坐标汇总
+    # Sheet 14: 坐标汇总
     coords = []
     for h in HOTELS:
         coords.append(["住宿", h[0], h[1], h[2], h[7], gen_google_maps_uri(*parse_coords(h[7]), h[1], google_place_id_for(h[1]))])
@@ -816,12 +921,8 @@ def generate_excel(output_path, include_research=True):
         coords.append(["美食", r[0], r[1], r[2], r[7], gen_google_maps_uri(*parse_coords(r[7]), r[1], google_place_id_for(r[1]))])
     for a in effective_attractions():
         coords.append(["景点", a[0], a[1], a[2], a[6], gen_google_maps_uri(*parse_coords(a[6]), a[1], google_place_id_for(a[1]))])
-    for t in TRANSPORT:
-        dep = t[0].split('→')[0] if '→' in t[0] else t[0]
-        arr = t[0].split('→')[1] if '→' in t[0] else ''
-        coords.append(["交通-出发", dep, dep, "", t[6], gen_google_maps_uri(*parse_coords(t[6]))])
-        if arr:
-            coords.append(["交通-到达", arr, arr, "", t[7], gen_google_maps_uri(*parse_coords(t[7]))])
+    for node in effective_transport_nodes():
+        coords.append(["交通节点", node['place'], node['name'], node['name_en'], node['coords'], gen_google_maps_uri(*parse_coords(node['coords']), node['name'])])
 
     ws13 = wb.create_sheet('坐标汇总')
     excel_rows['coords'] = localize_excel_rows('coords', coords)
@@ -829,7 +930,7 @@ def generate_excel(output_path, include_research=True):
         ['类别', '目的地', '名称(中文)', '名称(英文)', '经纬度', '地图链接'],
         excel_rows['coords'], [10, 12, 22, 30, 18, 60])
 
-    # Sheet 14: 每日行程
+    # Sheet 15: 每日行程
     ws14 = wb.create_sheet('每日行程')
     excel_rows['itinerary'] = localize_excel_rows('itinerary', ITINERARY)
     write_sheet(ws14,
@@ -909,6 +1010,15 @@ def _prepare_itinerary_json():
             routes_data[r_name] = {}
         if day not in routes_data[r_name]:
             routes_data[r_name][day] = []
+        if str(ptype).strip() == "交通":
+            transport_nodes = transport_nodes_for_edge(pname)
+            for offset, node in enumerate(transport_nodes):
+                routes_data[r_name][day].append({
+                    "name": node["name"], "name_en": node["name_en"], "type": "交通",
+                    "coords": node["coords"], "seq": float(seq) + (offset * 0.1),
+                    "img1": "", "img2": ""
+                })
+            continue
         imgs = img_lookup.get(pname, {"img1": "", "img2": ""})
         routes_data[r_name][day].append({
             "name": pname, "type": ptype, "coords": coords,
@@ -982,38 +1092,18 @@ def generate_html(output_path, map_platforms, amap_js_key='', amap_security='', 
             "rating": dv[5],
             "img1": dv[7], "img2": dv[8]
         })
-    for t in TRANSPORT:
-        route_str = t[0]  # e.g. "宿务→墨宝"
-        dep = route_str.split('→')[0].strip() if '→' in route_str else route_str.strip()
-        arr = route_str.split('→')[1].strip() if '→' in route_str else ''
-        # Build transport detail: 方向 + 方式 + 公司 + 票价 + 耗时 + 班次
-        transport_detail_parts = [t[1]]  # 交通方式
-        if t[2]: transport_detail_parts.append(t[2])  # 运营公司
-        if t[3]: transport_detail_parts.append(f"{t[3]}元")  # 参考票价
-        if t[4]: transport_detail_parts.append(t[4])  # 行程时间
-        if t[5]: transport_detail_parts.append(t[5])  # 班次频率
-        transport_detail = ' | '.join(transport_detail_parts)
-        transport_note = t[8] if len(t) > 8 and t[8] else ''  # 备注
-        if transport_note:
-            transport_detail += f"  [{transport_note}]"
-        # Add to departure destination
-        if dep in dest_items:
-            dest_items[dep]["交通"].append({
-                "cn": f"出发{dep} → 到达{arr}",
-                "en": f"From {dep} to {arr}",
-                "coords": t[6],
-                "detail": transport_detail,
-                "rating": ""
-            })
-        # Add to arrival destination
-        if arr and arr in dest_items:
-            dest_items[arr]["交通"].append({
-                "cn": f"出发{dep} → 到达{arr}",
-                "en": f"From {dep} to {arr}",
-                "coords": t[6],  # use departure coords
-                "detail": transport_detail,
-                "rating": ""
-            })
+    # HTML deliberately exposes only independently mappable transport nodes.
+    # Fare, schedule, distance and reservation detail stays in Excel.
+    for node in effective_transport_nodes():
+        place = node["place"]
+        dest_items.setdefault(place, {"住宿": [], "美食": [], "景点": [], "潜水": [], "交通": []})
+        dest_items[place]["交通"].append({
+            "cn": node["name"],
+            "en": node["name_en"],
+            "coords": node["coords"],
+            "detail": f"{node['type']} | {node['source_status']}",
+            "rating": ""
+        })
 
     # Generate map buttons HTML for an item
     def gen_map_buttons(coords_str, name_cn):
