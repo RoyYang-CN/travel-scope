@@ -13,6 +13,14 @@ description: >
 
 # Travel-Scope
 
+## v3.1.0 图片真实性与跨城市输出闭环门禁（强制）
+
+- Live 输出严禁使用算法合成、虚构或无法实际访问的图片 URL；旧城市 payload 不能因格式正确而直接复用。
+- 海外 Live 图片必须来自 Google Places API (New) 的具体 POI 图片映射；旧的 Unsplash 模板字段必须重新采集。
+- 生成前先执行 `scripts/gen_travel_scope.py` 的来源/唯一性检查；生成后必须执行 `scripts/validate_output.py --verify-remote-images`，逐张确认 HTTP 200 且内容类型为 `image/*`。
+- 任一图片返回 404、非图片内容、虚构 ID、跨 POI 复用或类别错配时，阻断正式交付；不得用其他类别图片或查询参数伪装通过。
+- 所有城市构建脚本必须把统一采集器输出回写到 payload，再调用公共生成器；不能在城市脚本中定义静态图片常量。
+
 ## v3.0.2 Excel-EN 语言化与 v3.0.1 POI 身份闭环门禁（强制）
 
 ## v3.0.3 分类自适应与图片类别门禁（强制）

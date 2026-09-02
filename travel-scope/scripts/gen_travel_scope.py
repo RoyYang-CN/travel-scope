@@ -158,6 +158,7 @@ DEMO_MODE = False
 # Provider-verified identity/media supplied by the upstream Live data builder.
 GOOGLE_PLACE_IDS = {}
 GOOGLE_IMAGES = {}
+GOOGLE_PLACE_LOCATIONS = {}
 
 
 def google_place_id_for(name):
@@ -184,6 +185,34 @@ def image_identity(url):
     return f"{parsed.scheme.lower()}://{parsed.netloc.lower()}{parsed.path}" if parsed.scheme and parsed.netloc else value
 
 
+def is_synthetic_image_url(url):
+    """Detect the known placeholder Unsplash ID pattern used by old builders."""
+    value = str(url or "").strip()
+    return bool(re.search(r"images\.unsplash\.com/photo-151000000\d+-000000000\d+", value))
+
+
+def apply_provider_overrides():
+    """Hydrate the shared rows so HTML, route JSON and Excel use provider media/coordinates."""
+    categories = [
+        ("hotels", "HOTELS", 7, 8, 9),
+        ("restaurants", "RESTAURANTS", 7, 8, 9),
+        ("attractions", "ATTRACTIONS", 6, 7, 8),
+        ("dive_sites", "DIVE_SITES", 6, 7, 8),
+    ]
+    for _, global_name, coord_index, img1_index, img2_index in categories:
+        rows = globals().get(global_name, []) or []
+        for row in rows:
+            if not isinstance(row, list) or len(row) <= img2_index or len(row) <= 1:
+                continue
+            name = str(row[1]).strip()
+            mapped_images = GOOGLE_IMAGES.get(name, [])
+            if isinstance(mapped_images, (list, tuple)) and len(mapped_images) >= 2:
+                row[img1_index], row[img2_index] = str(mapped_images[0] or ""), str(mapped_images[1] or "")
+            mapped_coords = GOOGLE_PLACE_LOCATIONS.get(name, "")
+            if mapped_coords and len(row) > coord_index:
+                row[coord_index] = mapped_coords
+
+
 def validate_image_integrity(require_images=True):
     """Reject template/media reuse before any HTML or Excel is written."""
     categories = [
@@ -204,6 +233,10 @@ def validate_image_integrity(require_images=True):
             if isinstance(mapped, (list, tuple)) and len(mapped) >= 2:
                 urls = [mapped[0], mapped[1]]
             identities = [image_identity(url) for url in urls]
+            if any(is_synthetic_image_url(url) for url in urls):
+                errors.append(f"{label}[{row_number}] {name} 使用虚构图片URL，必须重新采集")
+            if _is_overseas() and not DEMO_MODE and any("images.unsplash.com" in str(url) for url in urls):
+                errors.append(f"{label}[{row_number}] {name} 的海外Live图片不是Google Places来源")
             if require_images and any(not identity for identity in identities):
                 continue
             if len(set(identities)) < len(identities):
@@ -223,7 +256,7 @@ def load_demo_fixture(path):
     global COUNTRY, COUNTRY_EN, TRAVEL_MODE, DOMESTIC_DESTINATION
     global DESTINATIONS, DESTINATION_COVERAGE, SOURCE_EVIDENCE, DYNAMIC_INFO
     global ROUTES, HOTELS, RESTAURANTS, TRANSPORT, TRANSPORT_NODES, ATTRACTIONS, DIVE_SITES
-    global BUDGET, PRACTICAL, ITINERARY, GOOGLE_PLACE_IDS, GOOGLE_IMAGES
+    global BUDGET, PRACTICAL, ITINERARY, GOOGLE_PLACE_IDS, GOOGLE_IMAGES, GOOGLE_PLACE_LOCATIONS
     with open(path, "r", encoding="utf-8") as fixture_file:
         payload = json.load(fixture_file)
     if not isinstance(payload, dict):
@@ -234,6 +267,7 @@ def load_demo_fixture(path):
     DOMESTIC_DESTINATION = bool(payload.get("domestic_destination", False))
     GOOGLE_PLACE_IDS = payload.get("google_place_ids", {}) or {}
     GOOGLE_IMAGES = payload.get("google_images", {}) or {}
+    GOOGLE_PLACE_LOCATIONS = payload.get("google_place_locations", {}) or {}
     for key in (
         "destinations", "destination_coverage", "source_evidence", "dynamic_info",
         "routes", "hotels", "restaurants", "transport", "transport_nodes", "attractions",
@@ -247,6 +281,7 @@ def load_demo_fixture(path):
                 "transport": "TRANSPORT", "transport_nodes": "TRANSPORT_NODES", "attractions": "ATTRACTIONS", "dive_sites": "DIVE_SITES",
                 "budget": "BUDGET", "practical": "PRACTICAL", "itinerary": "ITINERARY",
             }[key]] = payload[key]
+    apply_provider_overrides()
 
 
 def display_name(cn, en="", lang=None):

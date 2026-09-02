@@ -74,7 +74,7 @@ Chinese card view and product output:
 
 ## Current release
 
-`v3.0.6` — independent transport nodes, detailed Excel transport edges, and image reuse QA.
+`v3.1.0` — real image source validation, remote image reachability QA, independent transport nodes, and image reuse QA.
 
 The EN delivery gate now checks dynamic destination and route labels as well as the fixed interface text. English output uses `English Name (中文名)` for places and blocks incomplete route/destination translations before release.
 

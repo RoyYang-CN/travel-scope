@@ -7,7 +7,9 @@ import json
 import re
 import sys
 import urllib.parse
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+import requests
 
 
 def fail(errors, message):
@@ -19,6 +21,21 @@ def image_identity(url):
     return f"{parsed.scheme.lower()}://{parsed.netloc.lower()}{parsed.path}" if parsed.scheme and parsed.netloc else str(url or "").strip()
 
 
+def is_synthetic_image_url(url):
+    return bool(re.search(r"images\.unsplash\.com/photo-151000000\d+-000000000\d+", str(url or "")))
+
+
+def verify_remote_image(url):
+    try:
+        response = requests.get(url, timeout=20, stream=True)
+        content_type = (response.headers.get("content-type") or "").lower()
+        ok = response.status_code == 200 and content_type.startswith("image/")
+        response.close()
+        return ok, response.status_code, content_type
+    except requests.RequestException as exc:
+        return False, type(exc).__name__, ""
+
+
 def main():
     parser = argparse.ArgumentParser(description="Validate Travel-Scope delivery artifacts")
     parser.add_argument("--html", required=True)
@@ -27,6 +44,7 @@ def main():
     parser.add_argument("--scope-json")
     parser.add_argument("--route-plan-json", help="Optional route semantics/coverage plan")
     parser.add_argument("--expected-days", type=int)
+    parser.add_argument("--verify-remote-images", action="store_true", help="Request every card image and require HTTP 200 image/*")
     args = parser.parse_args()
 
     errors = []
@@ -46,6 +64,15 @@ def main():
         fail(errors, f"图片数量不完整: poi_cards={poi_cards}, image_tags={len(image_tags)}, expected={poi_cards * 2}")
     if any(not u.startswith(("http://", "https://")) for u in image_tags):
         fail(errors, "存在非 HTTP(S) 图片URL")
+    synthetic = [u for u in image_tags if is_synthetic_image_url(u)]
+    if synthetic:
+        fail(errors, f"存在虚构图片URL: {len(synthetic)} 张；必须重新采集真实图片")
+    if args.verify_remote_images and image_tags:
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            remote_results = list(pool.map(verify_remote_image, image_tags))
+        bad = sum(not result[0] for result in remote_results)
+        if bad:
+            fail(errors, f"图片远程可用性检查失败: {bad}/{len(image_tags)} 未返回 HTTP 200 image/*")
     if len(image_tags) != len(set(image_tags)):
         fail(errors, "卡片图片存在跨 POI URL 复用，疑似模板图或映射错位")
     image_ids = [image_identity(u) for u in image_tags]
