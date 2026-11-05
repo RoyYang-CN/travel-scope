@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="470" viewBox="0 0 1200 470" role="img" aria-labelledby="title desc">
+  <title id="title">Travel-Scope honest map-link states</title>
+  <desc id="desc">Four map-link states prevent a search URL or coordinate pin from being misrepresented as an exact entity match.</desc>
+  <rect width="1200" height="470" rx="26" fill="#f2f6f5"/>
+  <text x="60" y="66" fill="#123b4b" font-family="Georgia,Times New Roman,serif" font-size="38" font-weight="700">Honest map-link degradation</text>
+  <text x="60" y="102" fill="#55707b" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18">A button is emitted only at the strongest state supported by evidence.</text>
+
+  <g font-family="Inter,Segoe UI,Arial,sans-serif">
+    <g transform="translate(60 145)">
+      <rect width="250" height="230" rx="18" fill="#0f5261"/>
+      <circle cx="38" cy="38" r="19" fill="#9fd6dc"/>
+      <text x="38" y="45" fill="#0f5261" font-size="19" text-anchor="middle" font-weight="800">1</text>
+      <text x="24" y="92" fill="#ffffff" font-size="20" font-weight="800">PUBLISHER</text>
+      <text x="24" y="120" fill="#ffffff" font-size="20" font-weight="800">ENTITY LINK</text>
+      <text x="24" y="164" fill="#d9eef0" font-size="16">Qualifying publisher</text>
+      <text x="24" y="188" fill="#d9eef0" font-size="16">entity-page evidence.</text>
+    </g>
+    <g transform="translate(335 145)">
+      <rect width="250" height="230" rx="18" fill="#2d7080"/>
+      <circle cx="38" cy="38" r="19" fill="#d8ecef"/>
+      <text x="38" y="45" fill="#2d7080" font-size="19" text-anchor="middle" font-weight="800">2</text>
+      <text x="24" y="92" fill="#ffffff" font-size="20" font-weight="800">NAMED SEARCH</text>
+      <text x="24" y="140" fill="#e7f3f4" font-size="16">Named candidate.</text>
+      <text x="24" y="164" fill="#e7f3f4" font-size="16">Landing is explicitly</text>
+      <text x="24" y="188" fill="#e7f3f4" font-size="16">marked unverified.</text>
+    </g>
+    <g transform="translate(610 145)">
+      <rect width="250" height="230" rx="18" fill="#647f88"/>
+      <circle cx="38" cy="38" r="19" fill="#edf3f3"/>
+      <text x="38" y="45" fill="#647f88" font-size="19" text-anchor="middle" font-weight="800">3</text>
+      <text x="24" y="92" fill="#ffffff" font-size="20" font-weight="800">COORDINATE</text>
+      <text x="24" y="140" fill="#f1f5f5" font-size="16">Reserved for genuinely</text>
+      <text x="24" y="164" fill="#f1f5f5" font-size="16">unnamed coordinate</text>
+      <text x="24" y="188" fill="#f1f5f5" font-size="16">landmarks.</text>
+    </g>
+    <g transform="translate(885 145)">
+      <rect width="250" height="230" rx="18" fill="#dfe7e6" stroke="#9aacab" stroke-width="2"/>
+      <circle cx="38" cy="38" r="19" fill="#526b72"/>
+      <text x="38" y="45" fill="#ffffff" font-size="19" text-anchor="middle" font-weight="800">4</text>
+      <text x="24" y="92" fill="#28434d" font-size="20" font-weight="800">NONE</text>
+      <text x="24" y="140" fill="#526b72" font-size="16">Evidence is insufficient.</text>
+      <text x="24" y="164" fill="#526b72" font-size="16">No map button is emitted.</text>
+    </g>
+  </g>
+
+  <text x="60" y="425" fill="#28434d" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="700">
+    No paid Google Places API · no API key · no Google Maps scraping · no synthesized Place IDs
+  </text>
+</svg>

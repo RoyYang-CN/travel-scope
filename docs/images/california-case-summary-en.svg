@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">Travel-Scope California validated case summary</title>
+  <desc id="desc">Measured facts for the signed California Chinese formal reader in Travel-Scope v5.0.0.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c2f3d"/>
+      <stop offset="1" stop-color="#285f73"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#00141c" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="620" rx="28" fill="url(#bg)"/>
+  <text x="70" y="72" fill="#9fd6dc" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="4">VALIDATED CASE STUDY</text>
+  <text x="70" y="132" fill="#ffffff" font-family="Georgia,Times New Roman,serif" font-size="48" font-weight="700">California · 14-day formal reader</text>
+  <text x="70" y="172" fill="#d8edf0" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="22">Owner-signed zh-formal product · portable single-file HTML · no paid Google API</text>
+
+  <g filter="url(#shadow)" font-family="Inter,Segoe UI,Arial,sans-serif">
+    <g transform="translate(70 220)">
+      <rect width="240" height="132" rx="18" fill="#ffffff" fill-opacity="0.96"/>
+      <text x="26" y="52" fill="#123b4b" font-size="38" font-weight="800">5</text>
+      <text x="26" y="88" fill="#476675" font-size="18">destinations</text>
+    </g>
+    <g transform="translate(335 220)">
+      <rect width="240" height="132" rx="18" fill="#ffffff" fill-opacity="0.96"/>
+      <text x="26" y="52" fill="#123b4b" font-size="38" font-weight="800">4</text>
+      <text x="26" y="88" fill="#476675" font-size="18">candidate routes</text>
+    </g>
+    <g transform="translate(600 220)">
+      <rect width="240" height="132" rx="18" fill="#ffffff" fill-opacity="0.96"/>
+      <text x="26" y="52" fill="#123b4b" font-size="38" font-weight="800">59</text>
+      <text x="26" y="88" fill="#476675" font-size="18">itinerary entries</text>
+    </g>
+    <g transform="translate(865 220)">
+      <rect width="265" height="132" rx="18" fill="#ffffff" fill-opacity="0.96"/>
+      <text x="26" y="52" fill="#123b4b" font-size="38" font-weight="800">CNY 25,695</text>
+      <text x="26" y="88" fill="#476675" font-size="18">planning estimate / person</text>
+    </g>
+    <g transform="translate(70 378)">
+      <rect width="320" height="116" rx="18" fill="#e8f4f4"/>
+      <text x="26" y="48" fill="#123b4b" font-size="34" font-weight="800">401</text>
+      <text x="26" y="82" fill="#476675" font-size="18">research records</text>
+    </g>
+    <g transform="translate(415 378)">
+      <rect width="320" height="116" rx="18" fill="#e8f4f4"/>
+      <text x="26" y="48" fill="#123b4b" font-size="34" font-weight="800">8</text>
+      <text x="26" y="82" fill="#476675" font-size="18">source providers</text>
+    </g>
+    <g transform="translate(760 378)">
+      <rect width="370" height="116" rx="18" fill="#e8f4f4"/>
+      <text x="26" y="48" fill="#123b4b" font-size="34" font-weight="800">3.54 MB</text>
+      <text x="26" y="82" fill="#476675" font-size="18">self-contained reader HTML</text>
+    </g>
+  </g>
+
+  <rect x="70" y="532" width="1060" height="54" rx="14" fill="#061d27" fill-opacity="0.68"/>
+  <text x="92" y="566" fill="#ffffff" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18">
+    Release boundary: zh-formal PASS · English DEFERRED · Philippines AUDIT_HOLD · production_certified=false
+  </text>
+</svg>

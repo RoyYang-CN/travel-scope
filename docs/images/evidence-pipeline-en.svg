@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="470" viewBox="0 0 1200 470" role="img" aria-labelledby="title desc">
+  <title id="title">Travel-Scope evidence pipeline</title>
+  <desc id="desc">The product workflow from intake through research, validation, rendering, browser QA, and release sealing.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#5b7882"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="470" rx="26" fill="#0b2b37"/>
+  <text x="60" y="66" fill="#ffffff" font-family="Georgia,Times New Roman,serif" font-size="38" font-weight="700">Evidence pipeline</text>
+  <text x="60" y="102" fill="#b7d9dc" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18">Every hand-off has a machine-readable contract and a blocking failure state.</text>
+
+  <g font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="700" text-anchor="middle">
+    <g transform="translate(45 150)">
+      <rect width="145" height="100" rx="16" fill="#ffffff"/>
+      <text x="72" y="44" fill="#123b4b">Q0-Q8</text><text x="72" y="70" fill="#4f6f7a">intake</text>
+    </g>
+    <g transform="translate(215 150)">
+      <rect width="145" height="100" rx="16" fill="#ffffff"/>
+      <text x="72" y="44" fill="#123b4b">route</text><text x="72" y="70" fill="#4f6f7a">discovery</text>
+    </g>
+    <g transform="translate(385 150)">
+      <rect width="145" height="100" rx="16" fill="#ffffff"/>
+      <text x="72" y="44" fill="#123b4b">research +</text><text x="72" y="70" fill="#4f6f7a">evidence</text>
+    </g>
+    <g transform="translate(555 150)">
+      <rect width="145" height="100" rx="16" fill="#d8eff0"/>
+      <text x="72" y="44" fill="#123b4b">formal</text><text x="72" y="70" fill="#4f6f7a">gates</text>
+    </g>
+    <g transform="translate(725 150)">
+      <rect width="145" height="100" rx="16" fill="#ffffff"/>
+      <text x="72" y="44" fill="#123b4b">single-file</text><text x="72" y="70" fill="#4f6f7a">SPA</text>
+    </g>
+    <g transform="translate(895 150)">
+      <rect width="145" height="100" rx="16" fill="#ffffff"/>
+      <text x="72" y="44" fill="#123b4b">browser</text><text x="72" y="70" fill="#4f6f7a">QA</text>
+    </g>
+    <g transform="translate(1065 150)">
+      <rect width="100" height="100" rx="16" fill="#8cc9cc"/>
+      <text x="50" y="44" fill="#0b2b37">release</text><text x="50" y="70" fill="#0b2b37">seal</text>
+    </g>
+  </g>
+
+  <g stroke="#8fb2b7" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <path d="M190 200 H210"/><path d="M360 200 H380"/><path d="M530 200 H550"/>
+    <path d="M700 200 H720"/><path d="M870 200 H890"/><path d="M1040 200 H1060"/>
+  </g>
+
+  <path d="M628 255 V315 H470" stroke="#e5b77b" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M968 255 V315 H770" stroke="#e5b77b" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <rect x="300" y="315" width="600" height="92" rx="18" fill="#173f4c" stroke="#e5b77b" stroke-width="2"/>
+  <text x="600" y="353" fill="#ffe0b3" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="20" font-weight="800" text-anchor="middle">REVISE / BLOCK</text>
+  <text x="600" y="383" fill="#d8edf0" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" text-anchor="middle">Return an itemized gap ledger; never manufacture a successful shape.</text>
+</svg>

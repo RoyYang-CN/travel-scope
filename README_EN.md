@@ -1,6 +1,6 @@
 # Travel-Scope v5.0.0
 
-[中文](README.md) · [Download v5.0.0](https://github.com/RoyYang-CN/travel-scope/releases/tag/v5.0.0) · [Open the signed California reader](https://github.com/RoyYang-CN/travel-scope/releases/download/v5.0.0/travel-scope-v5.0.0-california-zh-formal.html)
+[Chinese documentation](README.md) · [Download v5.0.0](https://github.com/RoyYang-CN/travel-scope/releases/tag/v5.0.0) · [Open the signed California zh-formal reader (Chinese UI)](https://github.com/RoyYang-CN/travel-scope/releases/download/v5.0.0/travel-scope-v5.0.0-california-zh-formal.html)
 
 [![Public verification](https://github.com/RoyYang-CN/travel-scope/actions/workflows/quality.yml/badge.svg)](https://github.com/RoyYang-CN/travel-scope/actions/workflows/quality.yml)
 [![Release](https://img.shields.io/github/v/release/RoyYang-CN/travel-scope)](https://github.com/RoyYang-CN/travel-scope/releases/tag/v5.0.0)
@@ -10,7 +10,7 @@ Travel-Scope is an **evidence-aware travel research, validation, and single-file
 
 The public **v5.0.0 LIMITED-SCOPE RELEASE** validates one product surface: the California Chinese formal reader. Formal English delivery is deferred. The Philippines remains on `AUDIT_HOLD` and is excluded. The project does not claim global `production_certified` status.
 
-![California Chinese formal reader cover](docs/images/california-cover.jpg)
+![Measured California case summary](docs/images/california-case-summary-en.svg)
 
 ## Why Travel-Scope exists
 
@@ -27,7 +27,7 @@ Travel-Scope makes those boundaries explicit. **A state is upgraded only when ev
 
 ## Validated case study: a 14-day California guide
 
-v5.0.0 includes a signed California Chinese single-file SPA. It opens directly in a browser, requires no application server, and has no Google Places API key or Google Billing dependency.
+v5.0.0 includes a signed California Chinese single-file SPA. It opens directly in a browser, requires no application server, and has no Google Places API key or Google Billing dependency. The signed product UI is intentionally Chinese because formal English delivery is still deferred; this English document therefore uses English evidence diagrams rather than presenting translated screenshots as a certified English product.
 
 | Measured reader surface | California case |
 | --- | ---: |
@@ -45,35 +45,15 @@ v5.0.0 includes a signed California Chinese single-file SPA. It opens directly i
 
 > The budget is a planning estimate captured during research, not a live purchasable quote. When a reliable exchange rate is unavailable, the system preserves the source currency or marks the rate unverified instead of applying a fixed fallback.
 
-### Route selection and day-by-day execution
+### What the signed reader contains
 
-The reader keeps route comparison, daily itinerary, editorial imagery, destination context, and coverage in one product surface.
+The reader combines route comparison, daily itinerary, editorial media, destination context, stay candidates, food and café research, sights, transport, daily budgets, local utilities, practical notes, and a 401-record source ledger in one portable file.
 
-![California route overview](docs/images/california-itinerary.jpg)
+Daily cards preserve transport, sight, food, and stay context. When evidence supports only a named search, the product marks the landing as unverified instead of advertising an exact entity-card match. When no compliant image exists, it records an explicit no-photo state rather than generating a fake image or an empty asset.
 
-Daily cards preserve transport, sights, food, and stay context. When the evidence supports only a named search, the UI says that the map landing is unverified; it does not market the link as an exact entity-card match.
+The source projection, media manifest, dataset, rendered DOM, and gate reports must reconcile under the same measurement rules. Price notes retain source-time and currency boundaries; inventory, taxes, fees, and cancellation rules still require a booking-time recheck.
 
-![Daily plan with honest map notices](docs/images/california-day-plan.jpg)
-
-### Stays, food, and sights
-
-| Stay candidates and price semantics | Food, convenience, and cafés |
-| --- | --- |
-| ![Stay candidates](docs/images/california-stays.jpg) | ![Food research](docs/images/california-food.jpg) |
-
-The product is text- and evidence-first. When no compliant image exists, an explicit no-photo state is allowed; fake images and empty media assets are not. Price notes preserve source-time and currency boundaries, and users are expected to recheck inventory, taxes, fees, and cancellation rules before booking.
-
-| Core sights and experiences | Daily budget breakdown |
-| --- | --- |
-| ![Sight research](docs/images/california-sights.jpg) | ![Budget breakdown](docs/images/california-budget.jpg) |
-
-### The evidence ledger is part of the product
-
-The California reader projects 401 research records and exposes the source count, verification state, and provider count. Before formal delivery, the source projection, media manifest, dataset, DOM, and gate reports must reconcile under the same measurement rules.
-
-| Research source ledger | Responsive mobile reader |
-| --- | --- |
-| ![401 research records](docs/images/california-sources.jpg) | ![Mobile reader](docs/images/california-mobile.jpg) |
+The actual signed `zh-formal` UI remains available through the product link above and through the Chinese documentation. It is not reused here as evidence of an English UI.
 
 ## Core design
 
@@ -94,6 +74,8 @@ Travel-Scope explores destinations and route corridors before expanding hotels, 
 
 The released workflow does not call paid Google Places APIs, require a Google API key, scrape Google Maps pages, synthesize Place IDs, or promise that every link opens a unique Google entity card.
 
+![Four honest map-link states](docs/images/honest-map-states-en.svg)
+
 ### 4. Three-part media lineage
 
 Each formal media row must explain upstream revision identity, acquired bytes, and the derivation chain from acquisition to prepared and delivered assets. Media is also checked for license, MIME, geometry floor, per-image and total inline budgets, run-relative paths, offline replay, and deterministic rebuilds.
@@ -107,6 +89,8 @@ The reader inlines approved styles, scripts, and media. Formal runs use relative
 Travel-Scope reports component, integration, formal-run, browser DOM/visual, business-result, and release-scope verification separately. A lower-level PASS does not automatically become `production-certified`.
 
 ## Workflow
+
+![Travel-Scope evidence pipeline](docs/images/evidence-pipeline-en.svg)
 
 ```mermaid
 flowchart LR
