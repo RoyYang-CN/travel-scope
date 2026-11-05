@@ -10,7 +10,9 @@ Travel-Scope is an **evidence-aware travel research, validation, and single-file
 
 The public **v5.0.0 LIMITED-SCOPE RELEASE** validates one product surface: the California Chinese formal reader. Formal English delivery is deferred. The Philippines remains on `AUDIT_HOLD` and is excluded. The project does not claim global `production_certified` status.
 
-![Measured California case summary](docs/images/california-case-summary-en.svg)
+![Real California en-audit cover rendered by the Travel-Scope SPA](docs/images/california-en-audit-cover.jpg)
+
+> **Real interface, audit-only status.** This is a browser screenshot of the actual `en-audit` SPA renderer, not a translated mock-up or a separate English design. It uses the same navigation, layout, component system, map-link behavior, and California case structure as the Chinese reader. Unfinished English source text is shown honestly as `(translation pending)`. The screenshot is therefore product evidence for the real English rendering path, but it is **not** a claim that formal English delivery has passed.
 
 ## Why Travel-Scope exists
 
@@ -27,7 +29,7 @@ Travel-Scope makes those boundaries explicit. **A state is upgraded only when ev
 
 ## Validated case study: a 14-day California guide
 
-v5.0.0 includes a signed California Chinese single-file SPA. It opens directly in a browser, requires no application server, and has no Google Places API key or Google Billing dependency. The signed product UI is intentionally Chinese because formal English delivery is still deferred; this English document therefore uses English evidence diagrams rather than presenting translated screenshots as a certified English product.
+v5.0.0 includes a signed California Chinese single-file SPA. It opens directly in a browser, requires no application server, and has no Google Places API key or Google Billing dependency. The signed product UI remains Chinese because formal English delivery is deferred. The gallery below shows the **real English audit rendering** of the same product interface instead of substituting architecture diagrams for the product UI.
 
 | Measured reader surface | California case |
 | --- | ---: |
@@ -53,7 +55,25 @@ Daily cards preserve transport, sight, food, and stay context. When evidence sup
 
 The source projection, media manifest, dataset, rendered DOM, and gate reports must reconcile under the same measurement rules. Price notes retain source-time and currency boundaries; inventory, taxes, fees, and cancellation rules still require a booking-time recheck.
 
-The actual signed `zh-formal` UI remains available through the product link above and through the Chinese documentation. It is not reused here as evidence of an English UI.
+### Real English audit rendering
+
+The following screenshots were captured in a browser from `reader_profile=en-audit`. They show the actual SPA after switching to English: the same tabs, daily cards, candidate lists, honest map notices, budgets, and source ledger used by the Chinese interface. They are not post-edited translations.
+
+![Real en-audit daily itinerary with honest map-link notices](docs/images/california-en-audit-day-plan.jpg)
+
+| Stay candidates | Food research |
+| --- | --- |
+| ![Real en-audit stay candidates](docs/images/california-en-audit-stays.jpg) | ![Real en-audit food research](docs/images/california-en-audit-food.jpg) |
+
+| Sight research | Daily budget breakdown |
+| --- | --- |
+| ![Real en-audit sight research](docs/images/california-en-audit-sights.jpg) | ![Real en-audit budget breakdown](docs/images/california-en-audit-budget.jpg) |
+
+| Research-source ledger | Responsive mobile layout |
+| --- | --- |
+| ![Real en-audit research-source ledger](docs/images/california-en-audit-sources.jpg) | ![Real en-audit mobile itinerary](docs/images/california-en-audit-mobile.jpg) |
+
+The actual signed `zh-formal` UI remains available through the product link above and through the Chinese documentation. The audit screenshots above prove that English uses the real product layout; they do **not** promote the audit profile to a shippable formal reader. Remaining `(translation pending)` markers are visible defects to be resolved before formal English delivery can pass.
 
 ## Core design
 
