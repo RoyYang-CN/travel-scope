@@ -1,0 +1,59 @@
+{
+  "policy_version": "v4.2.2-budget-policy-1",
+  "contract_ref": "V4.2.2_ITERATION_CHECKLIST.md §10（非地图遗留问题不得被掩盖）/ V0-L05 汇率契约",
+  "revision_history": [
+    {
+      "version": "v4.2.2-budget-policy-1",
+      "date": "2026-10-30",
+      "why": "V5-B 建立唯一汇率登记处：废止 assets/spa-layout.js 里写死的 7.15／0.125 兜底与生成器注入的 0.14，缺来源即 UNREGISTERED，读者只看原币种。"
+    }
+  ],
+  "rate_status": {
+    "allowed": ["VERIFIED", "UNREGISTERED"],
+    "default_when_absent": "UNREGISTERED",
+    "verified_requires": ["rates", "rate_source", "rate_date"],
+    "note": "VERIFIED 不是自我声明：必须同时给出汇率数值、来源与核验日期，缺一即按 UNREGISTERED 处理并逐项报错。"
+  },
+  "currency_units": {
+    "CNY": "¥",
+    "USD": "$",
+    "PHP": "PHP "
+  },
+  "derivation_rule": {
+    "formula": "x_to_cny = rates.CNY / rates[x]（当 rates 里有 x）；若 base_currency 就是 x，则 x_to_cny = rates.CNY；两者都拿不到即为 null。",
+    "why": "旧 getPhpRate() 在 base_currency=PHP 时返回 1/rates.CNY，与 data-model 里『rates.CNY = 1 单位本币折 CNY 的乘数』相反；本规则按登记语义重算，并由测试钉住。",
+    "banned_fallbacks": ["7.15", "0.125", "0.14"]
+  },
+  "ui": {
+    "state_attribute": "data-rate-state",
+    "notice_unregistered": {
+      "cn": "汇率未登记：本页金额按人民币原样显示，未做换算；出行当日请以银行牌价为准。",
+      "en": "Exchange rate not registered: amounts are shown in CNY as recorded, with no conversion. Use the bank rate on the day of travel."
+    },
+    "notice_verified_prefix": {
+      "cn": "汇率来源：",
+      "en": "Exchange rate source: "
+    },
+    "reader_payload": "budget_fx"
+  },
+  "reason_codes": {
+    "FX_BUDGET_META_MISSING": "blocking",
+    "FX_RATE_STATUS_MISSING": "blocking",
+    "FX_RATE_STATUS_UNKNOWN": "blocking",
+    "FX_VERIFIED_WITHOUT_PROVENANCE": "blocking",
+    "FX_VERIFIED_WITHOUT_USABLE_RATE": "blocking",
+    "FX_UNREGISTERED_WITH_RATES": "blocking",
+    "FX_LEGACY_RATE_CLAIM": "blocking",
+    "FX_FALLBACK_LITERAL_IN_ASSET": "blocking",
+    "FX_RATE_STATE_DOM_DIFFERS": "blocking",
+    "FX_UNREGISTERED_NOTICE_MISSING": "blocking",
+    "FX_FABRICATED_CONVERSION": "blocking",
+    "FX_VERIFIED_BUT_NOT_CONVERTED": "blocking",
+    "FX_READER_PROJECTION_MISSING": "blocking"
+  },
+  "severity_note": "全部 blocking：汇率问题不会只影响某一条目标，而是让同一页上所有金额一起变得不可信，没有「逐项暴露、整批继续」的空间；登记处只列实际会被产出的 code（测试逐条核对可达性）。",
+  "non_goals": {
+    "live_rates": "本产品不联网取汇率；运行时零外部调用（§5），所以换算只在 run 内登记过来源的静态数值上发生。",
+    "fabrication": "缺登记时不得由代码补一个『看起来合理』的数字——那正是 V0-L05 记录的形态。"
+  }
+}

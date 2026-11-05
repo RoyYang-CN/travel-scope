@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "current_version": "5.0.0",
+  "segments": [
+    "major",
+    "minor",
+    "patch"
+  ],
+  "patch_min": 0,
+  "patch_max": 99,
+  "rollover": {
+    "4.0.99": "4.1.0",
+    "4.99.99": "5.0.0"
+  },
+  "rule": "Use semantic versioning: compatible approved Skill changes increment patch/minor as appropriate; an approved product-contract break may increment major. Every release synchronizes all current identities, source mirrors and packages.",
+  "last_major_migration": {
+    "date": "2026-11-05",
+    "from": "4.2.2",
+    "to": "5.0.0",
+    "kind": "release-identity-only",
+    "scope_unchanged": "LIMITED_SCOPE / validated zh-formal destination unchanged / English deferred / excluded-destination set unchanged / production_certified=false"
+  }
+}

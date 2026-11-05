@@ -1,0 +1,19 @@
+{
+  "modules": {
+    "WORTH_IT": {"length": 10, "required_indexes": [0, 1, 2, 3, 4, 5, 9]},
+    "LOCAL_CHAINS": {"length": 9, "required_indexes": [0, 1, 2, 3, 4, 5, 8]},
+    "PACKING": {"length": 8, "required_indexes": [0, 1, 2, 3, 4, 5, 6, 7]},
+    "LOCAL_KNOWLEDGE": {"length": 7, "required_indexes": [0, 1, 2, 3, 4, 5, 6], "required_topic_groups": [["天气", "季节", "weather", "season"], ["文化", "礼仪", "culture", "etiquette"], ["交通", "transport"], ["支付", "换汇", "payment", "cash"], ["安全", "safety"]], "required_keywords_anywhere": [["网络", "通信", "network", "connectivity"], ["紧急", "emergency"]]}
+  },
+  "invalid_statuses": ["", "待核验", "待复核", "待补充", "未知"],
+  "image_fallback": {
+    "levels": ["verified_exact_place", "same_destination_same_category_reference", "same_region_same_category_reference", "designed_no_photo_state"],
+    "reference_roles": ["destination_atmosphere", "category_reference"],
+    "rules": [
+      "Reference images must be visibly labelled and recorded in asset-manifest.json.",
+      "A reference image must not be presented as the named POI's own photograph.",
+      "Do not use another identifiable hotel, restaurant or operator as a substitute.",
+      "Use the designed no-photo state when licence, geography or category identity is uncertain."
+    ]
+  }
+}

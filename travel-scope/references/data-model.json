@@ -1,0 +1,3095 @@
+{
+  "required_fields": [
+    "record_id",
+    "kind",
+    "destination",
+    "name",
+    "coords",
+    "source_status"
+  ],
+  "kinds": [
+    "hotel",
+    "restaurant",
+    "cafe",
+    "attraction",
+    "dive",
+    "transport_node"
+  ],
+  "image_kinds": [
+    "hotel",
+    "restaurant",
+    "cafe",
+    "attraction",
+    "dive"
+  ],
+  "required_live_sidecars": [
+    "source_evidence_meta",
+    "map_targets",
+    "local_apps"
+  ],
+  "source_evidence_levels": [
+    "direct_entity",
+    "direct_schedule",
+    "official_area_reference",
+    "search_candidate"
+  ],
+  "source_verification_statuses": [
+    "verified",
+    "pending",
+    "unverified"
+  ],
+  "source_verification_status_labels": {
+    "verified": "已核验",
+    "pending": "待复核",
+    "unverified": "未核验"
+  },
+  "source_evidence_level_labels": {
+    "direct_entity": "实体直达",
+    "direct_schedule": "班次时刻直达",
+    "official_area_reference": "官方区域资料",
+    "search_candidate": "搜索候选"
+  },
+  "source_evidence_level_labels_note": "读者面板印的是这些中文显示名，不是 direct_entity 这类机器词表原值（ZH-RELEASE-1：DOM 不该出现机器英文）。等级没有显示名 ⇒ source_projection 直接阻断。",
+  "source_evidence_reader_face": "source_evidence_meta",
+  "source_evidence_columns": [
+    "evidence_id",
+    "destination",
+    "name",
+    "url",
+    "source_type",
+    "retrieved_at",
+    "supported_facts",
+    "is_independent_source",
+    "conflict_or_question",
+    "status"
+  ],
+  "source_evidence_columns_note": "ZH-RELEASE-1 登记：十列位置面 source_evidence 不再是读者面；读者面是 source_evidence_meta 经 scripts/source_projection.py 校验后的投影（业主 2026-11-02 裁 A）。此列序只是注册表，用来把两地列序不一致量成清册，不是给渲染器按位取值的许可。",
+  "_deprecated_map_target_levels": {
+    "note": "§17.2.7：兼容读取，不得再作为权威字段。迁移必须保留原值与 reason code。",
+    "values": [
+      "verified_platform_url",
+      "verified_place_id",
+      "verified_coordinate",
+      "unnamed_coordinate",
+      "search_candidate"
+    ],
+    "authority": false
+  },
+  "identity_status": [
+    "UNVERIFIED",
+    "VERIFIED",
+    "AMBIGUOUS",
+    "CONFLICT",
+    "UNRESOLVED",
+    "STALE"
+  ],
+  "identity_status_semantics": {
+    "VERIFIED": "必须由规则版本 + 独立证据引用（identity_evidence_ref）支撑；不表示绝对真实，也不表示 Google 已核验。",
+    "AMBIGUOUS": "多个候选无法用硬规则区分。",
+    "CONFLICT": "存在 §17.3.4 定义的硬冲突（国家/区域/分店/类别/航站楼/角色/坐标系）。",
+    "UNRESOLVED": "来源查询已执行且诚实返回零结果或不可判定。",
+    "UNVERIFIED": "尚未取得可支撑身份的证据。",
+    "STALE": "证据已过期（超过 policy 的 valid_for_days）。"
+  },
+  "coordinate_status": [
+    "MISSING",
+    "UNVERIFIED",
+    "VERIFIED",
+    "CONFLICT",
+    "STALE"
+  ],
+  "coordinate_required_context": [
+    "lat",
+    "lng",
+    "datum",
+    "axis_order",
+    "source_ref",
+    "precision_m",
+    "location_role"
+  ],
+  "coordinate_forbid": {
+    "missing_becomes_zero": true,
+    "missing_becomes_city_centroid": true,
+    "known_default_values": [
+      "34.0522,-118.2437",
+      "0,0"
+    ],
+    "note": "§17.2.2：坐标缺失必须写 MISSING 并给原因，不得填 0 或城市默认中心。"
+  },
+  "link_mode": [
+    "PUBLISHER_ENTITY_LINK",
+    "NAMED_SEARCH",
+    "COORDINATE",
+    "NONE"
+  ],
+  "link_mode_required_context": [
+    "provider",
+    "url_construction_version",
+    "selection_reason"
+  ],
+  "google_resolution_status": [
+    "NOT_OBSERVED",
+    "CORRECT_ENTITY",
+    "MULTIPLE_RESULTS",
+    "WRONG_ENTITY",
+    "NO_RESULT",
+    "BLOCKED",
+    "STALE"
+  ],
+  "google_resolution_status_semantics": {
+    "default": "NOT_OBSERVED",
+    "promotion_authority": "只有独立研发观察才能写非 NOT_OBSERVED 值，并必须记录观察环境与时间；该记录不作为长期 Google 内容缓存。",
+    "auto_promotion": "forbidden",
+    "note": "§17.2.4 / §17.1.6：正式自动链默认 NOT_OBSERVED，NOT_OBSERVED 是合法事实状态。"
+  },
+  "map_target_required_fields": [
+    "target_id",
+    "entity_type",
+    "category",
+    "criticality",
+    "display_name",
+    "names",
+    "country_code",
+    "destination_scope",
+    "address_status",
+    "identity_status",
+    "coordinate_status",
+    "link_mode",
+    "google_resolution_status",
+    "policy_version",
+    "evaluated_at",
+    "classifier_version",
+    "resolver_used"
+  ],
+  "map_target_required_fields_note": "§17.2.5 的 19 个必填字段 + W1R-B 新增 classifier_version（共 20）：记录 URL/引用判定所用的规则版本（当前 refclassifier-4），否则事后无法复现分类结果。 v4.2.2 V1R：必填面从 20 项变 18 项——evidence/lineage_group 改判为『必须显式在场、允许显式为空』（缺键=状态未知，报错；空列表/空串=已确认没有，只阻止 VERIFIED，不阻止 UNVERIFIED+NAMED_SEARCH）；resolver_version 改为条件必填（见 map_target_conditional_fields），正式链不使用 W3 resolver，必须写 resolver_used=false 而不是编造版本号。 v4.2.2 V4-A：18 项再变 17 项——required_location_role 移出无条件必填面，改为按类别适用矩阵条件必填（见 required_location_role_applicability）；V2R 实测它把 278 条正常酒店/餐厅/景点拖成 MAP_FIELD_MISSING，那是字段语义错误而不是数据问题。",
+  "map_target_legacy_fields_compat_only": [
+    "canonical_name",
+    "destination",
+    "target_level",
+    "verification_status",
+    "coords",
+    "google_url",
+    "apple_url",
+    "source_url",
+    "checked_at",
+    "qa_evidence"
+  ],
+  "address_status": [
+    "VERIFIED",
+    "PARTIAL",
+    "UNVERIFIED",
+    "MISSING",
+    "CONFLICT"
+  ],
+  "criticality": [
+    "CRITICAL_ITINERARY",
+    "IMPORTANT",
+    "NICE_TO_HAVE"
+  ],
+  "criticality_definition": {
+    "CRITICAL_ITINERARY": "实际入住、登机、登船、换乘、集合或行程不可替代目标。v4.2.2 §5.2 改变了处理方式：缺少独立落点核验**不再仅因此阻断整份行程**——具备可用规范名称且无已知硬冲突时仍给 NAMED_SEARCH，并把风险逐项暴露进行程正文与报告；只有 CONFLICT/WRONG_ENTITY/已知错链这类硬冲突才既无按钮又整批阻断（§8.3）。旧 §17.5.2 的「非 VERIFIED 即阻断行程段」语义在 v4.2.2 已被 §5.2/§8.3 取代。",
+    "IMPORTANT": "行程强相关但可替换。",
+    "NICE_TO_HAVE": "普通餐饮、咖啡馆、备选点；允许 NAMED_SEARCH 或 NONE（§17.5.3）。"
+  },
+  "required_location_role": [
+    "MAIN_ENTRANCE",
+    "RECEPTION",
+    "DEPARTURE_HALL",
+    "ARRIVAL_HALL",
+    "TERMINAL",
+    "BOARDING_POINT",
+    "PIER",
+    "STATION",
+    "OBSERVATION_POINT",
+    "ADDRESS_ONLY"
+  ],
+  "required_location_role_applicability": {
+    "_authority": "v4.2.2 §5.1/§5.3 + 业主 2026-10-29 指令 §5：位置角色只在「同一地点存在多个可混淆落点」的类别上是硬要求。酒店/餐厅/咖啡馆/景点不得因为没有 TERMINAL 或 PIER 而报错——那正是 v4.2.1 把 278 条正常目标拖成错误的原因。",
+    "rule": "CRITICAL_ROLE_MISSING 仅当 by_category[category].role_required=true 且 criticality=CRITICAL_ITINERARY 时才成立；缺角色在其余类别记为暴露项而不是错误。",
+    "value_legality": "角色**取值**是否合法由全局枚举 required_location_role 判定（MAP_ENUM_INVALID，整批阻断）。本矩阵不做 per-category 白名单：V4-A 第一版曾用 typical_roles 当白名单，把 11 条「码头里的餐厅/咖啡馆/景点」判成错，那是把『哪个入口』错当成『这类地点只能有哪些角色』。",
+    "by_category": {
+      "transport_node": {
+        "role_required": true,
+        "typical_roles": [
+          "TERMINAL",
+          "DEPARTURE_HALL",
+          "ARRIVAL_HALL",
+          "PIER",
+          "STATION",
+          "BOARDING_POINT",
+          "MAIN_ENTRANCE",
+          "RECEPTION"
+        ],
+        "why": "机场/码头/车站/换乘点本身就是「哪个楼、哪个口」的问题，选错航站楼等于把人送错地方（§5.2）。"
+      },
+      "hotel": {
+        "role_required": false,
+        "typical_roles": [
+          "",
+          "RECEPTION",
+          "MAIN_ENTRANCE",
+          "ADDRESS_ONLY"
+        ],
+        "why": "酒店是一整栋可识别建筑；前台/主入口是加分信息，不是身份条件。"
+      },
+      "restaurant": {
+        "role_required": false,
+        "typical_roles": [
+          "",
+          "MAIN_ENTRANCE",
+          "ADDRESS_ONLY"
+        ],
+        "why": "§5.3 普通餐饮允许诚实降级；不存在『错误航站楼』。"
+      },
+      "cafe": {
+        "role_required": false,
+        "typical_roles": [
+          "",
+          "MAIN_ENTRANCE",
+          "ADDRESS_ONLY"
+        ],
+        "why": "同 restaurant。"
+      },
+      "attraction": {
+        "role_required": false,
+        "typical_roles": [
+          "",
+          "MAIN_ENTRANCE",
+          "OBSERVATION_POINT",
+          "BOARDING_POINT",
+          "ADDRESS_ONLY"
+        ],
+        "why": "观景台/登船点这类确有分区，但整体景点不需要角色。"
+      },
+      "dive_site": {
+        "role_required": false,
+        "typical_roles": [
+          "",
+          "BOARDING_POINT",
+          "MAIN_ENTRANCE",
+          "ADDRESS_ONLY"
+        ],
+        "why": "潜点靠坐标与船家集合安排；潜店是建筑。"
+      },
+      "dive": {
+        "role_required": false,
+        "typical_roles": [
+          "",
+          "MAIN_ENTRANCE",
+          "ADDRESS_ONLY"
+        ],
+        "why": "与 dive_site 同一口径；kinds 里两个名字都出现，不登记会让未知类别吞掉真实数据。"
+      }
+    },
+    "unknown_category": {
+      "role_required": false,
+      "finding": "ROLE_APPLICABILITY_CATEGORY_UNKNOWN",
+      "severity": "exposed",
+      "why": "category 缺失或不在 kinds 里时，不猜适用性：既不判角色错误，也不判通过——单独暴露（category 本身另有必填检查）。"
+    },
+    "empty_role_means": [
+      "",
+      null
+    ],
+    "role_required_means": "required_location_role 非空（不在 empty_role_means 里）",
+    "typical_roles_must_be_subset_of": "required_location_role",
+    "measured_v2r": {
+      "california_empty_role_rows": 108,
+      "philippines_empty_role_rows": 175,
+      "previously_reported_as_error": 278,
+      "note": "V2R 实测：这 278 条里除 transport_node 外都不该是错误。数字来自 V2R 证据，不是估算。"
+    }
+  },
+  "entity_type_rules": {
+    "named_entity": "酒店、餐厅、咖啡馆、景点、潜店、机场、航站楼、码头、客运终端、车站、集合点一律 named_entity（§17.2.6）。",
+    "coordinate_landmark": "仅现实中确实没有标准名称的自然观测点/坐标点。",
+    "named_entity_must_not_render_pure_coordinate_button": true
+  },
+  "evidence_required_fields": [
+    "source_type",
+    "source_url_or_ref",
+    "retrieved_at",
+    "supported_fields",
+    "lineage_group",
+    "content_digest",
+    "usage_scope",
+    "status"
+  ],
+  "evidence_status": [
+    "complete",
+    "incomplete",
+    "expired",
+    "retracted"
+  ],
+  "evidence_status_usable": [
+    "complete"
+  ],
+  "evidence_source_types": [
+    "publisher_entity_page",
+    "official_entity_page",
+    "official_directory_entity_page",
+    "transport_operator_schedule",
+    "licensed_open_data_entity",
+    "official_area_reference",
+    "search_result",
+    "homepage",
+    "self_generated_map_url"
+  ],
+  "identity_supporting_source_types": [
+    "publisher_entity_page",
+    "official_entity_page",
+    "official_directory_entity_page",
+    "transport_operator_schedule",
+    "licensed_open_data_entity"
+  ],
+  "identity_supporting_fields": [
+    "display_name",
+    "names",
+    "address",
+    "country_code",
+    "category"
+  ],
+  "identity_evidence_rule": "§17.2.1：identity_status=VERIFIED 必须由至少一条自身字段完整、status 可用、supported_fields 命中 identity_supporting_fields、且 source_type 在 identity_supporting_source_types 内的证据支撑。只支撑 destination_scope 的区域背景证据不得放行。",
+  "identity_evidence_combination": {
+    "required_any": [
+      "display_name",
+      "names"
+    ],
+    "and_also_any": [
+      "address",
+      "stable_entity_ref"
+    ],
+    "stable_entity_ref_fields": [
+      "source_entity_ref",
+      "publisher_entity_id",
+      "osm_ref",
+      "declared_link_url"
+    ],
+    "insufficient_alone": [
+      "country_code",
+      "category",
+      "destination_scope"
+    ],
+    "disambiguation_rules": {
+      "address": "field_shape",
+      "stable_entity_ref": "classifier"
+    },
+    "address_field_shape": {
+      "source_fields": [
+        "address",
+        "street_address"
+      ],
+      "min_length": 12,
+      "min_tokens": 2,
+      "token_split": "[,;]",
+      "lookup_order": [
+        "evidence row",
+        "map target"
+      ],
+      "note": "地址作为可区分字段必须至少含两个分隔段且足够长；空地址、只写一个地名或只声称 supported_fields 而不给值都不算（W1R-B ③）。"
+    },
+    "stable_ref_classifier_rule": {
+      "url_fields": [
+        "declared_link_url"
+      ],
+      "reference_fields": [
+        "source_entity_ref",
+        "publisher_entity_id",
+        "osm_ref"
+      ],
+      "required_kind": "entity",
+      "identity_bearing_required": true,
+      "provider_urls_never_endorse_identity": true,
+      "recordable_reason_codes": [
+        "REF_NOT_IDENTITY_BEARING"
+      ],
+      "recordable_reason_codes_note": "geo: 与 google:cid 这类“记下来但不背书身份”的形式允许留在记录里（它们确实是采集到的东西）；其余被拒原因一律必须报错，不能让一条解释不通的稳定引用被 address 字段盖住（W1R-B1 ⑤）。",
+      "origin_check": "row_source_url_or_ref",
+      "lineage_check": "row_lineage_group",
+      "three_gates": [
+        "format",
+        "origin",
+        "lineage"
+      ],
+      "note": "W1R-B ③ + W1R-B1 ⑤：URL 型引用必须由 classify_reference 判为 kind=entity 且 purpose=identity 未被拒才可用；地图供应商自身域名上的链接（即使 kind=entity）永不支撑身份。非 URL 型引用逐字段做格式、来源、血缘三道校验，其中来源必须可分类、类别被允许、且证据行声明的 source_type 与适配器角色或数据集登记一致——source_type 本身不再是凭据。"
+    },
+    "identity_source_type_floor": [
+      "publisher_entity_page",
+      "official_entity_page",
+      "official_directory_entity_page",
+      "transport_operator_schedule",
+      "licensed_open_data_entity"
+    ],
+    "note": "W1R-A ③ + W1R-B + W1R-B1：只支持 country_code/category/destination_scope 的证据不成立身份；必须有实体名称字段，再叠加一个**经过三道校验**的可区分项；source_type 还要过地板。"
+  },
+  "evidence_membership": {
+    "container": "list_of_objects",
+    "single_object_allowed": true,
+    "non_object_member": "report_per_member",
+    "note": "W1R-A ④：evidence 里的字符串/数字/null 等非对象成员必须逐项报错，不得被静默过滤。"
+  },
+  "map_url_authority": {
+    "delegated_to": "url_reference_classifier",
+    "authority": false,
+    "note": "W1R-A 的 hostname/path 规则已整体并入 typed classifier（现为 refclassifier-4）；保留本键只为兼容读取，不再被任何校验分支使用（scripts/data_model.py 里不得再有第二套 URL 判定）。"
+  },
+  "link_context_fields": [
+    "link_provider",
+    "link_builder_version",
+    "link_selection_reason",
+    "classifier_version",
+    "link_selection_version"
+  ],
+  "map_link_output_fields": {
+    "_note": "v4.2.2 V1 新增：链接选择器唯一允许写入 dataset 的字段面。代码侧常量是 scripts/map_link_selector.py::WRITABLE_FIELDS，两者必须逐项相等——test_v422_map_honest_contract.test_output_fields_are_registered_in_schema 咬住它，防止实现悄悄扩面（§8.1『状态与按钮不一致=整批 FAIL』的前置条件）。",
+    "authority_config": "references/map-link-selection.json",
+    "authority_implementation": "scripts/map_link_selector.py::WRITABLE_FIELDS",
+    "promotion_forbidden": "写这些字段不得改变 identity_status / coordinate_status / google_resolution_status（§3.1/§3.2/§3.4）",
+    "fields": {
+      "link_mode": "四态之一：PUBLISHER_ENTITY_LINK / NAMED_SEARCH / COORDINATE / NONE（§3.3，不因降级而合并）",
+      "link_provider": "本条链接所属 provider；Google 的证据不得升级 Apple，反之亦然（§4 前言）",
+      "link_builder_version": "构造 URL 所用的 builder 版本登记名（沿用 W1R 的 context 字段，NONE 时为空）",
+      "link_selection_reason": "命中的规则 ID + 闭集 reason code（§8.2：100% target 必须有选择原因）",
+      "link_selection_version": "当时用的是哪一版选择机（§13：事后必须能复现，值来自配置 selection_version）",
+      "map_link_url": "读者实际点到的 href；NONE 必须为空字符串，不允许留旧值",
+      "query_fields_used": "进入搜索串的**字段名**清单（名称/终端/地址/目的地/国家），只记字段名不记值，用于证明没有未登记来源",
+      "link_notices": "必须显示的提示键（key_target_unverified / ambiguous_multiple_results），文案单源在配置 ui.notices",
+      "isolated_link_url": "被阻断但仍需留痕的旧 URL（不发布、不删证据，§4 第 1 步）",
+      "map_query_name_source": "名称取自 dataset 的哪一个字段（血缘：names.en / display_name / canonical_name(+after_residue)）",
+      "selection_signals": "判定所用的信号快照（身份状态、连接模糊信号、观察状态），供报告与 DOM 对账"
+    }
+  },
+  "map_target_alias_contract": {
+    "_authority": "v4.2.2 §8.1 + 业主 2026-10-31 V6-R 第 1 条：同址双键里被证明业务字段完全等价的那一行可以声明 alias_of，其读者按钮由 canonical 那颗覆盖；分母不变，报告仍逐行列出。本块只登记字段语义与schema，配对清单与校验判据的唯一登记处在 map-gate-v422.json::consistency_checks.dataset_vs_dom.alias_contract。",
+    "field": "alias_of",
+    "kind": "string",
+    "semantics": "缺省或空串 = 该行自己是 canonical（渲染与期望按钮仍按它算）；非空 = 该行是所指 map_targets 键的别名。别名不是新状态：它的 identity_status / coordinate_status / google_resolution_status / link_mode / map_link_url 一律照常留在行里，门禁运行时逐项复核，与 canonical 不完全等价就整批不豁免。",
+    "presence": "可选字段（历史 dataset 不带它＝全部 canonical），不进 map_target_required_fields，也不进 map_target_explicit_empty_fields——否则 v4.2.1 的只读产物会凭空多 403 条 MAP_FIELD_NOT_EXPLICIT，把兼容路径判成本版违规。",
+    "must_not_be_inferred": "不允许按 coords 或名称在运行时推断配对：同一坐标承载多个真实 POI 是存在的（CA 11 组 23 条、PH 墨宝三处潜点同一坐标），按坐标猜会把两个不同实体并成一颗按钮，那才是真正的诚实缺口被抹掉。",
+    "validator": "scripts/map_gate_v422.py::resolve_aliases（一致性判据在 alias_identity + normalized_field_value：对象按 key 排序后 JSON 编码、数组保序、缺格不等于空值；比对的字段面 23 项与排除面只在 map-gate-v422.json::alias_contract 那一处登记，本块不复制清单）",
+    "amended_2026_10_31_v6r1": "业主追加指令把 canonical_name / display_name / names / link_notices / evidence 纳进等价指纹（18 → 23 项），排除面收窄到 target_id / alias_of / migration / quarantine / unresolved_fields 并逐项登记理由；五个 identical_fields_digest 由门禁同一函数现算重登（.temp/.../tooling/v6r1_tighten_alias_contract.py）。实测更正：本块 semantics 里「不完全等价」的判据以前不比对名字，而五组真实配对的名字三项本来相同——真正逐行不同的是字典键与 target_id。真实数据面 25 次字段注入全部被接住（V6r1_real_pair_drift_demo.json）。",
+    "writer": ".temp/v422_honest_map/V6_candidate_run/tooling/v6r_register_aliases.py（测量并写出 aliased dataset；配对来自真浏览器 DOM 取值面 + alias_identity 判据）",
+    "codes": ["GATE_DOM_ALIAS_TARGET_MISSING", "GATE_DOM_ALIAS_CYCLE", "GATE_DOM_ALIAS_CONFLICT", "GATE_DOM_ALIAS_UNREGISTERED", "GATE_DOM_ALIAS_NOT_DECLARED"],
+    "measured_2026_10_31": "加州 5 条 alias（205 = 200 canonical + 5 alias），菲律宾 0 条；配对与指纹见 map-gate-v422.json::alias_contract.entries 与 V6r_alias_registration.json。"
+  },
+  "map_link_per_provider_container": {
+    "_authority": "v4.2.2 §3.3/§4 前言：每个 provider 各自记录 link_mode，Google 的证据不得升级 Apple。v4.2.1/v4.2.2 V2 之前 dataset 只有一套单值 link 字段（= 主 provider），导致 §8.1 的 dataset↔DOM↔href 对账对第二个 provider 永远无法成立（V2-G02）。本块登记 per-provider 容器，渲染层与门禁只能读它，不允许自己拼。",
+    "field": "map_link_by_provider",
+    "keyed_by": "map-link-selection.json::providers",
+    "value_fields_ref": "map_link_output_fields.fields",
+    "primary_provider": "google",
+    "primary_provider_rule": "单值 link_* 字段始终是 primary_provider 的那一份，历史门禁与旧读者只看它；其余 provider 只存在于容器内。渲染器必须按容器逐 provider 出按钮，不得回退去读 legacy google_url/apple_url。",
+    "legacy_fields": [
+      "google_url",
+      "apple_url"
+    ],
+    "legacy_fields_disposition": "compat-only（map_target_legacy_fields_compat_only 已登记）：允许留在 dataset 作为证据，但渲染层与 DOM 门禁引用它们即为 FAIL（§4 禁止动作 + §8.1 一致性）。",
+    "writer": "scripts/map_link_selector.py::select_all_providers",
+    "writer_note": "指针必须写成可寻址的 `文件::函数` 原样，注释放这里；渲染层与生成器都不得自行组装容器（V3 门禁按本字段对账装配点）。",
+    "value_fields_note": "每个 provider 一份，字段面与单值容器完全相同——不允许某个 provider 多写或少写字段。",
+    "keyed_by_note": "容器键必须是已登记 provider 名；select_all_providers() 对被请求的未登记 provider 直接报错，而不是静默少一个按钮。",
+    "rendered_providers_ref": "map-link-selection.json::ui.rendered_providers",
+    "rendered_providers_note": "DOM 里出现的 provider 集合必须等于这个清单（§8.1 dataset↔DOM↔href 对账的可判定义）。v4.2.2 现值：只有 google；apple 决策存在于审计 dataset 容器但不出按钮，也不进读者载荷（见 reader_payload_projection）。",
+    "reader_payload_projection": {
+      "rule": "审计面与读者面是两个面：dataset 文件与逐 target 报告必须保留全部已登记 provider 的决策（§3.3 不得因为读者页只有一颗按钮就少记一条）；单文件 HTML 的内嵌 dataset 只保留 ui.rendered_providers 那一子集。",
+      "implementation": "scripts/spa_renderer.py::_project_reader_map_links",
+      "marker_field": "map_link_render_projection",
+      "marker_fields_required": [
+        "authority",
+        "rendered_providers",
+        "stripped_providers",
+        "stripped_fields",
+        "stripped_utf8_bytes",
+        "audit_only_providers",
+        "rules_ref",
+        "targets_with_container",
+        "audit_records"
+      ],
+      "field_kinds_authority": "map-link-selection.json::reader_payload_projection.audit_only_field_kinds（字段种类闭集与逐 provider 实测数字都在那里，本处只指过去，不复制第二份数字）",
+      "must_not_mutate_audit_dataset": "投影只作用于 _adapt_spa_dataset() 的深拷贝；对输入 dataset 就地修改即违反本条（执行型测试断言输入容器不变）。",
+      "byte_measured_v3r": "真实渲染实测（V6-B 复算更正）：CA 读者载荷剔掉 112649B(110.0KiB)、PH 剔掉 104680B(102.2KiB)，两棵 run 合计 217329B(212.2KiB)——本字段原写 217341B，是加法自错（112649+104680=217329），已按复算改正。legacy apple_url 是 19384B(18.9KiB)，原写 19.9KiB 亦已改正。方法见 .temp/v422_honest_map/V3r_reader_scope/payload_measurement.json。",
+      "byte_measured_v6b": "V6-B 把同一口径补全：V3R 只剔决策容器，CA 载荷里仍留 apple_url 19384B + classifier_verdicts.apple_url 74210B + 归属 Apple 的 quarantine 行 136924B = 230518B(225.1KiB)，本轮一并剔出读者载荷；PH 除容器外本来没有 Apple 字段，增量为 0。两棵 run 的 Apple 归属数据合计 447847B(437.3KiB)，其中 217329B 由 V3R 剔、230518B 由 V6-B 剔。业主窄指令第 4 条按 ~0.6MB 记账——差额不是漏量：那部分直觉来自 provider-neutral 血缘字段（两棵合计 3086520B），它们不归属 Apple，本轮不动，理由见 map-link-selection.json::reader_payload_projection.not_projected.why_untouched。逐字段实测见 .temp/v422_honest_map/V6_candidate_run/artifacts/V6b_projection_field_measurement.json。",
+      "why": "§4 的最小 reader 范围来自 Checklist §7 只登记 Google 文案；既然读者拿不到那颗按钮，就不该为它付下载字节。"
+    },
+    "legacy_fields_forbidden_in_dom": "legacy google_url / apple_url 不得成为任何 href；渲染层引用它们即 FAIL（§4 禁止动作）。"
+  },
+  "link_context_required_by_mode": {
+    "PUBLISHER_ENTITY_LINK": [
+      "link_provider",
+      "link_builder_version",
+      "link_selection_reason",
+      "classifier_version",
+      "link_selection_version"
+    ],
+    "NAMED_SEARCH": [
+      "link_provider",
+      "link_builder_version",
+      "link_selection_reason",
+      "classifier_version",
+      "link_selection_version"
+    ],
+    "COORDINATE": [
+      "link_provider",
+      "link_builder_version",
+      "link_selection_reason",
+      "classifier_version",
+      "link_selection_version"
+    ],
+    "NONE": [
+      "link_selection_reason"
+    ],
+    "note": "§17.2.3 + W1R-B ②：带链接的三种模式都必须记录判定所用 classifier_version，否则事后无法复现当初的 URL 分类。NONE 不产生 URL，只强制选择原因。当前权威值为 refclassifier-4；旧值必须按 STALE 处理。 v4.2.2 追加：三种有按钮的模式还必须记 link_selection_version，否则事后无法复现当时用的是哪一版选择机（§13 每包必须留 before/after）。"
+  },
+  "publisher_entity_link": {
+    "required_evidence_source_types": [
+      "publisher_entity_page"
+    ],
+    "required_evidence_fields": [
+      "declared_link_url",
+      "link_url_provider"
+    ],
+    "declared_link_rule": {
+      "required_kind": "entity",
+      "provider_urls_never_endorse_identity": true,
+      "row_origin_rule": "source_url_or_ref 必须自身判为 kind=entity 的发布方页面（provider 根页/搜索页/坐标页/非 URL 垃圾串不得充当凭据来源）",
+      "adapter_rule": "出处主机必须命中已登记 source adapter 且声明 publisher_entity_page 角色；未登记主机与未登记路径不能证明发布方发布过该地点（W1R-B1 ④）",
+      "self_reference_forbidden": true,
+      "classifier_authority": "url_reference_classifier"
+    },
+    "note": "§17.3.3/§17.4.1 + W1R-B/W1R-B1：发布方实体链只在 classifier 判定为 entity 时可成立；搜索页、门牌页、纯坐标页、未知短链、未登记域名一律拒绝。"
+  },
+  "names_schema": {
+    "type": "object",
+    "required": [
+      "en"
+    ],
+    "allowed": [
+      "en",
+      "cn",
+      "local"
+    ],
+    "value_rule": "非空字符串",
+    "en_must_be_latin": true,
+    "note": "§17 W1R 冻结：names 是对象；en 必填且不含汉字（它是构造 URL 的唯一来源）；cn/local 可选；出现 allowed 之外的键即 NAMES_KEY_UNKNOWN。"
+  },
+  "coordinate_domain": {
+    "lat_range": [
+      -90,
+      90
+    ],
+    "lng_range": [
+      -180,
+      180
+    ],
+    "accepted_types": [
+      "int",
+      "float"
+    ],
+    "rejected": [
+      "NaN",
+      "Infinity",
+      "-Infinity",
+      "bool",
+      "非数值字符串",
+      "字符串化的坐标对"
+    ]
+  },
+  "evidence_ineligible_sources": {
+    "by_classifier_kind": {
+      "home": "EVIDENCE_HOMEPAGE_ONLY（根页/门牌页不能证明具体地点）",
+      "search": "EVIDENCE_SEARCH_URL（搜索页只是候选，不是核验）"
+    },
+    "by_classifier_reason_code": {
+      "REF_NOT_PLACE_ENTITY": "EVIDENCE_SOURCE_UNCLASSIFIABLE — OSM user/changeset 不是地点（W1R-B1 ③）",
+      "REF_SOURCE_ADAPTER_UNREGISTERED": "EVIDENCE_SOURCE_UNCLASSIFIABLE — 主机不在版本化批准来源清单（§17.3.9 / W1R-B1 ④）",
+      "REF_SOURCE_PATH_UNREGISTERED": "EVIDENCE_SOURCE_UNCLASSIFIABLE — 主机已登记但路径形状未登记（W1R-B1 ④）",
+      "REF_SOURCE_BLOCKED_PATH": "EVIDENCE_SOURCE_UNCLASSIFIABLE — 隐私/登录/robots/索引一类非凭据面（W1R-B1 ④）",
+      "REF_ORIGIN_UNCLASSIFIABLE": "EVIDENCE_SOURCE_UNCLASSIFIABLE — 证据行来源根本读不成来源（W1R-B1 ⑤，含垃圾串与空值）",
+      "REF_ORIGIN_PENDING_REGISTRATION": "EVIDENCE_SOURCE_UNCLASSIFIABLE — 声称数据集来源但 dataset id 未登记（W1R-B1 ⑤）",
+      "REF_COORDINATE_SHAPE": "EVIDENCE_COORDINATE_ONLY — 出处是纯坐标页，不证明地点身份"
+    },
+    "consumed_error_codes": [
+      "EVIDENCE_SELF_ATTESTATION",
+      "EVIDENCE_HOMEPAGE_ONLY",
+      "EVIDENCE_SEARCH_URL",
+      "EVIDENCE_SOURCE_UNCLASSIFIABLE",
+      "EVIDENCE_COORDINATE_ONLY",
+      "LINK_EVIDENCE_SELF_REFERENCE",
+      "LINK_EVIDENCE_PROVIDER_MISMATCH",
+      "LINK_DECLARED_URL_INVALID",
+      "LINK_DECLARED_URL_SHAPE_INVALID",
+      "LINK_DECLARED_URL_NOT_ENTITY",
+      "LINK_DECLARED_URL_PROVIDER_MISMATCH",
+      "LINK_EVIDENCE_PAGE_NOT_ENTITY",
+      "IDENTITY_REF_KIND_NOT_ENTITY",
+      "IDENTITY_VERIFIED_WITHOUT_QUALIFYING_EVIDENCE",
+      "IDENTITY_STABLE_REF_INVALID",
+      "EVIDENCE_INCOMPLETE"
+    ],
+    "by_provider_host_role": "按 url_reference_classifier.evidence_eligibility_by_provider_host：google/apple 页 = EVIDENCE_SELF_ATTESTATION，osm 对象页 = 许可开放数据来源",
+    "self_reference": "LINK_EVIDENCE_SELF_REFERENCE（source_url_or_ref 与 declared_link_url 同值）",
+    "note": "W1R-B 把不合格来源改由 classifier kind 判定；W1R-B1 再补 reason_code 一层，让“不是实体页的原因”在消费端可读，而不是笼统一句未证实。W1R-B1 还补了消费端空洞：出处被 kind=invalid 拒绝时，旧校验分支一条错误都不产生（已证实的端到端反例 source_url_or_ref=\"garbage\" + source_entity_ref=\"wikidata:Q42\" 曾以零错误进入 VERIFIED）；现在必须报 EVIDENCE_SOURCE_UNCLASSIFIABLE，纯坐标出处报 EVIDENCE_COORDINATE_ONLY。"
+  },
+  "evidence_independence": {
+    "rule": "同一底层对象的多个镜像/服务只算一个血缘组（§17.3.2）。",
+    "same_lineage_examples": [
+      [
+        "nominatim",
+        "photon",
+        "overpass",
+        "osm"
+      ]
+    ]
+  },
+  "place_id_policy": {
+    "required": false,
+    "is_coverage_metric": false,
+    "is_release_gate": false,
+    "synthetic_or_regex_only": "quarantine",
+    "note": "§17.1.5：Place ID 是可选外部 ID，不是必填字段、覆盖率指标或发布门槛；无来源/合成/仅凭正则形状通过的 ID 一律隔离。"
+  },
+  "self_attestation": {
+    "forbidden": true,
+    "detected_patterns": [
+      "source_url == google_url",
+      "source_url == apple_url",
+      "evidence 引用本项目生成的地图 URL"
+    ],
+    "handling": "显式降级 + reason code，不得计入任何 VERIFIED 分子。"
+  },
+  "billing": {
+    "google_apis_allowed": false,
+    "forbidden_env": [
+      "TRAVEL_SCOPE_GOOGLE_PLACES_KEY",
+      "GOOGLE_MAPS_KEY",
+      "TRAVEL_SCOPE_GOOGLE_PLACES_DAILY_LIMIT",
+      "TRAVEL_SCOPE_GOOGLE_PLACES_MONTHLY_LIMIT"
+    ],
+    "reported_counters": [
+      "google_billable_api_calls",
+      "google_api_keys_used",
+      "google_maps_scrape_attempts",
+      "paid_fallback_attempts"
+    ],
+    "required_counter_values": {
+      "google_billable_api_calls": 0,
+      "google_api_keys_used": 0,
+      "google_maps_scrape_attempts": 0,
+      "paid_fallback_attempts": 0
+    },
+    "note": "§17.1.1 / §17.1.2 / §17.5.5：四项计数必须为 0；不得因“ID-only 当前零价格”启用 Billing。"
+  },
+  "map_target_levels": [
+    "verified_platform_url",
+    "verified_place_id",
+    "verified_coordinate",
+    "unnamed_coordinate",
+    "search_candidate"
+  ],
+  "legacy_migration": {
+    "reference": "references/map-contract-migration.md",
+    "target_level_mapping": {
+      "verified_platform_url": "legacy_only",
+      "verified_place_id": "legacy_only",
+      "verified_coordinate": "legacy_only",
+      "unnamed_coordinate": "legacy_only",
+      "search_candidate": "legacy_only"
+    },
+    "legacy_mapping_authority": false,
+    "forbidden_auto_mappings": [
+      "target_level=verified_coordinate -> identity_status=VERIFIED",
+      "target_level=verified_place_id -> identity_status=VERIFIED",
+      "verification_status=verified -> identity_status=VERIFIED",
+      "any -> google_resolution_status=CORRECT_ENTITY",
+      "URL 构造成功 -> coordinate_status=VERIFIED",
+      "source_url 非空 -> evidence.status=VERIFIED",
+      "名称高相似度 -> 覆盖硬冲突"
+    ],
+    "reason_code_required": true,
+    "preserve_legacy_value": true
+  },
+  "map_entity_types": [
+    "named_entity",
+    "coordinate_landmark"
+  ],
+  "budget_meta": {
+    "type": "object",
+    "required": [
+      "base_currency",
+      "rate_status"
+    ],
+    "authority": "汇率能不能换算由 references/budget-policy.json 判定（V5-B）；本节只登记形状，不再各自复述规则。",
+    "properties": {
+      "base_currency": {
+        "type": "string",
+        "description": "Destination currency, e.g. PHP, THB, IDR, MYR"
+      },
+      "rate_status": {
+        "type": "string",
+        "enum": ["VERIFIED", "UNREGISTERED"],
+        "description": "VERIFIED 必须同时给 rates + rate_source + rate_date；缺任一即按 UNREGISTERED 处理并被门禁报错。UNREGISTERED 时 rates 必须为空——留着数值却自称未登记，UI 迟早会用它换算。"
+      },
+      "rate_source": {
+        "type": "string",
+        "description": "汇率出处（哪个机构/文件/夹具），空字符串等于没有出处"
+      },
+      "rate_date": {
+        "type": "string",
+        "description": "该汇率的核验日期"
+      },
+      "rates": {
+        "type": "object",
+        "properties": {
+          "CNY": {
+            "type": "number",
+            "description": "Multiplier to convert 1 base_currency unit to CNY"
+          },
+          "USD": {
+            "type": "number",
+            "description": "Multiplier to convert 1 base_currency unit to USD"
+          }
+        }
+      },
+      "rate_note_cn": {
+        "type": "string"
+      },
+      "rate_note_en": {
+        "type": "string"
+      }
+    }
+  },
+  "route_budget_schema": {
+    "type": "object",
+    "required": [
+      "total_cny"
+    ],
+    "properties": {
+      "total_cny": {
+        "type": "number"
+      },
+      "lodging_cny": {
+        "type": "number"
+      },
+      "food_cny": {
+        "type": "number"
+      },
+      "transport_cny": {
+        "type": "number"
+      },
+      "activities_cny": {
+        "type": "number"
+      },
+      "other_cny": {
+        "type": "number"
+      },
+      "summary": {
+        "type": "string"
+      }
+    }
+  },
+  "url_reference_classifier": {
+    "_authority_note": "W1R-B 方案 B / W1R-B1 语义收口：URL 与稳定引用判定的唯一机器合同。身份证据、发布方链接、W4 renderer 生成的 href、W5 DOM/href 门禁必须调用 classify_reference 并消费本块配置；禁止任何再实现的 hostname/前缀/query/坐标判定。",
+    "classifier_version": "refclassifier-4",
+    "supersedes": [
+      "refclassifier-1",
+      "refclassifier-2",
+      "refclassifier-3"
+    ],
+    "version_gate": {
+      "rule": "map target classifier_version 必须精确等于当前 classifier_version；supersedes 中的值报 CLASSIFIER_VERSION_STALE，其他非空值报 CLASSIFIER_VERSION_UNKNOWN。当前版本只能在按当前规则重新判定后写入，不得机械改标签。",
+      "stale_code": "CLASSIFIER_VERSION_STALE",
+      "unknown_code": "CLASSIFIER_VERSION_UNKNOWN"
+    },
+    "implementation": "scripts/data_model.py::classify_reference",
+    "reference_implementation": "scripts/data_model.py::classify_reference",
+    "output_fields": [
+      "provider",
+      "kind",
+      "canonical_locator",
+      "reason_code",
+      "host",
+      "scheme",
+      "adapter",
+      "detail",
+      "field",
+      "reference_form",
+      "namespace",
+      "purpose",
+      "approval_status"
+    ],
+    "kinds": [
+      "entity",
+      "search",
+      "coordinate",
+      "home",
+      "invalid"
+    ],
+    "kind_identity_bearing": [
+      "entity"
+    ],
+    "schemes": [
+      "https"
+    ],
+    "match_rule": "normalized_hostname_exact",
+    "path_match_rule": "boundary_prefix",
+    "token_match_rule": "full_segment_or_full_value",
+    "token_match_note": "W1R-B1/B2：坐标必须落在完整路径片段或完整查询值上，禁止在尾随垃圾或第二个 @ 之后搜索命中；同一 selector key 的多个不同值与跨 entity key 都拒绝；raw/decoded 分隔符或控制字符不得进入路径；coordinate 没有非空域内 locator 时一律降 invalid。",
+    "precedence": [
+      "scheme",
+      "authority",
+      "unsafe_path",
+      "redirect_query",
+      "selector_conflict",
+      "entity_query",
+      "home_root",
+      "entity_path",
+      "non_place_object",
+      "coordinate",
+      "search",
+      "extension_or_unknown"
+    ],
+    "precedence_note": "重排一次即产生不同判定，所以顺序本身是合同的一部分。W1R-B1 新增两步：selector_conflict 先于任何单键判定（路径与查询算同一族，答案与参数顺序无关）；non_place_object 先于坐标面（OSM 的 user/changeset 是对象但不是地点）。",
+    "forbidden_query_keys": [
+      "url",
+      "redirect",
+      "redirect_to",
+      "next",
+      "target",
+      "return",
+      "returnurl",
+      "goto",
+      "dest",
+      "u"
+    ],
+    "unsafe_path_tokens": [
+      "..",
+      "%2e%2e"
+    ],
+    "coordinate_pair_re": "^(-?\\d+(?:\\.\\d+)?)[,;/]\\s*(-?\\d+(?:\\.\\d+)?)$",
+    "coordinate_segment_re": "^@(-?\\d+(?:\\.\\d+)?),(-?\\d+(?:\\.\\d+)?)(?:,\\d+(?:\\.\\d+)?z?)?$",
+    "coordinate_domain": {
+      "lat": [
+        -90.0,
+        90.0
+      ],
+      "lng": [
+        -180.0,
+        180.0
+      ]
+    },
+    "dataset_locator_re": "^dataset:[a-z0-9._\\-]{2,}",
+    "coordinate_locator_rule": {
+      "rule": "kind=coordinate 必须同时给出非空且落在 ±90/±180 域内的 canonical_locator，否则 invalid",
+      "anchoring": "只取路径里第一个 @ 片段，且必须整段匹配 coordinate_segment_re；查询值必须是完整坐标对；尾随垃圾、第二个 @、三个值的 ll 一律拒绝（W1R-B1 ①）。",
+      "fragment_rule": "#map=… 片段只在登记的查看器路径（/ 与 /map）上算坐标面；未知路径带片段是REF_PATH_SMUGGLING，不是坐标页。"
+    },
+    "canonical_locator_format": {
+      "entity_map": "<provider>:<entity-token>",
+      "entity_adapter": "<adapter_id>:<host><path>",
+      "search": "<provider|adapter>:search:<key>=<value>（或 :search:path）",
+      "coordinate": "coord:<lat6>,<lng6>",
+      "home": "<provider>:<path>",
+      "invalid": ""
+    },
+    "canonical_locator_semantics": {
+      "entity": "必填：规范化后的实体定位符，用于血缘一致性比对",
+      "coordinate": "必填且域内：coord:<lat6>,<lng6>；空定位符的坐标面不存在（W1R-B1 ①）",
+      "rejected_reference_forms": "被拒的引用（如坐标型 geo: URI）仍回报解析出的定位符，只作诊断，不构成任何认可；kind 保持 invalid。"
+    },
+    "providers": {
+      "google": {
+        "hostnames": [
+          "google.com",
+          "www.google.com",
+          "maps.google.com",
+          "maps.app.goo.gl"
+        ],
+        "shortlink_hostnames": [
+          "maps.app.goo.gl"
+        ],
+        "home_paths": [
+          "/",
+          "/maps",
+          "/maps/"
+        ],
+        "entity_path_prefixes": [
+          "/maps/place/"
+        ],
+        "entity_query_keys": {
+          "cid": {
+            "namespace": "google",
+            "locator": "google:cid/<value>",
+            "id_re": "^[1-9]\\d{5,19}$",
+            "allowed_paths": [
+              "/maps",
+              "/maps/",
+              "/"
+            ]
+          }
+        },
+        "search_path_prefixes": [
+          "/maps/search/"
+        ],
+        "search_query_keys": [
+          "q",
+          "query"
+        ],
+        "coordinate_path_prefixes": [
+          "/maps/@",
+          "/@",
+          "/@/"
+        ],
+        "coordinate_query_keys": [
+          "ll",
+          "view",
+          "destination"
+        ],
+        "coordinate_value_keys": [
+          "q",
+          "query"
+        ],
+        "coordinate_fragment_path_allowlist": [
+          "/",
+          "/maps",
+          "/maps/"
+        ],
+        "coordinate_fragment_re": "^map=\\d+(?:\\.\\d+)?/(-?\\d+(?:\\.\\d+)?)/(-?\\d+(?:\\.\\d+)?)$",
+        "allowed_selector_combinations": [
+          [
+            "coordinate_query",
+            "search_query"
+          ]
+        ]
+      },
+      "apple": {
+        "hostnames": [
+          "maps.apple.com"
+        ],
+        "home_paths": [
+          "/"
+        ],
+        "entity_path_prefixes": [
+          "/place/",
+          "/map/",
+          "/review/"
+        ],
+        "entity_query_keys": {
+          "auid": {
+            "namespace": "apple",
+            "locator": "apple:auid/<value>",
+            "id_re": "^\\d{3,}$",
+            "allowed_paths": [
+              "/",
+              "/place",
+              "/map"
+            ]
+          },
+          "cid": {
+            "namespace": "apple",
+            "locator": "apple:cid/<value>",
+            "id_re": "^\\d{3,}$",
+            "allowed_paths": [
+              "/",
+              "/place",
+              "/map"
+            ]
+          },
+          "mid": {
+            "namespace": "apple",
+            "locator": "apple:mid/<value>",
+            "id_re": "^[A-Za-z0-9]{3,}$",
+            "allowed_paths": [
+              "/",
+              "/place",
+              "/map"
+            ]
+          }
+        },
+        "search_path_prefixes": [
+          "/search/"
+        ],
+        "search_query_keys": [
+          "q",
+          "address"
+        ],
+        "coordinate_path_prefixes": [],
+        "coordinate_query_keys": [
+          "ll",
+          "coordinate",
+          "daddr",
+          "saddr"
+        ],
+        "coordinate_value_keys": [
+          "q"
+        ],
+        "allowed_selector_combinations": [
+          [
+            "coordinate_query",
+            "search_query"
+          ]
+        ]
+      },
+      "osm": {
+        "hostnames": [
+          "openstreetmap.org",
+          "www.openstreetmap.org"
+        ],
+        "home_paths": [
+          "/",
+          "/map",
+          "/map/"
+        ],
+        "viewer_paths_note": "/map 与 / 一样是通用查看器入口，不是地点对象",
+        "entity_path_prefixes": [
+          "/way/",
+          "/node/",
+          "/relation/"
+        ],
+        "non_place_path_prefixes": [
+          "/changeset/",
+          "/user/"
+        ],
+        "non_place_reason": "REF_NOT_PLACE_ENTITY",
+        "entity_id_re": "^[1-9]\\d{0,17}$",
+        "entity_allowed_suffixes": [],
+        "place_namespaces": {
+          "way": "osm",
+          "node": "osm",
+          "relation": "osm"
+        },
+        "search_path_prefixes": [
+          "/search"
+        ],
+        "search_query_keys": [
+          "query",
+          "q"
+        ],
+        "coordinate_marker_pair_keys": [
+          "mlat",
+          "mlon"
+        ],
+        "coordinate_query_keys": [
+          "lat",
+          "lon"
+        ],
+        "coordinate_fragment_path_allowlist": [
+          "/",
+          "/map",
+          "/map/"
+        ],
+        "coordinate_fragment_re": "^map=\\d+(?:\\.\\d+)?/(-?\\d+(?:\\.\\d+)?)/(-?\\d+(?:\\.\\d+)?)$",
+        "accepted_row_source_types": [
+          "licensed_open_data_entity"
+        ],
+        "allowed_selector_combinations": [
+          [
+            "coordinate_query",
+            "search_query"
+          ]
+        ]
+      }
+    },
+    "selector_families": {
+      "entity_query": {
+        "google": [
+          "cid"
+        ],
+        "apple": [
+          "auid",
+          "cid",
+          "mid"
+        ],
+        "osm": []
+      },
+      "search_query": {
+        "google": [
+          "q",
+          "query"
+        ],
+        "apple": [
+          "q"
+        ],
+        "osm": [
+          "query",
+          "q"
+        ]
+      },
+      "coordinate_query": {
+        "google": [
+          "ll",
+          "view",
+          "destination"
+        ],
+        "apple": [
+          "ll",
+          "coordinate",
+          "daddr",
+          "saddr"
+        ],
+        "osm": [
+          "mlat",
+          "mlon",
+          "lat",
+          "lon"
+        ]
+      }
+    },
+    "selector_combination_semantics": "allowed_selector_combinations 是“族名集合”的白名单，不是查询键列表：跨族组合必须逐条登记才允许。coordinate+search 只允许“一个可解析坐标 + 一个命名查询”；若 search value 本身也可解析为坐标，所有坐标必须一致，否则 REF_COORDINATE_CONFLICT（W1R-B2 ③）。",
+    "selector_value_rule": {
+      "rule": "entity selector 的每一个值都必须过自己的 id_re；一个 URL 只允许一个 entity selector key；同一 search key 的多个不同值（含名称/坐标混合）拒绝；entity/search/coordinate 三族的未登记组合也拒绝，全部与参数顺序无关",
+      "codes": [
+        "REF_MALFORMED_SELECTOR_VALUE",
+        "REF_AMBIGUOUS_ENTITY_SELECTOR",
+        "REF_SELECTOR_COMBINATION",
+        "REF_AMBIGUOUS_SEARCH_SELECTOR"
+      ],
+      "note": "W1R-B1 ②：`?cid=好值&cid=坏值` 与其反序不得一真一假。"
+    },
+    "surface_eligible_approval_statuses": [
+      "approved_for_identity",
+      "measured_in_frozen_input_pending_terms_check"
+    ],
+    "identity_eligible_approval_statuses": [
+      "approved_for_identity"
+    ],
+    "source_adapters": [
+      {
+        "id": "tripadvisor_entity_page",
+        "hostnames": [
+          "www.tripadvisor.com",
+          "tripadvisor.com"
+        ],
+        "roles": [
+          "official_directory_entity_page"
+        ],
+        "entity_path_res": [
+          "^/restaurant_review-[a-z0-9%._\\-]+-reviews\\.html$"
+        ],
+        "candidates_not_registered": [
+          {
+            "pattern": "^/hotel_review-.*-reviews\\.html$",
+            "measured_in_frozen_input": 0,
+            "note": "W1R-B1 ④：未测量到的路径形状不得预先给整个域名通行；W3 实测后再登记"
+          },
+          {
+            "pattern": "^/attraction_review-.*-reviews\\.html$",
+            "measured_in_frozen_input": 0,
+            "note": "同上"
+          }
+        ],
+        "blocklist_path_res": [
+          "^/privacy.*$",
+          "^/terms.*$",
+          "^/registrationlogin$",
+          "^/login.*$",
+          "^/signin.*$",
+          "^/robots\\.txt$",
+          "^/sitemap.*$",
+          "^/about.*$",
+          "^/.*\\.js$"
+        ],
+        "search_query_keys": [
+          "searchterm",
+          "q",
+          "query"
+        ],
+        "approval_status": "measured_in_frozen_input_pending_terms_check",
+        "measured": {
+          "ph_source_urls": 86,
+          "ca_source_urls": 0,
+          "measured_families": [
+            "/restaurant_review-<slug>-reviews.html x86"
+          ]
+        },
+        "license_note": "UGC 聚合站；仅作发现与目录凭据，不得声称发布方身份"
+      },
+      {
+        "id": "booking_hotel_page",
+        "hostnames": [
+          "www.booking.com",
+          "booking.com"
+        ],
+        "roles": [
+          "official_directory_entity_page"
+        ],
+        "entity_path_res": [
+          "^/hotel/[a-z]{2}/[a-z0-9%._\\-]+\\.html$"
+        ],
+        "blocklist_path_res": [
+          "^/searchresults\\.html$",
+          "^/privacy.*$",
+          "^/terms.*$",
+          "^/login.*$",
+          "^/signin.*$",
+          "^/robots\\.txt$",
+          "^/sitemap.*$"
+        ],
+        "search_query_keys": [
+          "nflt",
+          "searchterm",
+          "dest_id",
+          "ss"
+        ],
+        "approval_status": "measured_in_frozen_input_pending_terms_check",
+        "measured": {
+          "ph_source_urls": 42,
+          "ca_source_urls": 0,
+          "measured_families": [
+            "/hotel/<cc>/<slug>.html x42"
+          ],
+          "unregistered_listing_paths": [
+            "/hotel",
+            "/cars",
+            "/flights"
+          ]
+        }
+      },
+      {
+        "id": "philippines_travel_official",
+        "hostnames": [
+          "philippines.travel",
+          "www.philippines.travel"
+        ],
+        "roles": [
+          "official_entity_page",
+          "official_area_reference"
+        ],
+        "entity_path_res": [
+          "^/destinations/poi/[a-z0-9%._\\-]+$",
+          "^/transport/[a-z0-9%._\\-]+$"
+        ],
+        "candidates_not_registered": [
+          {
+            "pattern": "^/destinations/<slug>$",
+            "measured_in_frozen_input": 0,
+            "note": "区域/列表页：只能作为 destination_scope 的候选，未测量前不登记为实体路径"
+          }
+        ],
+        "blocklist_path_res": [
+          "^/privacy.*$",
+          "^/terms.*$",
+          "^/login.*$",
+          "^/robots\\.txt$",
+          "^/sitemap.*$",
+          "^/admin.*$"
+        ],
+        "search_query_keys": [
+          "q",
+          "search",
+          "keyword"
+        ],
+        "approval_status": "measured_in_frozen_input_pending_terms_check",
+        "measured": {
+          "ph_source_urls": 56,
+          "ca_source_urls": 0,
+          "measured_families": [
+            "/destinations/poi/<slug> x46",
+            "/transport/<slug> x10"
+          ]
+        },
+        "license_note": "官方旅游局站点；区域页可作 destination_scope，不得单独证明具体实体身份"
+      },
+      {
+        "id": "padi_dive_site_page",
+        "hostnames": [
+          "www.padi.com",
+          "padi.com"
+        ],
+        "roles": [
+          "official_entity_page",
+          "official_directory_entity_page"
+        ],
+        "entity_path_res": [
+          "^/dive-sites/[a-z0-9%._\\-]{2,40}/[a-z0-9%._\\-]{2,80}$"
+        ],
+        "blocklist_path_res": [
+          "^/privacy.*$",
+          "^/terms.*$",
+          "^/login.*$",
+          "^/robots\\.txt$",
+          "^/sitemap.*$"
+        ],
+        "search_query_keys": [
+          "q",
+          "search"
+        ],
+        "approval_status": "measured_in_frozen_input_pending_terms_check",
+        "measured": {
+          "ph_source_urls": 14,
+          "ca_source_urls": 0,
+          "measured_families": [
+            "/dive-sites/<country-slug>/<slug> x14"
+          ],
+          "measured_example": "https://www.padi.com/dive-sites/philippines/hilton-marine-sanctuary-mactan"
+        }
+      },
+      {
+        "id": "contract_fixture_publisher",
+        "hostnames": [
+          "grandhotel.example"
+        ],
+        "roles": [
+          "publisher_entity_page",
+          "official_entity_page"
+        ],
+        "entity_path_res": [
+          "^/[a-z0-9%._\\-]{2,60}(/[a-z0-9%._\\-]{2,60}){0,4}$"
+        ],
+        "blocklist_path_res": [
+          "^/privacy.*$",
+          "^/terms.*$",
+          "^/login.*$",
+          "^/signin.*$",
+          "^/robots\\.txt$",
+          "^/sitemap.*$",
+          "^/index\\.(html?|php)$"
+        ],
+        "search_query_keys": [
+          "q",
+          "query",
+          "s",
+          "search",
+          "keyword",
+          "keywords"
+        ],
+        "approval_status": "contract_fixture_only_not_for_shipment",
+        "measured": {
+          "ph_source_urls": 0,
+          "ca_source_urls": 0
+        },
+        "fixture_note": "只为了让发布方实体链的正路可被测试；真实目的地不得使用 .example TLD，W5 门禁必须证明成品里没有出现 fixture 适配器。"
+      },
+      {
+        "id": "contract_fixture_tourism_board",
+        "hostnames": [
+          "tourism.example.gov"
+        ],
+        "roles": [
+          "official_area_reference",
+          "official_entity_page"
+        ],
+        "entity_path_res": [
+          "^/[a-z0-9%._\\-]{2,60}(/[a-z0-9%._\\-]{2,60}){0,4}$"
+        ],
+        "blocklist_path_res": [
+          "^/privacy.*$",
+          "^/robots\\.txt$",
+          "^/sitemap.*$",
+          "^/index\\.(html?|php)$"
+        ],
+        "search_query_keys": [
+          "q",
+          "search"
+        ],
+        "approval_status": "contract_fixture_only_not_for_shipment",
+        "measured": {
+          "ph_source_urls": 0,
+          "ca_source_urls": 0
+        },
+        "fixture_note": "合同 fixture 的官方区域页来源，只用于 background 类证据行的正路测试；真实目的地必须走 W3 登记的来源，不得出现 .example.gov。"
+      },
+      {
+        "id": "contract_fixture_publisher_b",
+        "hostnames": [
+          "otherhotel.example"
+        ],
+        "roles": [
+          "publisher_entity_page"
+        ],
+        "entity_path_res": [
+          "^/[a-z0-9%._\\-]{2,60}(/[a-z0-9%._\\-]{2,60}){0,4}$"
+        ],
+        "blocklist_path_res": [
+          "^/privacy.*$",
+          "^/robots\\.txt$",
+          "^/sitemap.*$",
+          "^/index\\.(html?|php)$"
+        ],
+        "search_query_keys": [
+          "q",
+          "query"
+        ],
+        "approval_status": "contract_fixture_only_not_for_shipment",
+        "measured": {
+          "ph_source_urls": 0,
+          "ca_source_urls": 0
+        },
+        "fixture_note": "第二个 fixture 主机，专门用来证明 W1R-B1 ⑥ 的精确主机血缘：命名空间等于另一个已登记主机时必须是 REF_LINEAGE_CONTRADICTION，而不是泛化的来源未证实。"
+      }
+    ],
+    "source_adapter_policy": {
+      "rule": "非 provider 主机只有落在登记过的 source_adapter（主机 + 角色 + 实体路径模式 + 封禁路径）里才可能是实体页；未登记主机 REF_SOURCE_ADAPTER_UNREGISTERED，已登记主机的未登记路径 REF_SOURCE_PATH_UNREGISTERED，隐私/登录/robots/索引一类面 REF_SOURCE_BLOCKED_PATH。",
+      "why": "W1R-B1 ④ 推翻了 refclassifier-1 的默认“任意非根路径长度≥2 即实体页”——那等于给整个域名通行。§17.3.9 要求任何可访问域名先进版本化批准清单。",
+      "approval_status_meaning": {
+        "measured_in_frozen_input_pending_terms_check": "路径模式来自冻结输入的实测统计，但许可条款尚未逐条核验；W3 前不得据此宣称已获授权。",
+        "contract_fixture_only_not_for_shipment": "仅合同测试用的 .example fixture；生产 policy 在 classifier 层直接拒绝，不等待 W5 扫 DOM。",
+        "approved_for_identity": "已完成域名/用途/条款或许可检查，可按登记角色参与身份证据；当前没有真实 adapter 处于此状态。"
+      },
+      "machine_gate": "surface_eligible_approval_statuses 只控制形状识别；identity_eligible_approval_statuses 才能支撑 VERIFIED 或 PUBLISHER_ENTITY_LINK。pending 可作 discovery 记录但不得背书身份；fixture 在生产 policy 连形状也拒绝。",
+      "measured_frozen_input": {
+        "ph_non_provider_source_urls": 198,
+        "by_adapter": {
+          "tripadvisor_entity_page": 86,
+          "booking_hotel_page": 42,
+          "philippines_travel_official": 56,
+          "padi_dive_site_page": 14
+        },
+        "ca_non_provider_source_urls": 0,
+        "ca_note": "CA 冻结输入的 205 条 source_url 全部是 www.google.com 自证链接，因此本轮之前 CA 没有任何可用出处来源；W2 迁移必须把它们降级。",
+        "evidence": ".temp/v421_map_phase1/W1RB1_probe/w1rb1_source_path_measurement.json"
+      }
+    },
+    "unregistered_verdict": {
+      "host": "invalid",
+      "reason_code": "REF_SOURCE_ADAPTER_UNREGISTERED",
+      "path": "invalid",
+      "reason_code_path": "REF_SOURCE_PATH_UNREGISTERED",
+      "note": "W1R-B1 ④：取消“非根路径长度≥2 即 entity”的默认。§17.3.9 要求任何可访问域名先进版本化批准清单，未登记域名与未登记路径都不得声称自己是实体页。"
+    },
+    "reference_forms": {
+      "url": [
+        "declared_link_url"
+      ],
+      "osm_object": [
+        "osm_ref",
+        "source_entity_ref"
+      ],
+      "wikidata_entity": [
+        "wikidata_id",
+        "source_entity_ref"
+      ],
+      "publisher_scoped_id": [
+        "publisher_entity_id",
+        "source_entity_ref"
+      ],
+      "coordinate_uri": [
+        "source_entity_ref"
+      ],
+      "provider_id": [
+        "source_entity_ref"
+      ],
+      "dataset_locator": [
+        "dataset_ref",
+        "source_url_or_ref"
+      ]
+    },
+    "ref_rules": {
+      "osm": {
+        "canonical_re": "^osm:(node|way|relation)/[1-9]\\d{0,17}$",
+        "bare_re": "^(node|way|relation)/[1-9]\\d{0,17}$",
+        "bare_allowed_fields": [
+          "osm_ref"
+        ],
+        "reference_form": "osm_object",
+        "non_place_ids_re": "^osm:(changeset|user)/",
+        "origin": [
+          "osm_entity_url",
+          "dataset:osm_extracts"
+        ],
+        "lineage": [
+          "locator_must_equal_origin_url_locator",
+          "lineage_group_required"
+        ]
+      },
+      "wikidata": {
+        "canonical_re": "^wikidata:Q[1-9]\\d{0,17}$",
+        "reference_form": "wikidata_entity",
+        "origin": [
+          "adapter_role:official_directory_entity_page",
+          "adapter_role:official_entity_page",
+          "adapter_role:publisher_entity_page",
+          "dataset:wikidata_dump"
+        ],
+        "lineage": [
+          "lineage_group_required"
+        ]
+      },
+      "geo": {
+        "canonical_re": "^geo:-?\\d+(?:\\.\\d+)?,-?\\d+(?:\\.\\d+)?$",
+        "range_check": true,
+        "reference_form": "coordinate_uri",
+        "identity_bearing": false,
+        "why_not_identity_bearing": "a geo URI is a coordinate, not an entity handle",
+        "origin": [],
+        "lineage": [
+          "never_accepted"
+        ]
+      },
+      "google": {
+        "canonical_re": "^google:cid/\\d{6,}$",
+        "reference_form": "provider_id",
+        "unresolvable_offline": true,
+        "identity_bearing": false,
+        "why_not_identity_bearing": "we never call Google, so a Google CID cannot be resolved or attested by any approved source",
+        "origin": [],
+        "lineage": [
+          "never_accepted"
+        ]
+      }
+    },
+    "osm_place_object_rule": {
+      "place_objects": [
+        "node",
+        "way",
+        "relation"
+      ],
+      "non_place_objects": [
+        "user",
+        "changeset"
+      ],
+      "code": "REF_NOT_PLACE_ENTITY",
+      "rule": "只有 node/way/relation 是地点实体；user/changeset 是 OSM 上的对象但不是地点，不得进入发布方地点链接、身份证据或 osm_ref 血缘（W1R-B1 ③）。"
+    },
+    "publisher_scoped_ref": {
+      "reference_form": "publisher_scoped_id",
+      "namespace_match": "exact_normalized_host",
+      "namespace_host_re": "^[a-z0-9][a-z0-9.\\-]{1,250}$",
+      "registered_namespaces": [
+        "grandhotel.example",
+        "otherhotel.example"
+      ],
+      "registered_namespaces_note": "W1R-B1 ⑥：命名空间不再从 hostname 末两段推导，也不接受任何“看起来像域名”的字符串；必须逐条登记，未登记一律 REF_NAMESPACE_UNKNOWN。本轮只登记两个合同 fixture 主机，真实发布方命名空间等 W3 实测后再登记。",
+      "id_re": "^[a-z0-9][a-z0-9._\\-]{1,79}$",
+      "origin": [
+        "adapter_role:publisher_entity_page"
+      ],
+      "lineage": [
+        "namespace_must_equal_origin_host",
+        "lineage_group_required"
+      ],
+      "public_suffix_note": "W1R-B1 ⑥：不再取 hostname 末两段；example.co.uk 这类多级公共后缀在末两段规则下会把命名空间降级成 co.uk，任何 co.uk 站点都能冒充。登记清单 + 精确主机匹配同时封掉 co.uk: 与 cebu.grandhotel.example: 两种伪造。"
+    },
+    "publisher_namespace_rule": {
+      "namespace_match": "exact_normalized_host",
+      "registered_namespaces": [
+        "grandhotel.example",
+        "otherhotel.example"
+      ],
+      "why": "W1R-B1 ⑥：命名空间必须由精确规范化主机匹配并逐条登记；取 hostname 末两段会把 example.co.uk 降级成 co.uk，任何 co.uk 站点都能冒充实体命名空间，也会让子域伪造通过。",
+      "real_publishers": "本轮只登记两个合同 fixture 主机。真实 PH/CA 发布方命名空间等 W3 实测后登记；未登记命名空间一律 REF_NAMESPACE_UNKNOWN。"
+    },
+    "origin_classes": {
+      "osm_entity_url": {
+        "kind": "entity",
+        "provider": "osm"
+      },
+      "adapter_role:<role>": {
+        "kind": "entity",
+        "provider": "",
+        "requires": [
+          "adapter_declares_role",
+          "row_source_type_matches"
+        ]
+      },
+      "dataset:<id>": {
+        "kind": "entity",
+        "provider": "",
+        "requires": [
+          "registered_dataset_ids_contains_id"
+        ]
+      }
+    },
+    "origin_diagnostic_codes": [
+      "REF_NOT_PLACE_ENTITY",
+      "REF_SOURCE_BLOCKED_PATH",
+      "REF_SOURCE_ADAPTER_UNREGISTERED",
+      "REF_SOURCE_PATH_UNREGISTERED",
+      "REF_ORIGIN_UNCLASSIFIABLE",
+      "REF_SHORT_LINK_UNRESOLVED",
+      "REF_USERINFO_PRESENT",
+      "REF_PROVIDER_LOOKALIKE_HOST",
+      "REF_PATH_UNSAFE",
+      "REF_QUERY_PARAM_CAN_REDIRECT",
+      "REF_PORT_INVALID",
+      "REF_PORT_UNEXPECTED",
+      "REF_URL_CONTROL_CHARACTER",
+      "REF_PATH_RAW_SEPARATOR",
+      "REF_PATH_DECODED_SEPARATOR",
+      "REF_ENTITY_PATH_TRAILING",
+      "REF_SCHEME_NOT_ALLOWED",
+      "REF_COORDINATE_TOKEN_MALFORMED",
+      "REF_COORDINATE_OUT_OF_DOMAIN",
+      "REF_COORDINATE_UNRESOLVED",
+      "REF_COORDINATE_CONFLICT",
+      "REF_SOURCE_APPROVAL_NOT_ELIGIBLE",
+      "REF_SOURCE_APPROVAL_PENDING",
+      "REF_ID_INVALID"
+    ],
+    "origin_diagnostic_note": "W1R-B1 ⑤：证据行来源自身如果是“根本读不成来源”的形状（非地点对象、被封面、未登记主机、含 userinfo/redirect…），直接把该码上报，比泛化的REF_ORIGIN_UNPROVEN 更能定位问题；home/search/coordinate 这类“能读但不是实体页”的形状仍归 REF_ORIGIN_UNPROVEN（来源类别不允许）。",
+    "dataset_origin_rules": {
+      "osm_extracts": {
+        "dataset_id_re": "^osm_extracts$",
+        "registered": false,
+        "requires": [
+          "origin_url_or_locator_matches_adapter",
+          "lineage_group",
+          "content_digest"
+        ]
+      },
+      "wikidata_dump": {
+        "dataset_id_re": "^wikidata_dump$",
+        "registered": false,
+        "requires": [
+          "lineage_group",
+          "content_digest"
+        ]
+      },
+      "registered_dataset_ids": [],
+      "note": "W1R-B1 ⑤：数据集/开放数据来源不得只凭 source_type 绕过来源真实性。本轮没有任何数据集登记（registered_dataset_ids 为空），所以 dataset 类来源全部拒绝；W3 落地 OSM/Wikidata extract 时必须在此登记 dataset id、来源形式、locator 与 lineage 规则后才可放行。"
+    },
+    "dataset_source_types": [
+      "registered_dataset",
+      "licensed_open_data",
+      "licensed_open_data_entity",
+      "open_data"
+    ],
+    "dataset_source_types_note": "W1R-B 正式运行时发现的合同不一致：origin 类里写的是 licensed_open_data，而 evidence_source_types 用的是 licensed_open_data_entity；这里把枚举里真实存在的名字并进数据集来源类，而不是改枚举去迁就配置。W1R-B1 ⑤ 进一步要求数据集来源必须登记 dataset id （registered_dataset_ids），本轮清单为空，所以数据集类来源全部拒绝，不再由 source_type 背书。",
+    "origin_provenance_rule": {
+      "rule": "证据行的 source_url_or_ref 与引用值走同一个 classify_reference；来源不可分类 (REF_ORIGIN_UNCLASSIFIABLE)、非实体、角色未声明、数据集未登记都拒绝。",
+      "refuted_in_w1rb1": "已证实的端到端反例：source_type=licensed_open_data_entity + source_url_or_ref=\"garbage\" + source_entity_ref=\"wikidata:Q42\" 曾让 validate_map_targets() 零错误并进入 VERIFIED；现在返回 REF_ORIGIN_UNCLASSIFIABLE。",
+      "row_source_type_must_be_enum": "行声明的 source_type 必须是 evidence_source_types 里的登记值；OSM 实体页只在接受 licensed_open_data_entity 时算许可开放数据来源。"
+    },
+    "address_shape": {
+      "min_length": 12,
+      "min_tokens": 2,
+      "token_split": "[,;]"
+    },
+    "evidence_eligibility_by_provider_host": {
+      "google": "self_attestation",
+      "apple": "self_attestation",
+      "osm": "licensed_open_data_source",
+      "note": "W1R-B 正式实现时发现的真实冲突：身份证据规则把「供应商域名上的 URL」一律判为自证，而离线 resolver 的合法来源恰恰是 OSM 对象页。区别在于 OSM 是带许可与血缘的第三方开放数据（§17.3 批准网络源，ODbL 署名），Google/Apple 页面是我们自己按钮的目标，不能反过来证明自己。因此按 provider 分别登记资格，而不是整体放宽。"
+    },
+    "host_registration_resolved_first": {
+      "rule": "URL 判定先解析主机注册情况，再判 scheme / userinfo 等门",
+      "note": "否则 http://<provider>/maps/... 会被误报成『不在登记 provider 主机上』，把读者引向错误的修法（W1R-B ①）。"
+    },
+    "forbidden_in_render_layer": [
+      "hostname literal",
+      "path prefix test",
+      "query key test",
+      "coordinate regex",
+      "kind inference from another field",
+      "source adapter path pattern",
+      "namespace host-root slicing"
+    ],
+    "forbidden_in_render_layer_note": "W1R-B ②/W1R-B1 ⑥：W4 renderer 与 W5 DOM/href 门禁只能读 classifier 的 kind / reason_code / canonical_locator / adapter，不得在 JS 或门禁里再写一份 hostname/前缀/query/坐标判定，也不得自己从主机名切命名空间。接口是 classify_reference(value, policy, field=, required_provider=, purpose=, row=)。",
+    "reuse_points": {
+      "w4_renderer": {
+        "function": "scripts/data_model.py::classify_reference",
+        "surface": "按钮 href 与 data-* 状态",
+        "consumes": [
+          "kind",
+          "canonical_locator",
+          "reason_code",
+          "adapter"
+        ]
+      },
+      "w5_dom_gate": {
+        "function": "scripts/data_model.py::classify_reference",
+        "surface": "渲染后 DOM 的 href 审计",
+        "consumes": [
+          "provider",
+          "kind",
+          "canonical_locator",
+          "reason_code",
+          "adapter"
+        ]
+      },
+      "evidence_validator": {
+        "function": "scripts/data_model.py::classify_reference",
+        "surface": "身份证据与发布方链接",
+        "consumes": [
+          "kind",
+          "reason_code",
+          "canonical_locator",
+          "detail"
+        ]
+      },
+      "link_builder": {
+        "function": "scripts/data_model.py::classify_reference",
+        "surface": "构造后的自检（构造版本仍必填）",
+        "consumes": [
+          "provider",
+          "kind",
+          "canonical_locator"
+        ]
+      },
+      "note": "四处复用同一实现与同一份配置；W1R-B1 仍只改合同与校验，渲染层接线在 W4/W5。"
+    },
+    "reason_codes": {
+      "OK": "classified as a usable reference of this kind",
+      "REF_NOT_HTTPS_URL": "a URL-typed field holds something that is not an absolute http(s) URL",
+      "REF_SCHEME_NOT_ALLOWED": "scheme outside the allow-list",
+      "REF_HOST_NOT_REGISTERED": "normalized hostname is not a registered provider host",
+      "REF_PROVIDER_LOOKALIKE_HOST": "hostname extends a registered provider host with extra labels",
+      "REF_USERINFO_PRESENT": "netloc carries userinfo; the authority is not the registered host",
+      "REF_PORT_INVALID": "authority carries a non-numeric or out-of-range port; classifier returns invalid instead of raising",
+      "REF_PORT_UNEXPECTED": "non-default port on a registered provider host",
+      "REF_PATH_UNSAFE": "path carries traversal tokens after percent-decoding",
+      "REF_PATH_DECODED_SEPARATOR": "percent-decoding introduces a slash, backslash, query/fragment delimiter or control character",
+      "REF_PATH_SMUGGLING": "a path segment extends a registered token without a boundary",
+      "REF_QUERY_PARAM_CAN_REDIRECT": "query carries a redirect-capable key",
+      "REF_SHORT_LINK_UNRESOLVED": "short link host without a frozen resolution record",
+      "REF_HOME_OR_ROOT_PATH": "provider or publisher root page proves nothing about a place",
+      "REF_ENTITY_TOKEN_MISSING": "entity prefix present but the entity token is empty",
+      "REF_ENTITY_PATH_TRAILING": "an exact object path carries an unregistered trailing segment",
+      "REF_PATH_NOT_IN_KNOWN_SHAPE": "no registered rule matched; unclassified shapes are never shipped",
+      "REF_SEARCH_SHAPE": "search surface, not an entity",
+      "REF_COORDINATE_SHAPE": "coordinate/pin surface, not an entity",
+      "REF_COORDINATE_UNRESOLVED": "a coordinate marker is present but no in-domain pair can be read from a full token; W1R-B1 ① forbids kind=coordinate with no locator",
+      "REF_COORDINATE_TOKEN_MALFORMED": "the coordinate token carries garbage or a second @ after an unparseable first token",
+      "REF_COORDINATE_OUT_OF_DOMAIN": "lat/lng outside ±90 / ±180",
+      "REF_COORDINATE_CONFLICT": "two independently readable coordinate selectors disagree",
+      "REF_NOT_A_REFERENCE_FORM": "the value is neither an absolute URL nor any registered reference form, so it cannot be a reference at all",
+      "REF_ID_INVALID": "reference id violates its own pattern",
+      "REF_NAMESPACE_UNKNOWN": "reference namespace is not registered",
+      "REF_FIELD_NOT_ALLOWED_FOR_FORM": "this reference form is not accepted in this field",
+      "REF_NOT_IDENTITY_BEARING": "the form identifies no entity (coordinate) or is unattestable offline",
+      "REF_ORIGIN_UNPROVEN": "reference form not allowed for this evidence origin",
+      "REF_ORIGIN_UNCLASSIFIABLE": "the evidence row's source value cannot be classified at all",
+      "REF_LINEAGE_REQUIRED": "no lineage_group declared on the evidence row",
+      "REF_LINEAGE_CONTRADICTION": "reference and the row source URL point at different objects",
+      "REF_PROVIDER_MISMATCH": "classified provider differs from the required provider",
+      "REF_NOT_PLACE_ENTITY": "the object exists but is not a place (OSM changeset/user)",
+      "REF_SELECTOR_COMBINATION": "two or more selector families are combined without being registered",
+      "REF_AMBIGUOUS_ENTITY_SELECTOR": "an entity selector carries multiple distinct values",
+      "REF_MALFORMED_SELECTOR_VALUE": "one value of a repeated selector fails its own pattern",
+      "REF_AMBIGUOUS_SEARCH_SELECTOR": "one search selector key carries multiple distinct values, including mixed name/coordinate semantics",
+      "REF_URL_CONTROL_CHARACTER": "raw URL contains a C0 or DEL control character",
+      "REF_PATH_RAW_SEPARATOR": "raw path contains a backslash instead of a registered URL path separator",
+      "REF_SOURCE_ADAPTER_UNREGISTERED": "the host is not on the versioned approved-source list",
+      "REF_SOURCE_PATH_UNREGISTERED": "the host is approved but this path shape is not registered",
+      "REF_SOURCE_BLOCKED_PATH": "the path is a known non-evidence surface (privacy/login/robots/…)",
+      "REF_SOURCE_APPROVAL_NOT_ELIGIBLE": "adapter status is not permitted even for production shape classification",
+      "REF_SOURCE_APPROVAL_PENDING": "adapter shape is recognized but its approval status cannot support identity or publisher-link claims",
+      "REF_ROLE_NOT_DECLARED": "the adapter does not declare the row's source_type as a role it serves",
+      "REF_ORIGIN_PENDING_REGISTRATION": "a dataset origin was claimed but the dataset id is not registered",
+      "ADDRESS_SHAPE_INVALID": "address too thin to separate same-name entities"
+    },
+    "registration_note": {
+      "applemaps.com": "已从 provider 允许清单移除：该主机名不受 Apple 控制，注册它等于把第三方页面当成 Apple 地图实体；正确主机是 maps.apple.com。移除只收窄允许面，不放宽。",
+      "www.google.com.ph": "国家子域不在清单内，命中 REF_PROVIDER_LOOKALIKE_HOST；如需支持必须显式注册并接受覆盖率核验。",
+      "uri.amap.com / baidu": "国内 provider 尚未登记；渲染层现有的高德/百度判断仍列在 W4/W5 的第二套判定清单里，接线时一并收编。",
+      "grandhotel.example / otherhotel.example": "合同 fixture 主机，approval_status 明确为 contract_fixture_only_not_for_shipment；真实目的地不得使用 .example TLD。"
+    },
+    "extension_provenance": "kinds / canonical_locator / reason_code 与逐例期望值全部来自隔离探针；W1R-B 用 classifier_probe_v2.py（106 例，冻结为 W1RB_contract/probe_matrix.json），W1R-B1 用 classifier_probe_v3.py = 冻结基线 106 例 + 手写 DELTA（6 例期望值变化，全部是拒绝变严或原因码变精）+ 手写 NEW_CASES（55 例审计反例与补充），共 161 例 0 漏。规则由探针 CONFIG 单向写入本块，期望值不从规则生成（§17.7.1 ⑧）。"
+  },
+  "identity_supporting_fields_authority": false,
+  "identity_supporting_fields_superseded_by": "identity_evidence_combination.stable_ref_classifier_rule + url_reference_classifier",
+  "identity_supporting_fields_note": "W1R-B：单看 supported_fields 命中哪个字段名已不足以判定，必须再看 classifier 的实际输出。",
+  "link_mode_required_context_authority": false,
+  "link_mode_required_context_superseded_by": "link_context_required_by_mode",
+  "link_mode_required_context_note": "W1R-B ②把必填上下文统一到逐 link mode 的四字段清单（含 classifier_version）。",
+  "second_judgment_inventory": {
+    "authority": "scripts/data_model.py::classify_reference",
+    "disposition_allowed": [
+      "unreviewed_second_judgment_candidate",
+      "pattern_substring_not_a_call_site"
+    ],
+    "disposition_allowed_note": "台账的处置词表是**闭集且只有这两值**：unreviewed_second_judgment_candidate（默认：命中了但没人复核）与 pattern_substring_not_a_call_site（子串误报：命中来自文本里的字面量，不是调用面）。默认值排第一，因为「什么都不写时该用哪个」必须只有唯一答案。**第二个值不叫「已复核」**——上一版把它描述成「已复核那一档」，业主 2026-11-01 判这是放宽过头：一个能装下「我已经看过了」的空格子，最后一定会装下没看过的东西。它现在被下面的 disposition_substring_exception 逐条钉住：持有人清单只有 scripts/pyc_hygiene.py 一项、测量形状只允许 provider_decision=1 且其余四类为 0、复核说明必须含 cause_literal 那串字面文本、任何第二个文件使用它直接判红。权威条目自己（is_classifier_authority=true）不吃这张词表，它由「authority 只有一条且路径等于 authority 字段」单独钉。为什么当初加宽而不是把那一条写成默认值：默认值说的是「没人看过」，而那条命中我确实看过并给出了结论，把已复核的东西登记成未复核同样是假陈述——所以答案是**把例外钉到只有一格**，不是把词表当通用出口。",
+    "disposition_substring_exception": {
+      "disposition": "pattern_substring_not_a_call_site",
+      "holders": [
+        "scripts/pyc_hygiene.py"
+      ],
+      "holders_are_exactly_one": true,
+      "pinned_shape": {
+        "url_parse": 0,
+        "host_extraction": 0,
+        "query_path_handling": 0,
+        "coordinate_in_url": 0,
+        "provider_decision": 1
+      },
+      "pinned_touches": [
+        "provider_decision"
+      ],
+      "cause_literal": "no:cacheprovider",
+      "review_note_must_contain": "no:cacheprovider",
+      "why_this_is_not_a_call_site": "pyc_hygiene.py 不判 URL、不取主机名、不调外部 provider（前四类计数为 0）。那 1 处 provider_decision 来自文件头抄录的业主复现命令原文「python -B -m pytest -p no:cacheprovider scripts -q」：cacheprovider 含子串 provider，被 provider_decision 的子串模式抓到。真相是「这条链上没有任何 provider 调用面」，所以照实登记命中并标为子串误报，而不是改窄 pattern 把它藏起来——改 pattern 会让别的文件的真命中一起消失。",
+      "enforced_by": "scripts/test_v421_map_audit_vectors.py::disposition_violations（门牙的唯一实现）",
+      "positive_tests": [
+        "ForkDebtTests.test_pattern_substring_disposition_is_locked_to_one_holder_and_one_shape",
+        "ForkDebtTests.test_authority_file_is_the_only_registered_classifier_home"
+      ],
+      "negative_tests": [
+        "ForkDebtTests.test_second_holder_of_the_substring_disposition_is_rejected",
+        "ForkDebtTests.test_pinned_shape_drift_of_the_exception_holder_is_rejected",
+        "ForkDebtTests.test_exception_review_note_without_the_cause_literal_is_rejected",
+        "ForkDebtTests.test_disposition_vocabulary_may_not_gain_a_third_value"
+      ],
+      "retirement_rule": "本例外是**子串扫描器**（semantic_call_sites_measured.patterns 用 re.IGNORECASE 扫全文，含注释与文档字符串）的产物。若扫描器改成只扫可执行 AST/token，这条误报就不存在了 ⇒ **删除 holders 里的这一项连同整个 disposition_substring_exception，并把词表收回单值**；不得把它当成「复核过的文件可以用第二个处置值」的先例扩大复用。增加 holders 需要业主裁决，测试面是闭集，加一行就等于把门牙磨平。",
+      "registered_at": "MT-D2 门牙修正（业主 2026-11-01 两处争议裁决第 1 条）"
+    },
+    "literal_forks": {
+      "spa-layout.js": "W4",
+      "split-layout.js": "W4",
+      "app_contract.py": "W5",
+      "domestic_poi_sources.py": "W5",
+      "gen_travel_scope.py": "W5",
+      "map_contract.py": "W5",
+      "search_source_evidence.py": "W5",
+      "validate_output.py": "W5",
+      "visual_qa.py": "W5"
+    },
+    "literal_forks_note": "W1R-B 的 9 项字面量清册：只证明这些文件里出现已登记的 provider 字符串，不证明重复判断已经穷尽。保留为 W4/W5 债务，条目只减不增。",
+    "semantic_call_sites": [
+      {
+        "file": "scripts/adjust_itinerary.py",
+        "sha256_12": "A7E2E9945217",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 9,
+          "provider_decision": 0
+        },
+        "touches": [
+          "coordinate_in_url"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/api_cache.py",
+        "sha256_12": "A9C2EBBC0461",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 3,
+          "coordinate_in_url": 0,
+          "provider_decision": 48
+        },
+        "touches": [
+          "provider_decision",
+          "query_path_handling"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/app_contract.py",
+        "sha256_12": "EDFF69892BFA",
+        "counts": {
+          "url_parse": 1,
+          "host_extraction": 1,
+          "query_path_handling": 1,
+          "coordinate_in_url": 0,
+          "provider_decision": 5
+        },
+        "touches": [
+          "host_extraction",
+          "provider_decision",
+          "query_path_handling",
+          "url_parse"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/audit_run.py",
+        "sha256_12": "46C4DED059C1",
+        "counts": {
+          "url_parse": 1,
+          "host_extraction": 1,
+          "query_path_handling": 3,
+          "coordinate_in_url": 0,
+          "provider_decision": 21
+        },
+        "touches": [
+          "host_extraction",
+          "provider_decision",
+          "query_path_handling",
+          "url_parse"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/build_truth_worklist.py",
+        "sha256_12": "81E436622061",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 6,
+          "provider_decision": 2
+        },
+        "touches": [
+          "coordinate_in_url",
+          "provider_decision"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/cafe_contract.py",
+        "sha256_12": "74FCE4F583C1",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 3
+        },
+        "touches": [
+          "provider_decision"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/category_lexicon.py",
+        "sha256_12": "EA79D9F09D3B",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/checkpoint_store.py",
+        "sha256_12": "E2F224EC2567",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/collect_google_images.py",
+        "sha256_12": "CC1B64199678",
+        "counts": {
+          "url_parse": 2,
+          "host_extraction": 0,
+          "query_path_handling": 10,
+          "coordinate_in_url": 22,
+          "provider_decision": 35
+        },
+        "touches": [
+          "coordinate_in_url",
+          "provider_decision",
+          "query_path_handling",
+          "url_parse"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/collect_open_media.py",
+        "sha256_12": "E97A88417263",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 2,
+          "coordinate_in_url": 3,
+          "provider_decision": 5
+        },
+        "touches": [
+          "coordinate_in_url",
+          "provider_decision",
+          "query_path_handling"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/data_model.py",
+        "sha256_12": "5D9DBEFF95AD",
+        "counts": {
+          "url_parse": 2,
+          "host_extraction": 2,
+          "query_path_handling": 5,
+          "coordinate_in_url": 4,
+          "provider_decision": 177
+        },
+        "touches": [
+          "coordinate_in_url",
+          "host_extraction",
+          "provider_decision",
+          "query_path_handling",
+          "url_parse"
+        ],
+        "is_classifier_authority": true,
+        "disposition": "authority: classify_reference lives here",
+        "v422_review_note": "V4-D 按现场重测回写指纹与计数（台账过期＝登记不再是量出来的）。"
+      },
+      {
+        "file": "scripts/delivery_gate.py",
+        "sha256_12": "B69B79DE338A",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 11
+        },
+        "touches": ["provider_decision"],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/domestic_itinerary.py",
+        "sha256_12": "15C30927D16E",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/domestic_poi_sources.py",
+        "sha256_12": "EA71FE6E462F",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 93
+        },
+        "touches": [
+          "provider_decision"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/formal_data_gate.py",
+        "sha256_12": "83B660BEDFF6",
+        "counts": {
+          "url_parse": 5,
+          "host_extraction": 6,
+          "query_path_handling": 23,
+          "coordinate_in_url": 20,
+          "provider_decision": 12
+        },
+        "touches": ["coordinate_in_url", "host_extraction", "provider_decision", "query_path_handling", "url_parse"],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate",
+        "v422_review_note": "V4-D 按现场重测回写指纹与计数（台账过期＝登记不再是量出来的）。"
+      },
+      {
+        "file": "scripts/gen_travel_scope.py",
+        "sha256_12": "3578FB99B01D",
+        "counts": {
+          "url_parse": 4,
+          "host_extraction": 3,
+          "query_path_handling": 28,
+          "coordinate_in_url": 70,
+          "provider_decision": 220
+        },
+        "touches": ["coordinate_in_url", "host_extraction", "provider_decision", "query_path_handling", "url_parse"],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/image_assets.py",
+        "sha256_12": "D6B5480FDC85",
+        "counts": {
+          "url_parse": 2,
+          "host_extraction": 1,
+          "query_path_handling": 1,
+          "coordinate_in_url": 0,
+          "provider_decision": 3
+        },
+        "touches": [
+          "host_extraction",
+          "provider_decision",
+          "query_path_handling",
+          "url_parse"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/init_run.py",
+        "sha256_12": "452BB03FCC05",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 1
+        },
+        "touches": [
+          "provider_decision"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/intake_contract.py",
+        "sha256_12": "1E2F59C9C30E",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/international_poi_sources.py",
+        "sha256_12": "46B99F8007AA",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 2
+        },
+        "touches": [
+          "provider_decision"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/local_media_gate.py",
+        "sha256_12": "1602EBA3DF62",
+        "counts": {
+          "url_parse": 5,
+          "host_extraction": 3,
+          "query_path_handling": 7,
+          "coordinate_in_url": 0,
+          "provider_decision": 3
+        },
+        "touches": ["host_extraction", "provider_decision", "query_path_handling", "url_parse"],
+        "v422_review_note": "ZH-RELEASE-3 / R3D（业主 2026-11-03 第三轮裁「采用现有 designed_no_photo_state，不再发明第二套无图机制」）再次改动本模块：新增 no_photo_policy／is_no_photo_row／no_photo_section_slots／_image_bearing_values／check_no_photo_row／no_photo_retired_assets，并把 validate_section_media 的角色与档位词表改成读 media-policy::display_roles／selection_levels（撤掉代码里的硬编码副本），verify_media_gaps 增加 section_media 参数以核对退役字节不得变成缺口。计数变化 {}；逐处现场定位（行号由本次测量算出，不是手打）：{}。新增那一处 url_parse 是 check_no_photo_row 里对 no_photo_evidence 的 urlsplit(ev)——它判的是「证据引用必须是 run 内相对路径」，不是身份与链接判定，因此不构成第二套 provider 判据；沿用 pyc_hygiene／ZH-RELEASE-2／R3 先例照实入册，不为了数字好看去窄化 pattern。上一轮（ZH-RELEASE-3 三段血缘）注记逐字保留如下：ZH-RELEASE-3 / R3B（业主 2026-11-03 第三轮裁「采用现有 designed_no_photo_state，不再发明第二套无图机制」）再次改动本模块：新增 no_photo_policy／is_no_photo_row／no_photo_section_slots／_image_bearing_values／check_no_photo_row／no_photo_retired_assets，并把 validate_section_media 的角色与档位词表改成读 media-policy::display_roles／selection_levels（撤掉代码里的硬编码副本），verify_media_gaps 增加 section_media 参数以核对退役字节不得变成缺口。计数变化 {\"url_parse\": [4, 5]}；逐处现场定位（行号由本次测量算出，不是手打）：{\"url_parse\": [55, 1047, 1123, 1169, 1260]}。新增那一处 url_parse 是 check_no_photo_row 里对 no_photo_evidence 的 urlsplit(ev)——它判的是「证据引用必须是 run 内相对路径」，不是身份与链接判定，因此不构成第二套 provider 判据；沿用 pyc_hygiene／ZH-RELEASE-2／R3 先例照实入册，不为了数字好看去窄化 pattern。上一轮（ZH-RELEASE-3 三段血缘）注记逐字保留如下：ZH-RELEASE-3（业主 2026-11-03 第二轮裁示一：快照合同改成「Commons 修订身份＋实际采集字节＋本地派生链」三段行级血缘）改动了本模块：新增 _url_path／row_anchor_index／replay_delivered_from_prepared／commons_row_lineage 与重写 validate_source_identities，计数变化 {\"url_parse\": [3, 4], \"host_extraction\": [1, 3], \"query_path_handling\": [4, 7]}。逐处现场定位（行号由本次测量算出，不是手打）：{\"url_parse\": [55, 966, 1042, 1114], \"host_extraction\": [56, 58, 967], \"query_path_handling\": [56, 58, 969, 971]}。这些全部是未改动模式在新代码里的子串命中（urlsplit/netloc/.path/quote 这类 URL 形状字段名与归一实现），模式本身一字未改，也没有新增第二套语义判据；沿用 pyc_hygiene／ZH-RELEASE-2 先例照实入册，不为了数字好看去窄化 pattern。派生链第二跳的重放调用的是 scripts/prepare_media.py::prepare_asset（登记的唯一实现），不在本模块里再写一个缩放。", "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/map_contract.py",
+        "sha256_12": "11FCFC6382F3",
+        "counts": {
+          "url_parse": 7,
+          "host_extraction": 2,
+          "query_path_handling": 13,
+          "coordinate_in_url": 74,
+          "provider_decision": 83
+        },
+        "touches": ["coordinate_in_url", "host_extraction", "provider_decision", "query_path_handling", "url_parse"],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/map_gate_v422.py",
+        "sha256_12": "506C419DE3A6",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 99
+        },
+        "touches": ["provider_decision"],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate",
+        "v422_review_note": "V4-B 新增：本文件只裁决严重性（谁整批阻断、谁逐项暴露），不解析 URL、不取主机名、不判 provider 归属。provider_decision 命中 22 处全部是读取登记值的名字本身（providers / primary_provider / rendered_providers / provider 字段名），没有一处比对主机或路径。硬冲突判定复用 map-link-selection.json::known_bad_link_markers 与 blocking_quarantine_reason_codes 的在册名单，不自建第三套。 V4-D 按现场重测回写指纹与计数（台账过期＝登记不再是量出来的）。"
+      },
+      {
+        "file": "scripts/map_link_selector.py",
+        "sha256_12": "D39E1A6D50D2",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 2,
+          "coordinate_in_url": 3,
+          "provider_decision": 131
+        },
+        "touches": ["coordinate_in_url", "provider_decision", "query_path_handling"],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate",
+        "v422_review_note": "V1 实测：url_parse=0、host_extraction=0 —— 本文件不解析 URL、不提取主机名，provider 集合与 URL 模板全部来自 references/map-link-selection.json，坐标解析委托 map_contract.parse_coords（无第二套实现）。query_path_handling 命中 2 处：sys.path 与模板 {QUERY} 的 quote()；coordinate_in_url 命中 3 处：parse_coords 调用。身份/链接判定仍只有 data_model.classify_reference 一处，本条留在台账里是因为§17.7.1 ⑨ 规定台账条目只减不增，且处置枚举不得由新文件自行豁免（V3 接线渲染器后复核）。 重登记：V2 实跑发现 query_segments 少了『scope 本身已是拉丁写法』这一分支（CA 191/205 条 destination_scope=California 被丢段），修实现后指纹与测量值随之更新（本条即台账牙齿生效的证据）。 V3-0：新增 select_all_providers()（per-provider 容器唯一装配点），仍为零 URL 解析/零主机提取。"
+      },
+      {
+        "file": "scripts/preflight_qa.py",
+        "sha256_12": "7986B8010FAC",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 8
+        },
+        "touches": [
+          "provider_decision"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/prepare_media.py",
+        "sha256_12": "C9C82CDA6009",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/provenance_contract.py",
+        "sha256_12": "F666C7B6E7B5",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/pyc_hygiene.py",
+        "sha256_12": "B833ABBB388B",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 1
+        },
+        "touches": [
+          "provider_decision"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "pattern_substring_not_a_call_site",
+        "v422_review_note": "MT-D2 第 1 步新增的缓存卫生模块，不是链接判定者也不解析 URL（前四类计数均为 0）。那 1 处 provider_decision 命中来自文件头登记的业主复现命令原文「python -B -m pytest -p no:cacheprovider scripts -q」：cacheprovider 里含子串 provider，被 provider_decision 的模式抓到。这是**模式的已知子串误报**，照实登记而不是改窄模式把它藏起来——改 pattern 会让别的文件的真命中一起消失，而这里的真相是「这条链上没有任何外部 provider 调用」。"
+      },
+      {
+        "file": "scripts/reader_payload_scope.py",
+        "sha256_12": "3A3249EEFBFB",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 4,
+          "coordinate_in_url": 0,
+          "provider_decision": 1
+        },
+        "touches": [
+          "provider_decision",
+          "query_path_handling"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate",
+        "v422_review_note": "ZH-RELEASE-2（业主 2026-11-03 裁②）新增 names_schema() 与豁免的机械精确性判定 _compile_exemptions：query_path_handling 3→4，第 4 处在 71 行 `def names_schema(path: pathlib.Path = DATA_MODEL)`——模式 `\\.path\\b` 不辨大小写，命中的是 pathlib.Path 类名而非 URL 路径处理，与 27/44/48 行同性质；沿用 pyc_hygiene 先例照实入册、不为了数字好看去窄化 pattern。provider_decision 仍 1 处（文件头缺陷登记里引用的载荷字段名），未新增第二套判据。上一轮注记（ZH-RELEASE-1）见本条更早版本与 semantic_call_sites_measured.remeasurement_reason。"
+      },
+      {
+        "file": "scripts/rebuild_media.py",
+        "sha256_12": "2D568C47A53E",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 2,
+          "coordinate_in_url": 1,
+          "provider_decision": 0
+        },
+        "touches": [
+          "coordinate_in_url",
+          "query_path_handling"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/replay_build.py",
+        "sha256_12": "B1FCA0219C42",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/reseal_product.py",
+        "sha256_12": "E322D7075137",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/resolve_map_names.py",
+        "sha256_12": "DD26AA4D210C",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/route_explorer.py",
+        "sha256_12": "4CEDE88BD3B3",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/run_seal.py",
+        "sha256_12": "745B108A1B0F",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/search_source_evidence.py",
+        "sha256_12": "2682BE44826D",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 1,
+          "coordinate_in_url": 0,
+          "provider_decision": 11
+        },
+        "touches": [
+          "provider_decision",
+          "query_path_handling"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/source_projection.py",
+        "sha256_12": "6D101C169F3A",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 2,
+          "coordinate_in_url": 0,
+          "provider_decision": 7
+        },
+        "touches": [
+          "provider_decision",
+          "query_path_handling"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate",
+        "v422_review_note": "ZH-RELEASE-1（业主裁 Q2-A／#113）新增的来源台账唯一投影：query_path_handling 2 处在 28/55 行，都是 pathlib.Path；provider_decision 7 处在 33/105/112/129/132 行，全部是台账字段名 source_provider／统计桶名 by_provider 里的子串 provider，不是外部 provider 判定。它对 URL 只做**形状校验**（必须是 http(s) 绝对地址，url_parse=0＝从不解析、从不取主机），判定的是「这条来源记录形不形如可审计的直达证据」，不判实体身份或链接归属；身份判定仍只有 map_gate_v422/classify_reference 一处。"
+      },
+      {
+        "file": "scripts/spa_renderer.py",
+        "sha256_12": "015FF6D16EA9",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 58
+        },
+        "touches": ["provider_decision"],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate",
+        "v422_review_note": "V4-D 按现场重测回写指纹与计数（台账过期＝登记不再是量出来的）。"
+      },
+      {
+        "file": "scripts/translate_prose.py",
+        "sha256_12": "CB667ED065EF",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 14,
+          "provider_decision": 0
+        },
+        "touches": ["coordinate_in_url"],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate",
+      "v422_review_note": "MT-E1（2026-11-02，业主执行顺序第 2 步）新增 14 处 coordinate_in_url 命中：身份绑定要读 `map_targets[*].coords` 并与本行格子里的坐标**逐字**比对（与渲染器 mapLinks 同一组事实），模式 `coords?\\b` 抓到的是这些 `coords` 词。本文件不解析 URL、不取主机名、不做 provider 判断（其余四类计数为 0），也不输出任何地图链接——它读坐标只回答「这一格是不是它所属记录自己的名字标签」，与「这条引用该开哪个地图 URL」无关。disposition 保持默认候选值：`pattern_substring_not_a_call_site` 按业主 2026-11-01 的锁定只有 pyc_hygiene.py 一个持有人，且这里的命中不是子串误报。"
+    },
+      {
+        "file": "scripts/travel_renderer.py",
+        "sha256_12": "61F6B018F4A3",
+        "counts": {
+          "url_parse": 1,
+          "host_extraction": 3,
+          "query_path_handling": 1,
+          "coordinate_in_url": 0,
+          "provider_decision": 2
+        },
+        "touches": [
+          "host_extraction",
+          "provider_decision",
+          "query_path_handling",
+          "url_parse"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/usage_report.py",
+        "sha256_12": "CACD48921546",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 9
+        },
+        "touches": [
+          "provider_decision"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/validate_output.py",
+        "sha256_12": "DE90920B297F",
+        "counts": {
+          "url_parse": 5,
+          "host_extraction": 5,
+          "query_path_handling": 13,
+          "coordinate_in_url": 2,
+          "provider_decision": 47
+        },
+        "touches": [
+          "coordinate_in_url",
+          "host_extraction",
+          "provider_decision",
+          "query_path_handling",
+          "url_parse"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/verify_product.py",
+        "sha256_12": "D1624A9C2204",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 0
+        },
+        "touches": [],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate"
+      },
+      {
+        "file": "scripts/visual_qa.py",
+        "sha256_12": "BB7EE6DA281F",
+        "counts": {
+          "url_parse": 2,
+          "host_extraction": 1,
+          "query_path_handling": 3,
+          "coordinate_in_url": 0,
+          "provider_decision": 57
+        },
+        "touches": ["host_extraction", "provider_decision", "query_path_handling", "url_parse"],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate",
+        "v422_review_note": "V4-D 按现场重测回写指纹与计数（台账过期＝登记不再是量出来的）。"
+      },
+      {
+        "file": "scripts/zero_call_sentinel.py",
+        "sha256_12": "0C4AC8D4FD5A",
+        "counts": {
+          "url_parse": 0,
+          "host_extraction": 0,
+          "query_path_handling": 0,
+          "coordinate_in_url": 0,
+          "provider_decision": 6
+        },
+        "touches": [
+          "provider_decision"
+        ],
+        "is_classifier_authority": false,
+        "disposition": "unreviewed_second_judgment_candidate",
+        "v422_review_note": "V4-B 新增：执行期计数钩子，不是链接判定者。它按字符串包含比对主机名（url_parse/host_extraction 均为 0：不解析 URL、不取 .hostname/.netloc），且比对名单只读 references/map-gate-v422.json::zero_call_gate.host_classification，本文件不含字面主机名。 权威关系说明：billable/API 主机名（maps.googleapis.com 等）**故意不在** url_reference_classifier.providers.google.hostnames 里——那套登记的是『页面主机』，我们从不把 API 主机当引用；哨兵要拦的恰恰是『绝不允许出现』的那一类，两边名单故意不相交，test_zero_call_host_lists_have_declared_relationship 钉住这个关系，防止后来者悄悄合并两份名单。 V4-D 按现场重测回写指纹与计数（台账过期＝登记不再是量出来的）。"
+      }
+    ],
+    "semantic_call_sites_measured": {
+      "patterns": {
+        "url_parse": "urlsplit\\(|urlparse\\(|parse_qs\\(|parse_qsl\\(|urlunsplit\\(",
+        "host_extraction": "\\.hostname\\b|\\.netloc\\b",
+        "query_path_handling": "\\.query\\b|\\.path\\b|urlencode\\(|quote\\(",
+        "coordinate_in_url": "@[+-]?\\d|ll=[^&]|mlat|lat_?lng|coords?\\b",
+        "provider_decision": "google|apple|openstreetmap|maps\\.app|amap|baidu|provider"
+      },
+      "files_scanned": 54,
+      "files_touching_any_primitive": 33,
+      "candidates_excluding_authority": 32,
+      "evidence": ".temp/v421_map_phase1/W1RB1_contract/w1rb1_call_site_inventory.json",
+      "remeasured_at": "v5.0.0 release-identity migration（2026-11-05），按 semantic_call_sites_measured.patterns 现场复算",
+      "remeasurement_reason": "v5.0.0 只迁移当前产品身份。九个已登记模块仅因版本横幅、CLI 描述或路径注释改变字节指纹；url_parse／host_extraction／query_path_handling／coordinate_in_url／provider_decision 的逐文件计数和 touches 全部与 v4.2.2 R3H round10 相同。发布包完整性修复新增 build_release_package.py，使非测试脚本扫描分母 53→54；该脚本对五类语义原语的命中均为 0，因此 files_touching_any_primitive=33 与 candidates_excluding_authority=32 不变。公开仓库预检又将 init_run.py 的本机绝对路径默认值改为当前工作目录下的 runs；仅回写该文件指纹，五类语义原语计数、模式和门限均不变；v4.2.2 原树保留 round10 登记原文作为冻结历史。",
+      "previous_numbers": {"files_scanned": 50, "files_touching_any_primitive": 31, "candidates_excluding_authority": 30},
+      "previous_remeasurement": {"remeasured_at": "v4.2.2 ZH-RELEASE-3 / R3F round9（2026-11-04），脚本 .temp/v422_honest_map/ZH_RELEASE_3/tools/rewrite_semantic_ledger_round9.py", "reason": "ZH-RELEASE-3 / R3F round9 改树后复算：只有一个模块的指纹按现场重测回写。round8 落账之后我又修了同一把尺子里的一处接线缺陷——run_path_containment_errors 的 faces 过滤先跳过 manifest.json 面孔，把 run_manifest 参数变成了空参数（业主裁「输入路径也 run 相对」那一面当时扫不到）。改的是面孔过滤的口径（把「调用方交进来的 run manifest」也算交给它的那张面孔），形状判据/唯一转换器/run 内解析三把尺子一字未动。三个聚合值（52／33／32）不变⇒没有新增或拆除非测试模块；五个计数一字未动⇒没有第二套 URL／host／query／coordinate／provider 语义判据。上一轮（R3F round8）记录搬进 previous_remeasurement。"}
+    },
+    "rule": "W1R-B1 ⑨：语义调用点清册按 URL 解析 / 主机提取 / query·path / 坐标-in-URL / provider 判断五类原语测量。W4/W5 接线时每个候选文件必须二选一——改为调用 classify_reference，或证明它不做身份与链接判定；本块条目只减不增，新增文件即门禁失败。",
+    "this_round": "只登记，不修改 W4/W5 禁改文件（渲染器与正式门禁本轮不得触碰）。"
+  },
+  "name_placeholder_policy": {
+    "authority": "业主 2026-10-27 W2R2 第 4 条裁决：不得按名称是否以 Venue/Location/Place/Point/Spot 结尾直接判占位；只拒绝确切通用占位值与本清单登记的已知旧模板值",
+    "decision_rule": "exact_or_registered_template",
+    "comparison": "先按逗号/顿号/分号分段，再 casefold + 空白折叠；任一分段与本清单精确相等即判占位。分段这一步是为了继续拒绝 California Venue, California, California 这类逗号拼接的旧模板串，不是为了匹配词根。",
+    "exact_placeholder_values": [
+      "Venue",
+      "Location",
+      "Place",
+      "Point",
+      "Spot",
+      "Unnamed",
+      "POI",
+      "TODO",
+      "TBD",
+      "N/A",
+      "NA",
+      "None",
+      "Null",
+      "Unknown",
+      "-",
+      "--",
+      "—",
+      "未命名",
+      "待补充",
+      "待定",
+      "占位",
+      "地点",
+      "位置"
+    ],
+    "legacy_template_values": [
+      "California Venue"
+    ],
+    "legacy_template_values_provenance": "来自 §17 W2 实测：california_v420 的 151 个 map_target 共用同一串 canonical_name = 'California Venue'（gen_travel_scope.py 用 f\"{region} Venue\" 造出来的旧模板）。今后发现新的旧模板串只能把整条值登记进本清单，不得回头扩大正则、不得按具体店名建白名单。",
+    "forbidden": [
+      "用词根或后缀正则判断整名（旧 PLACEHOLDER_NAME_RE 就是这么误伤 Alfred Coffee Melrose Place / Ragged Point Vista Point 的）",
+      "按具体店名建豁免白名单",
+      "在下游模块再写一份占位名判定"
+    ],
+    "single_implementation": "scripts/data_model.py::is_placeholder_name；scripts/map_contract.py 必须调用它，两处不得对同名给出相反结论",
+    "known_good_names_must_pass": [
+      "Alfred Coffee Melrose Place",
+      "Ragged Point Vista Point",
+      "Point Reyes",
+      "The Venue at the Nassau Inn",
+      "Marketplace",
+      "Union Square Ferry Landing",
+      "2 Story Kitchen",
+      "7-Eleven",
+      "21 Choices",
+      "Spanish Fort Shopping Place"
+    ],
+    "known_bad_names_must_fail": [
+      "California Venue",
+      "California Venue, California, California",
+      "Venue",
+      "Location",
+      "Place",
+      "Point",
+      "Spot",
+      "Unnamed",
+      "POI",
+      "TODO",
+      "N/A",
+      "TBD",
+      "unknown",
+      "venue",
+      "PLACE",
+      "  Venue  ",
+      "Point, Point",
+      "未命名",
+      "待定"
+    ],
+    "positive_and_negative_locks": "scripts/test_v421_map_contract.py 逐条锁上述两串，并断言 data_model 与 map_contract 在同一批名称上结论一致"
+  },
+  "map_link_selection_contract": {
+    "_authority": "V4.2.2 §3–§6 链接选择合同：配置只住 references/map-link-selection.json，实现只住 scripts/map_link_selector.py。本块是 schema 侧的登记指针，不再复制一份规则，以免出现两处不同的答案（v4.2.1 §16.4 的结构性教训）。",
+    "selection_version": "v422-link-selection-1",
+    "config_file": "references/map-link-selection.json",
+    "implementation": "scripts/map_link_selector.py::select",
+    "render_layer_authority": "references/renderer-contract.json::presentation.map_link_contract.link_selection_contract",
+    "product_promise": "有可用名称且无已知错误 ⇒ 具名搜索并明示落点未核验；已知错链/冲突 ⇒ 无按钮；不承诺 Google 唯一实体卡片（§2.1/§2.2）。",
+    "named_search_allowed_identity_status_ref": "map-link-selection.json::identity_status_allowed_for_named_search",
+    "no_promotion": {
+      "rule": "生成 NAMED_SEARCH 的 URL 不得写 identity_status=VERIFIED、不得写 google_resolution_status 的任何非 NOT_OBSERVED 值、不得把 coordinate_status 从 MISSING/UNVERIFIED 改为 VERIFIED（§3.1/§3.4/§8.2）。",
+      "selector_writable_fields_ref": "map_link_selector.WRITABLE_FIELDS",
+      "violation_code": "MAP_LINK_FIELD_WRITE_OUTSIDE_ALLOW_LIST"
+    },
+    "query_rules_ref": "map-link-selection.json::query_rules",
+    "reason_codes_ref": "map-link-selection.json::reason_codes —— 选择原因码闭集只住配置文件；data-model 不复制清单，避免两处答案分叉（§11 V1「同步错误码」的落点）。配置加载会拒绝未登记 code，test_reason_codes_are_closed_enumeration 逐条比对规则与闭集。",
+    "reason_codes_must_not_be_copied_here": true,
+    "not_a_release_metric": {
+      "google_entity_card_hit_rate": "NOT MEASURED / NOT A RELEASE GATE（§8.2）；报告字段不得填 100% 或估算值。"
+    },
+    "local_name_policy": "§4 line 102：无可信英文名时保留有来源的本地正式名称并给具名搜索；登记值见 map-link-selection.json::query_rules.local_name_query_ratified_by"
+  },
+  "criticality_derivation": {
+    "_authority": "V4.2.2 §5.1（关键目标定义）＋§5.3（非关键目标）。用于 v4.2.1 W2 留下的 157 条 criticality 缺失（unresolved reason `CRITICALITY_NO_POSITIVE_REFERENCE`）。",
+    "applies_when": "target.criticality 缺失或为 None",
+    "ordered_rules": [
+      {
+        "if_role_in": [
+          "TERMINAL",
+          "BOARDING_POINT",
+          "PIER",
+          "STATION",
+          "DEPARTURE_HALL",
+          "ARRIVAL_HALL"
+        ],
+        "then": "CRITICAL_ITINERARY",
+        "reason_code": "DERIVED_FROM_LOCATION_ROLE_CRITICAL"
+      },
+      {
+        "if_category_in": [
+          "hotel"
+        ],
+        "then": "CRITICAL_ITINERARY",
+        "reason_code": "DERIVED_FROM_CATEGORY_HOTEL"
+      },
+      {
+        "if_category_in": [
+          "transport_node"
+        ],
+        "then": "CRITICAL_ITINERARY",
+        "reason_code": "DERIVED_FROM_CATEGORY_TRANSPORT"
+      },
+      {
+        "if_category_in": [
+          "attraction",
+          "dive",
+          "dive_site"
+        ],
+        "then": "IMPORTANT",
+        "reason_code": "DERIVED_FROM_CATEGORY_ON_ITINERARY_SIGHT"
+      },
+      {
+        "if_category_in": [
+          "restaurant",
+          "cafe"
+        ],
+        "then": "NICE_TO_HAVE",
+        "reason_code": "DERIVED_FROM_CATEGORY_EXPERIENCE"
+      }
+    ],
+    "when_no_rule_hits": "保持缺失并逐项进入报告：不得填默认值（§8.2 的『100% 有明确状态』要靠补齐来源达成，不靠给空字段盖一个好看的章）。",
+    "honesty_note": "这是按定义从**已有** category/role 推导出的产品分级，不是新的实地观察；每条必须能回指自己的来源字段，并记录 criticality_derivation_reason 与 criticality_source=derived。",
+    "must_record": [
+      "criticality_source",
+      "criticality_derivation_reason"
+    ]
+  },
+  "known_contract_gaps": {
+    "_authority": "V1 读真实迁移数据时发现的既有合同缺口；登记不修，修复归 V2（数据侧）与 V5（收口）。",
+    "items": [
+      {
+        "id": "V1-G01",
+        "gap": "12 条 target 的 category 值为 `dive_site`，而 kinds 枚举写的是 `dive`；同一含义两处不同拼法会让任何按枚举判断的规则静默漏掉这 12 条。",
+        "measured_in_frozen_input": 12,
+        "owner": "V2 数据侧统一；V4 门禁必须能拒绝未登记的 category",
+        "decision_required": true
+      },
+      {
+        "id": "V1-G02",
+        "gap": "14 条 target 的 category 为 None，而 category 属 map_target_required_fields。",
+        "measured_in_frozen_input": 14,
+        "owner": "V2 逐项登记；不得用默认类别填补",
+        "decision_required": true
+      },
+      {
+        "id": "V1-G03",
+        "gap": "157 条 target 无 criticality（W2 记 CRITICALITY_NO_POSITIVE_REFERENCE），但 §7 要求每个按钮带 data-criticality，§5.2 的关键目标提示也依赖它。",
+        "measured_in_frozen_input": 157,
+        "owner": "V2 按 criticality_derivation 推导并逐项留痕",
+        "decision_required": false
+      },
+      {
+        "id": "V1-G04",
+        "gap": "403 条 evidence 全部为 None（unresolved EVIDENCE_NO_DIGEST），因此 §4.2 的 PUBLISHER_ENTITY_LINK 分支在当前数据上恒不成立——v4.2.2 的实体直达按钮实际数量必须是 0，而不是伪造证据去凑。",
+        "measured_in_frozen_input": 403,
+        "owner": "业主业务复核（V7 候审包如实报 0）",
+        "decision_required": true
+      }
+    ]
+  },
+  "map_target_explicit_empty_fields": {
+    "fields": [
+      "evidence",
+      "lineage_group"
+    ],
+    "rule": "键必须在场；值允许为空列表/空字符串。缺键报 MAP_FIELD_NOT_EXPLICIT（状态未知不等于没有）。",
+    "consequence": "显式为空 ⇒ 该目标不得判 VERIFIED（IDENTITY_VERIFIED_WITHOUT_QUALIFYING_EVIDENCE 继续生效），但 UNVERIFIED + NAMED_SEARCH 不受阻（§5.2）。"
+  },
+  "map_target_conditional_fields": {
+    "resolver_version": {
+      "required_when": "resolver_used == true",
+      "forbidden_when": "resolver_used == false",
+      "reason": "§2.2 明令 W3 resolver 不进入正式生成前置链；写一个假的 resolver 版本就是伪造血缘。缺 resolver_used 显式布尔值即报 MAP_FIELD_MISSING（必填面里就是布尔本身）。"
+    },
+    "link_selection_version": {
+      "required_when": "link_mode ∈ {PUBLISHER_ENTITY_LINK, NAMED_SEARCH, COORDINATE}",
+      "reason": "§13：事后必须能复现当时用的是哪一版选择机。继续必填，不因本地名放开而放松。"
+    },
+    "required_location_role": {
+      "required_when": "criticality == CRITICAL_ITINERARY 且 required_location_role_applicability.by_category[category].role_required == true",
+      "always_checked": "取值必须落在该类别的 allowed_roles 里（角色可选，但选了就必须在册）",
+      "when_not_applicable": "缺角色既不报错也不宣称通过：按 unknown_category/适用矩阵登记为暴露项，逐项进报告",
+      "reason": "业主 2026-10-29 指令 §5：酒店不该因为缺少航站楼/码头角色而报错。V2R 实测这条无条件必填制造了 278 条假错误（CA 108 / PH 175 空角色行），把真实问题（transport_node 到底哪个航站楼）埋掉了。"
+    }
+  },
+  "english_gap_verdicts": {
+    "_authority": "v4.2.2 §2.2.2（交出去的是「业主按地址能找到的缺口」，不是把读数做到零）+ 业主 V6-R 指令第 5 条：地图收口后继续解决 CA/PH 英文内容缺口，不得以地图修复放宽英文门禁。",
+    "implemented_by": "scripts/translate_prose.py::locate_gaps",
+    "single_owner_rule": "判定词表只有 VERDICTS 一处定义；本登记面与它必须双向相等，多一条少一条都由 test_v422_en_gap_attribution.py 当场报错。",
+    "verdicts": [
+      "dataset_cell",
+      "dataset_cell_unregistered",
+      "render_composite",
+      "renderer_literal",
+      "unattributed",
+      "proper_name",
+      "money_scaffold"
+    ],
+    "semantics": {
+      "dataset_cell": "句子逐字等于 collect_fragments 已登记的某一列：RENDERED_COLUMNS 覆盖到了，translate_prose --apply 现在就能写这一格",
+      "dataset_cell_unregistered": "数据里逐字就有这句（dataset_value_index 结构遍历命中，允许剥掉渲染层连接符后的形态），但那一列没进 RENDERED_COLUMNS。它是数据缺口 + 定位器覆盖缺口两件事，applicable=false 明说 --apply 暂时写不到它——不许把它当成渲染层缺陷去改 I18N",
+      "render_composite": "渲染层把多个已登记单元格拼成一句（· 分隔），逐段可定位；unresolved_parts 是没被登记表覆盖的那半句，unresolved_in_data 说明它到底在不在数据里",
+      "renderer_literal": "只有当 assets/spa-layout.js 的真实字节里量到这句时才允许使用，且该行必须带 in_layout_js 实测值。v4.2.2 两棵候选实测 0 条",
+      "unattributed": "数据面与渲染层文件都量不到：承认定位口径有洞，不许冒充任何一侧的缺陷。两棵候选实测 0 条；一旦非 0，那是工具缺陷，不是内容缺陷",
+      "proper_name": "这句是**专名**，负责它的是显示面而不是翻译表：tier1 = 同一行里已有的英文名（name/name_en、title/title_en、caption_cn/caption_en），tier2 = provenance 完整的机器翻译显示名。列清单与档位语义住在 references/display-name-channel.json，判定只调 scripts/display_names.py。applicable=false：写进 prose_en 就是让散文表冒充专名来源；也不得写回 canonical_name / identity_status / google_resolution_status / evidence / VERIFIED，或参与地图查询串。撞名（同一名对到两个英文）时显示面两条都不给，本判定并报 display_source 缺位。",
+      "money_scaffold": "这句所在的格子是**格式化器槽**（登记见 translate_prose.FORMATTER_SLOTS，目前只有 transport[*][3]：CA 在这里放距离、PH 在这里放金额），英文由 assets/spa-layout.js 的 money() 登记语法与 enMetrics() 度量兜底出，不走翻译表。业主 2026-10-31 REVISE 第 5 条点名「菲律宾七条价格不是 prose 问题」就是这一档；applicable=false，且格式化器认不出时它仍显示 (translation pending) 并留在缺口账上（不许猜汇率，也不许原样漏中文）。"
+    },
+    "joiner_strip": {
+      "chars": "· | 与首尾空白（含全角空格）",
+      "why": "DOM 文本带着渲染层加的连接符（例如「| 每日主题」），不剥就永远对不上数据里那格原文，于是被误记成渲染层字面量。剥离只用于回查数据，登记文案与分母都不变。",
+      "slash_removed_2026_10_31": "业主 MT-B REVISE 第 3 条：`/` 曾经是若干渲染组合的分隔符，但同时也是地址、路线名与专名里的正文字符——`/中文名/` 若能匹配 `中文名`，就是把两条不同的数据格混成一条。JOINERS 里已删除 `/`，通用拆分 COMPOSITE_SPLIT 也只保留 `·` 与 `|`；负测见 test_v422_en_gap_attribution.py（`/中文名/` 不得匹配 `中文名`）。"
+    },
+    "withdrawn_claim": {
+      "was": "v4.2.1 起的兜底分支写死「字符串在 spa-layout.js 里，不在数据集里」，而这句话从来没被量过",
+      "measured_2026_10_31": {
+        "california_rows_claimed_renderer_literal": 204,
+        "philippines_rows_claimed_renderer_literal": 9,
+        "of_those_actually_found_in_dataset": 213,
+        "really_present_in_assets_spa_layout_js": 0
+      },
+      "consequence": "照旧数字去改 I18N/词根，一条缺口也清不掉；错的是归因，不是英文门。本块把「量不到」与「在渲染层」分成两个判定，并要求 renderer_literal 自带文件实测。"
+    },
+    "faces": {
+      "reader_payload": "交付物内嵌的那份载荷——回答「读者看到什么」，也是 §8.1 对账用的那份",
+      "audit_dataset": "--apply 真正写入的 dataset 面——回答「业主去哪儿补翻」",
+      "rule": "两面判定数可以不同（读者投影剔掉几类过程字段），缺口分母必须一致；分母以浏览器实测的 en_translation_pending 为准，不由登记值产生。"
+    },
+    "measured_2026_10_31": {
+      "california": {
+        "gaps": 373,
+        "reader_payload": {
+          "dataset_cell": 161,
+          "dataset_cell_unregistered": 212
+        },
+        "audit_dataset": {
+          "dataset_cell": 169,
+          "dataset_cell_unregistered": 204
+        },
+        "renderer_literal": 0,
+        "unattributed": 0
+      },
+      "philippines": {
+        "gaps": 16,
+        "reader_payload": {
+          "dataset_cell_unregistered": 9,
+          "dataset_cell": 7
+        },
+        "audit_dataset": {
+          "dataset_cell_unregistered": 9,
+          "dataset_cell": 7
+        },
+        "renderer_literal": 0,
+        "unattributed": 0
+      },
+      "face_delta_explained": "加州两面差 8 条 transport_nodes 类型串（机场／公路枢纽／综合枢纽…）：读者投影剔掉 3 类过程字段，collect_fragments 在读者面登记 386 条片段、审计面 401 条；DOM 实测分母 373 两面一致。",
+      "measurement": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6w_en_gap_attribution.json",
+      "registrar": ".temp/v422_honest_map/V6_candidate_run/tooling/v6w_measure_en_attribution.py",
+      "denominators_untouched": "英文缺口测量没动 403/205/198 任何固定分母，也没删过数据行；英文门仍按 SPA_EN_UNTRANSLATED_TEXT 阻断。"
+    },
+    "current_measurement_ref": {
+      "block": "measured_2026_11_01_post_structural_fix",
+      "why_a_pointer_and_not_an_edit": "业主 2026-11-01 裁决：measured_2026_10_31 是有效历史快照，不许改成 352/9；缺的是「当前快照 + 当前指针」，不是「旧值写错了」。读现状的一律走本指针，读历史的走日期块。",
+      "reader": ["scripts/test_v422_en_gap_attribution.py", "scripts/visual_qa.py 文案的缺口计数", ".temp/v422_honest_map/V6_candidate_run/tooling/v6w_measure_en_attribution.py"]
+    },
+    "measured_2026_11_01_post_structural_fix": {
+      "california": {
+        "gaps": 352,
+        "reader_payload": {
+          "dataset_cell": 350,
+          "proper_name": 2,
+          "dataset_cell_unregistered": 0
+        },
+        "audit_dataset": {
+          "dataset_cell": 352,
+          "proper_name": 0,
+          "dataset_cell_unregistered": 0
+        },
+        "renderer_literal": 0,
+        "unattributed": 0,
+        "proper_name_examples": ["旧金山市区", "圣西蒙 (大苏尔1号公路)"],
+        "proper_name_status": "awaiting_tier2_provenance（display-name-channel 的 tier2 还没拿到齐备 provenance，不升级身份）"
+      },
+      "philippines": {
+        "gaps": 9,
+        "reader_payload": {
+          "dataset_cell": 7,
+          "proper_name": 2,
+          "dataset_cell_unregistered": 0
+        },
+        "audit_dataset": {
+          "dataset_cell": 7,
+          "proper_name": 2,
+          "dataset_cell_unregistered": 0
+        },
+        "renderer_literal": 0,
+        "unattributed": 0,
+        "proper_name_examples": ["薄荷岛巧克力山", "杜马盖地黎刹海滨大道"],
+        "proper_name_status": "awaiting_tier2_provenance"
+      },
+      "face_delta_explained": "加州读者面 2 条 proper_name 在审计面记成 dataset_cell：显示名通道把 name_pairs 写进读者载荷，审计面的原始 dataset 里没有那两格英文值——同一处缺口的两面写法，不是两条缺口。",
+      "measurement": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6w_en_gap_attribution_seal42_current.json",
+      "measurement_history": [
+        {
+          "path": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6w_en_gap_attribution.json",
+          "sealed_at": "seal-39",
+          "measured": "CA 373 / PH 16",
+          "why_it_is_history": "三条结构通道（money／类别词根／显示专名）落地前的现状测量，分母与历史块 measured_2026_10_31 一致；通道落地后它不再是任何一格登记值的出处"
+        },
+        {
+          "path": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6w_en_gap_attribution_post_structural_fix.json",
+          "sealed_at": "seal-40",
+          "measured": "CA 352 / PH 9",
+          "registered_matches_measurement": false,
+          "why_it_is_history": "实测已经换到 352/9，但它对账的对象是登记面当时的历史块（current_measurement_ref 还没建），所以文件里如实写着 registered_matches_measurement=false。数值没错，错在把这份输出当现状指针——那会让读者按登记面找到一份自称「对不上」的证据"
+        },
+        {
+          "path": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6w_en_gap_attribution_seal41_current_run1_superseded.json",
+          "sealed_at": "seal-41",
+          "why_it_is_history": "指针同步后首跑：对账把「登记面没写这个键」和「实测这一类为 0」当成两回事，报出 3 条假不匹配。登记器已按 None≡0 归一修掉，旧输出按业主要求原名保留、不改写"
+        }
+      ],
+      "measurement_pointer_tooth": "v6w_measure_en_attribution.py 开跑先比 --out 与本块 measurement 的文件名，不是同一份就退出：当前块挂着一份历史测量的名字 = 现状没有物证。",
+      "registrar": ".temp/v422_honest_map/V6_candidate_run/tooling/v6w_measure_en_attribution.py",
+      "gap_id_migration": ".temp/v422_honest_map/MT1_translation/artifacts/MTB_RECLASSIFY_POST_SEAL42.json",
+      "gap_id_migration_history": [
+        {
+          "path": ".temp/v422_honest_map/MT1_translation/artifacts/MTB_RECLASSIFY_POST_STRUCTURAL_FIX.json",
+          "sealed_at": "seal-40",
+          "why_it_is_history": "同一套迁移规则、同一组 counts（CA 352/14/7/0、PH 9/0/7/0），但它量的 HTML 是 seal-40 那两棵候选；里程碑修复后的候选要另量，不能拿旧文件冒充本轮"
+        }
+      ],
+      "migration_counts": {
+        "california": {"persisted": 352, "reclassified": 14, "resolved": 7, "newly_exposed": 0},
+        "philippines": {"persisted": 9, "reclassified": 0, "resolved": 7, "newly_exposed": 0},
+        "rule": "resolved 只认「同一槽英文态真写出了英文」（DOM 逐槽追），gap_id 从新账消失但槽里仍是 marker = reclassified（登记串换了写法），不算读者进展"
+      },
+      "marker_instance_census": {
+        "california": {"unique_registered_sources": 352, "pending_counter": 352, "deepest_marker_instances": 354, "leaf_marker_slots": 345},
+        "philippines": {"unique_registered_sources": 9, "pending_counter": 9, "deepest_marker_instances": 10, "leaf_marker_slots": 10},
+        "ruling_2026_11_01": "业主实测：CA tr() marker 事件 393、唯一登记源 352、最深实例 354、visibleText() 无账 fallback 0。实例数 ≠ 唯一源串数是**度量分母口径**差异（同一源串在多个槽重复渲染、复合槽组合），不是漏登记；不得为它改 visibleText()、分母或登记器。",
+        "evidence": ".temp/v422_honest_map/MT1_translation/artifacts/MTB_HIDDEN_REGRESSION_PROBE_SEAL42.json",
+        "evidence_history": [
+          {
+            "path": ".temp/v422_honest_map/MT1_translation/artifacts/MTB_HIDDEN_REGRESSION_PROBE.json",
+            "sealed_at": "seal-40",
+            "why_it_is_history": "普查口径（any／deepest／leaf／counter／ledger）与本轮一致，量的却是里程碑修复前两棵候选；354 vs 352 这组数在修复前后都复现，正说明它是口径而不是偶发"
+          }
+        ]
+      },
+      "denominators_untouched": "与旧块同一条：没动 403/205/198 任何固定分母，没删数据行，英文门仍按 SPA_EN_UNTRANSLATED_TEXT 阻断。"
+    },
+    "columns_to_register_history_2026_10_31": {
+      "status": "COMPLETED_SUPERSEDED",
+      "closed_at": "seal-40（2026-10-31 MT-B2/MT-B3）",
+      "superseded_by": ["references/category-lexicon.json::category_columns", "references/data-model.json::english_gap_verdicts 的 RENDERED_COLUMNS 登记面", "references/display-name-channel.json::pair_columns"],
+      "why_not_a_next_step_anymore": "这张清单是「待补列」，列已在本轮补齐并实测 dataset_cell_unregistered 两侧归零；留着当\"下一步\"会诱导下一轮去登记已经登记过的列，造出假翻译工作。",
+      "rows": [
+      {
+        "column": "attractions[10]",
+        "rows": 65
+      },
+      {
+        "column": "restaurants[10]",
+        "rows": 59
+      },
+      {
+        "column": "hotels[10]",
+        "rows": 36
+      },
+      {
+        "column": "cafes[10]",
+        "rows": 29
+      },
+      {
+        "column": "budget[2]",
+        "rows": 14
+      },
+      {
+        "column": "itinerary[4]",
+        "rows": 2
+      },
+      {
+        "column": "source_evidence_meta>name",
+        "rows": 2
+      },
+      {
+        "column": "destination_coverage[4]",
+        "rows": 1
+      },
+      {
+        "column": "map_targets>蒙特雷与卡梅尔|老渔人码头吉罗伊海鲜>canonical_name",
+        "rows": 1
+      },
+      {
+        "column": "map_targets>蒙特雷与卡梅尔|老渔人码头吉罗伊海鲜>display_name",
+        "rows": 1
+      },
+      {
+        "column": "map_targets>蒙特雷与卡梅尔|老渔人码头吉罗伊海鲜>migration",
+        "rows": 1
+      },
+      {
+        "column": "restaurants[1]",
+        "rows": 1
+      },
+      {
+        "column": "source_evidence[2]",
+        "rows": 1
+      }
+      ],
+      "scope_history": "只列加州（审计面）；菲律宾另有 transport[3] 10 条、editorial_media>title 5 条，见同一证据文件的 runs.philippines",
+      "philippines_history": {"transport[3]": 10, "editorial_media>title": 5, "status": "COMPLETED_SUPERSEDED"}
+    },
+    "must_not_be_closed_by": [
+      "把 dataset_cell_unregistered 改回 renderer_literal（那正是本轮撤掉的假归因）",
+      "为了读数归零临时造英文来源（prose_en_provenance 为空时 --apply 自己报错：MT-C 起这条有代码了，见 references/prose-translation-contract.json 与 english_gap_verdicts.prose_translation_contract）",
+      "抬英文门阈值、删英文态或把 pending 文案从页面上抹掉",
+      "删数据行、改分母或把未翻译文本混进 en_text_replacements 的黑名单里"
+    ]
+  },
+  "prose_translation_contract": {
+    "registered_at": "2026-11-01",
+    "registered_by_round": "MT-C（业主授权链条 MT-C～MT-G 第 1 步）；MT-D 所有权判定（第 2 步）；MT-D2 第 1～7 步（形状别名合同／逐地址迁移／对账尺子／表长冻结）",
+    "registry": "references/prose-translation-contract.json",
+    "implemented_by": "scripts/translate_prose.py::validate_table + duplicate_entry_ids + apply_table + prose_translation_worklist + classify_fragment_ownership + shape_adapter + legacy_migration_inventory；scripts/prose_reconcile.py（不漂移对账唯一实现）；references/prose-glossary.json（术语表面）；references/dataset-shape-alias.json（形状别名面）；scripts/pyc_hygiene.py（缓存卫生唯一口径）",
+    "verified_by": "scripts/test_v422_prose_translation_contract.py + test_v422_prose_ownership.py + test_v422_dataset_shape_alias.py + test_v422_prose_glossary.py",
+    "scope": "只覆盖 prose 翻译表：MT-E1（2026-11-02，169 条 owner 迁移入树）之后冻结的实际表长是 **717**（CA 393 + PH 324，每 run 单独核算、不跨地去重；其中 CLEAN 672 + INJECTED 45）。MT-D2 第 7 步曾按**列所有权**冻出 886（CA 501 + PH 385），那个数现在只活在登记面的 `ownership.mt_e_table_length_frozen_at.history_superseded_2026_11_02` 与两张原样保留的历史表里，不当前值用。357（CA 350 + PH 7）是 seal-42 **交付面 visible pending 源串**的观测值，不是表长也不是门限。4 条 proper_name（CA 2 + PH 2）由 references/display-name-channel.json 负责，写进这张表就是让散文表冒充专名来源。",
+    "mt_e1_status_2026_11_02": {
+      "authorized_by": "业主 2026-11-02 执行顺序第 2 步：正式落地 169 条 owner 迁移、复算确认 prose 分母 717、旧 886 进历史面、两条 finding 换 owner 不得消失、候选表从新 worklist 重新生成。",
+      "what_changed": "所有权判定加了一层**身份绑定**（本格中文逐字等于本记录 map_target 标签，且该 target 坐标逐字出现在本行格子里；判据与渲染器 mapLinks 同源）。只有 `unique` 迁给 DISPLAY_NAME，其余判词（ambiguous／label_without_coord／no_binding／no_coord／address_unparsable／row_out_of_range）一律留在 prose。迁移面积逐 fragment 量：CA 108／PH 61＝169，两桶（MIXED／UNRESOLVED）仍为 0。",
+      "denominators_now": "prose CA 393＋PH 324＝717（CLEAN 353＋319＝672，INJECTED 40＋5＝45）；owned_non_prose CA 15→123／PH 0→61。raw 分母与两桶都没动，所以 886−717 只有一个来源。",
+      "hard_boundary_changed": "完整性硬边界里的数字随冻结值一起改（886→717）：硬边界若还写着旧数，validate_table 就会按一张已经不存在的表长判完整性。",
+      "not_done_and_why": "MT-E apply 仍 BLOCKED，且现在被两笔真缺陷钉住：`feb55e59b0d`（Ciopinno↔Cioppino，错在中文原格）留在 717 的 prose 表里继续阻断，`f90009bf57d`（Cathy↔Cathys）跟着 owner 迁进显示名修正清单继续阻断那条通道——总缺陷仍 2，数成 0 就判迁移缺陷。两地候选表（MTE1 两张）全部 owner_review_pending，dataset 未写、交付 HTML 未重建（仍与 seal-42 逐字节相同）。"
+    },
+    "owner_hard_boundaries": [
+      "provenance 缺字段必须阻断（表级 11 格、逐条 8 格，占位串与缺失同等）",
+      "717 条必须完整：缺项、陈旧项、多余项（含 entries 里重复键）一律整表阻断，不许部分写盘",
+      "翻译表摘要排除摘要字段自身（table_sha256 逐层按键名剔除后再算）",
+      "数字、币种、年份、专名与目的地不得漂移（结构面在此登记，语义对账由 MT-D 的 prose_reconcile 落地）",
+      "tier2 专名不得回写 canonical identity、地图查询、evidence 或 VERIFIED",
+      "owner review 未完成前 review_status 必须等于 owner_review_pending——闭集里躺着 owner_reviewed，所以判据是「当前必须等于哪一格」，不是「像不像合法值」"
+    ],
+    "measured_hole_before_this_round": "旧 apply_table 的 provenance 取法是 `(table_raw.get(\"provenance\") ...) or \"unlabelled translation table\"`（字符串），而 gen_travel_scope.py:453 只在 isinstance(dict) 时才并进载荷 ⇒ 字符串来源被构建侧静默丢弃；读者页可带着整套无出处英文散文出货，且上面那句 must_not_be_closed_by 是纸面话。",
+    "write_discipline": "只 write_bytes；写完读回复算 SHA-256 并断言无 CRLF；重读 JSON 与内存对象逐键相等。Windows 的 write_text 会把 LF 翻成 CRLF——同一份内容两种哈希，那种「没人改过却哈希变了」的账本轮已吃过一次。",
+    "known_limit": "duplicate_entry_id 只抓 entries 中 id 形状（f+10hex）的重复键；其它键名重复不在这一码覆盖面内，由顶层字段检查与摘要复算兜住。这条限制照实登记，不冒充全量键名扫描。",
+    "mt_d2_status_2026_11_01": {
+      "authorized_by": "业主 2026-11-01 对 #99 的裁决：只推进 MT-D2 七步——缓存卫生链重测／transport 形状别名合同与负测／en_text_replacements 逐地址迁移清册／拆入真实 owner 且禁批量 provenance／MIXED 与 UNRESOLVED 两桶归零／固定术语表与数字-日期-币种-URL-实体名-目的地不漂移对账／再冻结 MT-E 实际表长（不要求凑成 357、506 或 513）",
+      "steps_done_in_tree": "1～7 全部实现并配执行型测试：pyc_hygiene 唯一口径 + subprocess 调用点 AST 扫描 + 缓存0→正式命令→缓存仍0；references/dataset-shape-alias.json 版本化别名表 + 单一 shape_adapter（六条形状负测）；translate_prose.legacy_migration_inventory 八桶互斥穷尽 + 七态 served 账（CLI --legacy-migration-report）；两桶实测归零（CA 516＝501+15+0+0／PH 385＝385+0+0+0）；scripts/prose_reconcile.py + references/prose-glossary.json 八类结构事实接进 validate_table（8 个 fact_drift_* 已进 blocking_findings）；MT-E 表长冻结为 886",
+      "no_drift_measured": "legacy 候选英文双面：CA 输入 16／读者 111 条，漂移 0；PH 输入 819／读者 906 条，漂移 77（专名 66／目的地 5／数字 6）。第一版尺子报 83，其中 6 条是尺子自己的毛病，收窄后重测并把那 6 条原文登记为回归样本。",
+      "not_done_and_why": {
+        "render_slot_teardown": "spa-layout.js 31 处（其中 26 处把表值当显式 en 参数传入）／split-layout.js 2 处仍在读 legacy 表。拆除必须与 MT-E 落表 + MT-G 两地重建同轮验证：先拆会让读者页当场掉回 (translation pending)。本轮只清点，合同里状态写的是「未完成」。",
+        "unservable_and_unlocatable": "PH 165 条按地址迁到了真实 owner，但那个通道今天给不出英文；legacy 键账里输入面 57（CA 2／PH 55）、读者面 229（CA 88／PH 141）查不到任何数据地址。迁址不等于兑现，这些仍是缺口账。",
+        "translation_table": "【这一格是 2026-11-01 当时的状态，已被后续两轮改写：MT-E0（11-01）与 MT-E1（11-02）都已把候选表**生成**在 .temp 台账里，只是都没 apply；当前判据看 `mt_e1_status_2026_11_02.not_done_and_why`。】当时写的结论本身仍然成立：MT-E 仍 BLOCKED，dataset.prose_en 未落盘，英文正式交付判 FAIL；Skill 安装、ZIP、production-certified 继续禁止。"
+      },
+      "measured_evidence": ".temp/v422_honest_map/MT1_translation/artifacts/ 下 MTD_OWNERSHIP_MATRIX.json／MTD2_LEGACY_MIGRATION.json／MTD2_DRIFT_BASELINE.json，各自登记命令、cwd、关键环境、退出码、输入哈希与缓存绝对值",
+      "version_md_is_stale": "VERSION.md:217 是 DOC-MTD2-COUNT-1 那条撤回行（原句里的固定「2,129 items」已撤回，不再换成另一个永久数字）。legacy 条数随 run 与 build 投影变化：2026-11-01 在 CA/PH 两份冻结样本上实测为输入面 835 条（CA 16／PH 819）、读者载荷面 1,017 条（CA 111／PH 906），与 2,129 都不符；逐条账与出处登记在本合同 ownership.legacy_en_text_replacements.measured_two_faces_2026_11_01 与 .temp 的 MTD2_LEGACY_MIGRATION.json。旧登记值写着 VERSION.md:198，且当时说「改 VERSION.md 属业主单独授权、本轮不动它」——业主 2026-11-04 R3H 已授权同步 VERSION.md／SKILL.md 的发布范围，那句作废：授权已行使，行号也随这次改动按现场重测回写。"
+    }
+  },
+  "hotel_milestone_badges": {
+    "ratified_by": "业主 2026-11-01 裁决（#96：徽标事实必须从原始 x[10] 提取，不能从 poiNote 译文提取）",
+    "implemented_by": "assets/spa-layout.js::poiMilestone（唯一提取实现）",
+    "verified_by": "scripts/test_v422_hotel_milestone_badge.py",
+    "columns": {
+      "note": 10,
+      "opened_structured": 11,
+      "renovated_structured": 12
+    },
+    "source_precedence": ["structured_field", "dataset_note"],
+    "precedence_rule": "结构化 x[11]/x[12] 有合法年份时优先；没有才从**原始**说明 x[10] 解析。说明译文（tr() 之后的文本）永远不参与事实提取——那正是 PH 七个徽标在英文态消失的原因。",
+    "note_source_semantics": {
+      "dataset_note": "来源是数据集说明文本，只用于显示该酒店的新旧事实；不得升级为 VERIFIED、独立核验证据或 identity_status 依据",
+      "structured_field": "数据里另有结构化年份字段，同样只是事实值，不含来源等级"
+    },
+    "forbidden_upgrades": ["evidence", "source_status=VERIFIED", "identity_status", "google_resolution_status", "map_link_url", "查询串"],
+    "year_rules": {
+      "valid_year_range": [1900, 2100],
+      "min_badge_year": 2020,
+      "no_year_or_invalid_year": "不生成徽标（不许当 0、不许原样印出、也不许顺手放宽范围）",
+      "display_precedence": "qualified 里 opened 优先于 renovated（沿用修复前的显示选择，本轮只换提取源与合法性判定）"
+    },
+    "language_rule": "CN 与 EN 调用同一个 poiMilestone()，必须得到同一个 {kind, year, source}；只有徽标文案走 pick()。",
+    "dom_contract": {
+      "article_attribute": "article.poi[data-milestone] = \"{kind}:{year}:{source}\"",
+      "is_new_attribute": "article.poi[data-is-new] = \"1\" 当且仅当存在 qualified 里程碑",
+      "slot_must_exist_in_both_languages": true
+    },
+    "badges": {
+      "opened": {"cls": "badge-ok", "glyph": "✨", "cn": "全新开业", "en": " New"},
+      "renovated": {"cls": "badge-info", "glyph": "🛠️", "cn": "全面焕新", "en": " Reno"}
+    },
+    "badge_copy_keys_are_implementation_field_names": "登记面用与 JS 相同的字段名（cls/glyph/cn/en），双向对账才有意义；样式类前缀 `badge ` 由实现补",
+    "measured_2026_10_31_before_fix": {
+      "philippines": {"badge_slots_cn": 7, "badge_slots_en": 0, "structure_identical": false},
+      "note": "七个酒店年份徽标（✨2022/2021/2020 全新开业、🛠️2022/2021 全面焕新）在英文态整块消失：说明还是 (translation pending)，年份就从译文里正则不到。出处 .temp/v422_honest_map/MT1_translation/artifacts/MTB_HIDDEN_REGRESSION_PROBE.json"
+    }
+  }
+}

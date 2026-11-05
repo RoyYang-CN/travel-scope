@@ -1,0 +1,57 @@
+{
+  "schema_version": "4.2.2",
+  "registered_by_round": "MT-B3（v4.2.2 受控机器翻译：display-only 专名通道）",
+  "purpose": "英文页里的专名（地名/酒店/机场/码头/车站/餐厅/图题）只有两条出路：数据里已有的英文，或写明来源的机器翻译显示名。除此之外没有任何一条路可以把一个中文名升成「官方英文名」。",
+  "tiers": {
+    "tier1_dataset_pair": {
+      "what": "同一行里已经存在的 [中文, 英文] 专名对（name / name_en / title / title_en / caption_cn / caption_en）。",
+      "authority": "来源就是这一行数据本身；不新增事实，不换算，不改写。",
+      "provenance_required": false,
+      "note": "这一档不是「翻译」，是把已经交付的英文名接回渲染路径。v4.2.2 之前 enEntityName 只吃 map_targets 与 destinations/routes/destination_coverage 三种对，POI 行与图题行没进过任何对索引，所以 Old Fishermans Grotto 明明就在同一行第 3 格，英文页却只能显示 (translation pending)。"
+    },
+    "tier2_machine_translated_display_name": {
+      "what": "数据里没有官方英文时的机器翻译**显示名**（含音译），只用于「让读者看得懂这一格」。",
+      "authority": "machine_translation；显示面而已，不主张任何身份。",
+      "provenance_required": true,
+      "provenance_required_fields": [
+        "method", "engine", "engine_version", "generated_at",
+        "source_dataset_sha256", "table_sha256", "language_direction",
+        "glossary", "glossary_version", "review_status"
+      ],
+      "blocking_rule": "provenance 缺失、不是结构化对象、或仍是占位字符串 ⇒ 该条不进显示面，原格保持 (translation pending) 并登记缺口。宁可读者看见缺口，也不给他一个看起来像官方名的字符串。"
+    }
+  },
+  "pair_columns": [
+    { "dataset": "hotels", "cn_index": 1, "en_index": 2, "role": "酒店名" },
+    { "dataset": "restaurants", "cn_index": 1, "en_index": 2, "role": "餐厅名" },
+    { "dataset": "cafes", "cn_index": 1, "en_index": 2, "role": "咖啡馆名" },
+    { "dataset": "attractions", "cn_index": 1, "en_index": 2, "role": "景点名" },
+    { "dataset": "dive_sites", "cn_index": 1, "en_index": 2, "role": "潜点名" },
+    { "dataset": "transport_nodes", "cn_field": "name", "en_field": "name_en", "role": "枢纽口岸名" },
+    { "dataset": "editorial_media", "cn_field": "title", "en_field": "title_en", "role": "配图标题" },
+    { "dataset": "editorial_media", "cn_field": "caption_cn", "en_field": "caption_en", "role": "配图说明" }
+  ],
+  "name_only_columns": [
+    { "dataset": "transport_nodes", "field": "place", "role": "枢纽所在城市/区域的显示名（没有英文同行格）" }
+  ],
+  "name_only_columns_reason": "实测：CA 缺口账上有 `旧金山市区` 与 `圣西蒙 (大苏尔1号公路)`，地址都是 transport_nodes[n]['place']。这一列只有中文名、没有英文同行格，所以它不是 tier1，也不是「没人负责的未登记列」——它是**必须由 tier2 显式来源才能显示**的专名列。判定面据此给 proper_name（display_source=null 表示还在等 tier2），不再冒充 dataset_cell_unregistered。",
+  "collision_rule": "同一个中文显示名如果在两处对到两个不同英文，两处一起剔出显示面并登记 display_name_conflicts；不做「先到先得」，也不做长度排序取胜。",
+  "no_upgrade": {
+    "rule": "本通道的任何输出（tier1 与 tier2 都是）都不得写回、参与或被用来构造下面这些字段。",
+    "forbidden_targets": [
+      "map_targets[*].canonical_name",
+      "map_targets[*].identity_status",
+      "map_targets[*].google_resolution_status",
+      "map_targets[*].evidence / source_evidence",
+      "map_targets[*].source_status 及任何 VERIFIED 结论",
+      "地图查询串与 map_link_url（含搜索 URL）"
+    ],
+    "why": "业主红线：显示名好看与否是排版问题，身份对不对是事实问题。把 machine_translated_display_name 喂进地图查询，等于让 MT 结果去决定「Google 上哪一个才是它」，那是合成身份。"
+  },
+  "field_names": {
+    "name_pairs": "tier1 结果：中文显示名 → {english, address}",
+    "machine_translated_display_name": "tier2 结果：中文显示名 → 英文显示名（已通过 provenance 校验）",
+    "display_name_provenance": "tier2 逐条来源（结构化对象）",
+    "display_name_conflicts": "撞名被剔出的中文显示名清单"
+  }
+}

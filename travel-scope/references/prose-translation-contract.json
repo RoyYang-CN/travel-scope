@@ -1,0 +1,595 @@
+{
+  "schema_version": "4.2.2",
+  "registered_by_round": "MT-C（v4.2.2 受控机器翻译：翻译表 provenance 强制合同）",
+  "purpose": "英文散文只能来自**一张有来源记录的翻译表**，且这张表要么整份成立、要么一个字都不写进封存输入。本文件回答三个问题：来源必须写哪些字段、哪些情况一律阻断、写盘动作本身怎么留证据。",
+  "owner_ruling_2026_11_01": "MT-C～MT-G 授权：provenance 缺字段必须阻断；357 条翻译必须完整，缺项、陈旧项、多余项都不得部分写盘；翻译表摘要排除摘要字段自身；数字、币种、年份、专名和目的地不得漂移；tier2 专名不得回写 canonical identity、地图查询、evidence 或 VERIFIED；owner review 未完成前仍标候审。 ｜ MT-D 分母裁决（2026-11-01 第二次）：采用「只翻真正由 prose 通道负责的条目」，但所有权按地址判，不按中文文本做集合相减；四桶互斥且穷尽、每 run 单独核算；357 只作当前观测不作硬门限；混合/未解析两桶归零后才冻结 MT-E 的真实表长。",
+  "authority": "唯一实现 scripts/translate_prose.py::validate_table + apply_table；唯一登记面本文件。二者由 scripts/test_v422_prose_translation_contract.py 双向闭合（登记的字段代码必须真在校验，代码用的字段必须在册）。",
+  "table_shape": {
+    "required_top_level_fields": [
+      "schema_version",
+      "run",
+      "provenance",
+      "entries",
+      "table_sha256"
+    ],
+    "schema_version_value": "prose-translation-table-1",
+    "entries_container": "object：fragment id → 逐条 entry 记录",
+    "bare_string_entries_rejected": "entries 写成 {id: \"英文串\"} 一律阻断（entry_shape_not_object）。字符串形态答不了「这条是谁翻的、按哪份输入翻的、复核过没有」，而散文表恰恰最需要这三件事可复算。"
+  },
+  "table_provenance_required_fields": [
+    "method",
+    "engine",
+    "engine_version",
+    "generated_at",
+    "language_direction",
+    "glossary",
+    "glossary_version",
+    "source_dataset_sha256",
+    "input_snapshot_sha256",
+    "run_dir",
+    "review_status"
+  ],
+  "table_provenance_field_meaning": {
+    "method": "翻译是怎么产生的（controlled_machine_translation / human / mixed）；不许留空或写「自动」这类没法复算的词。",
+    "engine": "产生方身份。本项目的实测事实是「Qoder Desktop 会话内的模型」，没有对外可查的型号版本号，所以 engine 写会话宿主、engine_version 写会话 id，两者都可被业主独立核对。",
+    "engine_version": "上面那个身份的版本/会话标识。填一个查不到的型号串＝假来源，比留空更糟。",
+    "generated_at": "ISO8601（本地生成时刻），逐表一条。",
+    "language_direction": "zh-CN -> en 之类的方向串。方向反了或写了第三种语言，散文页会整批错位。",
+    "glossary": "术语表文件名（MT-D 的 references/prose-glossary.json）。",
+    "glossary_version": "术语表版本，必须与 MT-D 现场量到的那条一致。",
+    "source_dataset_sha256": "导出这张表时那份 dataset 的字节 SHA-256。apply 现场重算再比：表不是为这份输入造的就不许写。",
+    "input_snapshot_sha256": "MT-A immutable input snapshot（INPUT_SNAPSHOT.json）的字节 SHA-256，把表钉到本轮独立输入快照上。",
+    "run_dir": "这一张表属于哪一棵 run（california / philippines 各自的 run 目录名）。两地的表不许互相冒充。",
+    "review_status": "复核状态，闭集见 review_status_allowed。业主独立复核完成前只能是 owner_review_pending。"
+  },
+  "entry_required_fields": [
+    "id",
+    "cn",
+    "en",
+    "kind",
+    "addresses",
+    "provenance"
+  ],
+  "entry_provenance_required_fields": [
+    "method",
+    "engine",
+    "engine_version",
+    "generated_at",
+    "language_direction",
+    "glossary_version",
+    "review_status",
+    "source_fragment_sha256"
+  ],
+  "entry_field_meaning": {
+    "id": "稳定 id＝\"f\"+sha256(cn)[:10]，与 collect_fragments 同一算法；id 与 cn 必须互推得出（entry_id_digest_mismatch 阻断）。",
+    "cn": "原文逐字。与表里登记的 fragment 原文不等 ⇒ entry_cn_mismatch：同一个 id 换文本＝把译文挂到别的句子上。",
+    "en": "译文。空、纯空白、仍含汉字都阻断（entry_en_empty / entry_en_contains_cjk）——含汉字的「英文」就是把没翻的原文当翻过了。",
+    "kind": "片段类型，必须是 collect_fragments 会产出的 kind 之一。",
+    "addresses": "这一句在数据里的地址。空数组＝这条译文找不到落点，只能算猜。",
+    "source_fragment_sha256": "sha256(cn) 全 64 位。现场重算可核，且与 id 互为印证。"
+  },
+  "placeholder_rejection": {
+    "rule": "必填字段值若是「看着像填了、其实没填」的占位串，与缺失同等阻断。",
+    "patterns": [
+      "^tbd$",
+      "^todo$",
+      "^n/?a$",
+      "^none$",
+      "^null$",
+      "^待定$",
+      "^占位$",
+      "^待补$",
+      "^xxx+$",
+      "^\\?+$",
+      "^<.*>$",
+      "^…+$",
+      "^\\.\\.\\.$"
+    ],
+    "empty_is_also_blocked": "空串与纯空白按 missing_fields 处理，不算「填了」。"
+  },
+  "completeness_rule": {
+    "denominator_authority": "分母由 collect_fragments + MT-D 所有权判定现场算出（worklist＝PROSE_REQUIRED 那批），**不由表自带的计数或 length 字段决定**。旧的「文本集合相减」不再是所有权依据；原始清册（skip_covered=False）仍然完整保留，用于陈旧项判定与逐桶恒等式。",
+    "missing_entries_block": "有 fragment 没有对应 entry ⇒ 整表阻断（缺项）。",
+    "stale_entries_block": "有 entry 的 id 不在今天的 fragment 集合里 ⇒ 整表阻断（陈旧项：数据变了，这张表是旧数据的产物）。",
+    "extra_entries_block": "同一 id 出现两次、或两条 entry 的 cn 相同而 id 不同 ⇒ 整表阻断（多余项/重复项）。",
+    "duplicate_detection_scope": "duplicate_entry_id 在**解析前**的文本里抓 entries 中形状为 f+10hex 的重复键——json.loads 会静默保留最后一条，解析后再看就只能看到一个「没问题」的键。其它键名的重复不在这一码覆盖面内，由 missing_top_level_field 与 table_sha256（对解析后的对象复算，改一个键就重算不上）兜住；这条限制照实写，不冒充全量键名扫描。",
+    "no_partial_write": "以上任何一条不过，目标 dataset 文件字节必须一字不变。宁可整页继续 (translation pending)，不可半份英文。",
+    "prose_table_size_measured": "本轮 prose 翻译表面是 357 条（CA dataset_cell 350 + PH dataset_cell 7）；4 条 proper_name（CA 2 + PH 2）走 references/display-name-channel.json，不进这张表。出处 .temp/v422_honest_map/V6_candidate_run/artifacts/V6w_en_gap_attribution_seal42_current.json。",
+    "blocked_items_are_not_missing_items": "被 MIXED/UNRESOLVED block 的条目不进缺项账：它们缺的不是译文，是所有权。把它们算成缺项＝把别的通道的缺陷转嫁给翻译表；把它们写进表＝降级（见 ownership.no_demotion）。"
+  },
+  "ownership": {
+    "registered_by_round": "MT-D（业主 2026-11-01 分母裁决：只翻真正由 prose 通道负责的条目，但所有权必须按地址判）",
+    "rule": "ownership is decided per ADDRESS, not by subtracting Chinese text sets",
+    "why_text_subtraction_is_not_ownership": "旧口径 collect_fragments(skip_covered=True) 拿 renderable_names(dataset) 的**文本集合**决定「这条要不要翻」。它答的是「这句别处有没有英文」，不是「这一格归谁」：同文不同格的两条会被一起抹掉且不留账，而 prose_en 按内容键、渲染优先级高于类别与专名面，被这种文本填进表就是把别的通道的来源换成散文表——第二来源重新长出来，且台账上看不见。",
+    "raw_inventory_authority": "collect_fragments(dataset, skip_covered=False)＝完整原始清册；采集器本身一字未改（含 skip_covered 的默认值），既有审计语义不变。",
+    "single_implementation": "scripts/translate_prose.py::classify_fragment_ownership + prose_translation_worklist；--export、validate_table、apply_table 读的是同一份 worklist（导出文件还回读比一次字节）。",
+    "owners": {
+      "PROSE_TABLE": {
+        "registry": "scripts/translate_prose.py::RENDERED_COLUMNS + collect_fragments 的 poi_note/itin/coverage_desc 采集规则",
+        "address_source": "fragment[\"addresses\"]（采集器现场产出的地址，不另建列清单）",
+        "meaning": "这一格的英文来源就是翻译表本身。"
+      },
+      "CATEGORY_LEXICON": {
+        "registry": "references/category-lexicon.json::category_columns",
+        "reader": "scripts/category_lexicon.py::LEXICON['_category_columns']",
+        "meaning": "类别标签由词根组合出，进翻译表就是给同一列建第二个来源。"
+      },
+      "DISPLAY_NAME": {
+        "registry": "references/display-name-channel.json::pair_columns + name_only_columns",
+        "reader": "scripts/display_names.py::name_columns()",
+        "meaning": "专名走显示面（tier1 名对 / tier2 带来源的机器显示名），且不许回写 canonical identity、地图查询、evidence 或 VERIFIED。"
+      },
+      "MONEY_FORMATTER": {
+        "registry": "scripts/translate_prose.py::FORMATTER_SLOTS",
+        "meaning": "金额/度量骨架由渲染层的登记语法出（money()/enMetrics()），业主 REVISE 第 5 条点名的「菲律宾七条价格不是 prose 问题」就是这一档。"
+      },
+      "REGISTERED_EN_REPLACEMENT": {
+        "registry": "dataset.json::en_text_replacements",
+        "provenance_required": true,
+        "provenance_surface": "dataset.json::en_text_replacement_provenance[cn]",
+        "provenance_required_fields": [
+          "owner_contract",
+          "en_value",
+          "source"
+        ],
+        "mere_presence_is_not_exclusion": "文本出现在 en_text_replacements 里**不构成**从翻译表剔除的理由；要成为 owner 必须同时指出 owner contract、英文值与来源，三者缺一记 owner_unprovenanced_blocked。",
+        "measured_render_precedence": "assets/spa-layout.js::tr() 实测顺序（本轮读文件核对，非推测）：显式 en 格 → en_text_replacements → prose_en → category_en → CATEGORY_DICT → enEntityName → enMetrics → (translation pending)。replacement 抢在 prose_en **上面**，所以给一条只有 replacement 来源的文本写 prose_en，译文到不了读者眼前，还平白多出一条查不到来源的英文。这是把它记成 BLOCKED 的工程理由，不是拿规则压人。"
+      }
+    },
+    "outcomes": [
+      "PROSE_REQUIRED",
+      "OWNED_NON_PROSE",
+      "MIXED_OWNER_BLOCKED",
+      "OWNER_UNRESOLVED_BLOCKED"
+    ],
+    "outcome_semantics": {
+      "PROSE_REQUIRED": "该 fragment 的每个地址都只由 PROSE_TABLE 认领，且没有任何未证的文本主张。",
+      "OWNED_NON_PROSE": "该 fragment 的每个地址都由同一个非 prose 通道认领（且该通道主张成立）。",
+      "MIXED_OWNER_BLOCKED": "同一内容 id 的主张落在两个以上通道（含「prose 地址 + 非 prose 地址」）。必须阻断：prose_en 按内容键、渲染优先级高于类别/专名面，进表即覆盖那些通道。",
+      "OWNER_UNRESOLVED_BLOCKED": "有地址没有任何登记 owner，或存在来源不成立的 replacement 文本主张。"
+    },
+    "precedence": [
+      "1. 来源不成立的 replacement 文本主张 → OWNER_UNRESOLVED_BLOCKED(owner_unprovenanced_blocked)",
+      "2. 有地址无人认领 → OWNER_UNRESOLVED_BLOCKED(no_registered_owner_for_address)；成证的 replacement 主张按整格原文取值，足以替该地址答这一问，故它在场时这一条不触发",
+      "3. 主张落在两个以上通道 → MIXED_OWNER_BLOCKED(mixed_owner_for_content_id)",
+      "4. 单一 owner → PROSE_REQUIRED（PROSE_TABLE）或 OWNED_NON_PROSE（其余四档之一）"
+    ],
+    "mutually_exclusive_and_exhaustive": true,
+    "accounting_identity": "raw_fragments = prose_required + owned_non_prose + mixed_owner_blocked + unresolved_owner_blocked",
+    "accounting_code": "scripts/translate_prose.py::classify_fragment_ownership 末尾；等式破了发 ownership_accounting_mismatch 并让 --export 退出码为 2（判定实现自己的错，不许用它的任何数字）。",
+    "per_run_no_cross_dedup": "每个 run 单独核算：CA 与 PH 各算各的原始清册与四桶，不因两句中文一样就跨 run 去重——分母一旦跨面合并，「这条在这个 run 里归谁」就答不出来了。",
+    "per_address_listing": "ownership 报告里每条 fragment 都带 address_detail：地址、该地址的 owner 列表、归一化后的 (block, slot)，以及文本主张（含 en 值、是否成证、缺哪些来源字段）。",
+    "no_demotion": "非 prose 通道解析失败时，条目留在**它自己的通道**里阻断，禁止降级塞进翻译表：类别词根失败仍是类别缺陷，靠机器散文翻译绕过＝把「通道没做好」改写成「翻译表多一条」，两件真相都没了。牙齿＝entry_for_blocked_fragment。",
+    "channel_failure_stays_in_channel": "OWNED_NON_PROSE 不等于「已解决」：类别面解不出、tier2 显示名provenance 不齐时，DOM 仍是 pending，缺口记在 english_gap_verdicts那一侧，不转移成 prose 缺项。",
+    "measured_limits_and_open_questions": {
+      "shape_alias_not_unified": "同一语义列在两个登记面里用了不同写法：RENDERED_COLUMNS 按**下标**登记（transport_nodes[i][3]→node_type、[i][0]→node_region），category-lexicon 与 display-name-channel 按**字段名**登记（transport_nodes.type / .name / .place）。判定只认各自登记面的原样，不做「3 就是 type」的归一——归一表谁也没授权我建。",
+      "measured_consequence_2026_11_01": "两棵审计输入的 transport_nodes 行形状不同：CA 是位置数组（11 行，含 [i][0] 与 [i][3] 共 29 个 prose 地址），PH 是对象（0 个 prose 地址）。所以 CA 的 node_type「机场」这类值今天归 prose 通道，而类别通道注册的是 dict 形态的 type 列——同一语义列在两棵载荷里归了不同的主人。",
+      "second_face_of_the_same_hole": "按文本相减时代这个洞是隐身的（旧 skip_covered 会把与地名同形的 prose 格直接摘掉，如 transport_nodes[0][0] 的「旧金山」）；本判定按地址认领后它回到 worklist，于是一条城市名变成「prose 表要翻它」，而 tr() 里 prose_en 又排在 enEntityName 前面。这正是业主第 6 条担心的形状，只是换了方向。",
+      "who_decides": "两种处置都合法但必须由业主选：(a) 给这两列建**登记过的** index↔field 别名表，node_type/node_region 改判 OWNED_NON_PROSE；(b) 把 RENDERED_COLUMNS 里的 transport_nodes 0/3 撤下登记，让它们回到 dataset_cell_unregistered 账上。MT-D 不自作主张归一，也不假装看不见。",
+      "not_yet_done_in_mt_d": "本轮交付的是**所有权与分母**；固定术语表与数字/日期/币种/实体/目的地不漂移对账（MT-D 的另一半）仍待做，登记在此是为了不让它隐身。",
+      "status_2026_11_01_after_mt_d2": {
+        "shape_alias_question": "已按 (a) 处置：建 references/dataset-shape-alias.json（只登记被两棵载荷共同证明的 [0]↔place 与 [3]↔type），所有权与 worklist 共用同一个 shape_adapter；RENDERED_COLUMNS 的列登记**保留**，只在同址双主张时让位给语义通道。撤登记会让已知结构重新伪装成未登记数据。",
+        "replacement_provenance_question": "已按 #99 处置：不批量补 provenance（那是伪血缘），而是把 en_text_replacements 降级 candidate_only 并逐地址迁移。因此这 388 条（CA 10／PH 378）不再是「来源不明的主张」，而是**待翻译的散文格**。",
+        "term_table_and_reconciliation": "已做（MT-D2 第 6 步）：references/prose-glossary.json + scripts/prose_reconcile.py，8 类结构事实，接进 validate_table 阻断；实测账见 no_new_facts.reconciliation_layer.measured_2026_11_01。",
+        "still_open_render_slot_teardown": "本轮**未完成**：正式渲染路径仍读 legacy 表——spa-layout.js 31 处 occurrences（26 处把表值当显式 en 参数传入，改 tr() 顺序治不到）、split-layout.js 2 处。逐点清单登记在 .temp/v422_honest_map/MT1_translation/artifacts/MTD2_LEGACY_MIGRATION.json::render_call_site_inventory；拆除必须与 MT-E 落表＋MT-G 重建同轮做，单独拆会让读者页当场掉回 pending。",
+        "still_open_unservable_after_migration": "PH 165 条按地址迁到了真实 owner，但那个通道今天给不出英文（served=false，两面同数；CA 为 0）：迁址不等于兑现，这批仍是缺口账，MT-G 重建前必须逐条处置。",
+        "still_open_unlocatable": "legacy 键账（**不是** fragment 四桶）里查不到任何地址的键：输入面合计 57（CA 2／PH 55）、读者面合计 229（CA 88／PH 141）。多半来自 gen_travel_scope.py 的字面量表。它们进不了翻译表，只能按 legacy 键账清；不许因为「不是 fragment」就当不存在。"
+      }
+    },
+    "measured_357_status": "357（CA 350 + PH 7）是 seal-42 **交付面 visible pending 源串**的观测值，不是 MT-E 的硬门限。MT-D 实测不等就照实报映射差；只有 MIXED 与 UNRESOLVED 两桶归零，才冻结 MT-E 的真实表长。",
+    "mt_e1_candidate_tables_2026_11_02": {
+      "status": "GENERATED_NOT_APPLIED",
+      "supersedes": "ownership.mt_e0_candidate_tables_2026_11_01（886 行那两张表与其证据账原样留在盘上，作为历史面可审；本块是当前面）",
+      "owner_authorisation": "业主 2026-11-02 执行顺序第 2/3/4 步：169 条 owner 迁移入树并复算确认 prose 分母 717；两条 finding 必须换 owner 不得消失；候选表必须从新 worklist 重新生成，旧英文只按五条复用条件继承。",
+      "per_run_independent": "CA 与 PH 各自取数、各自成表、各自一套 provenance；不跨地去重（MT-E1 现场重测：两地恰有 1 条同形串，跨地去重会得到 716）。",
+      "tables": {"california": "MT1_translation/artifacts/MTE1_CANDIDATE_TABLE_california.json", "philippines": "MT1_translation/artifacts/MTE1_CANDIDATE_TABLE_philippines.json"},
+      "evidence": "MT1_translation/artifacts/MTE1_CANDIDATE_EVIDENCE.json",
+      "tool": ".temp/v422_honest_map/MT1_translation/tooling/mte1_candidate_table.py",
+      "en_basis_vocabulary": ["registered_display_name", "legacy_candidate_reuse", "agent_draft"],
+      "reuse_five_conditions": ["entry id 相同", "中文原文逐字相同", "地址集合相同", "owner 由今天的判定复算为 prose（不是照抄旧表）", "原 provenance 原样保留、不升级来源等级"],
+      "reuse_is_not_a_shortcut": "本轮**不新起草任何一条**：旧表里找不到出处就 abort，而不是用一次机器翻译把账填上。复用行逐条记 `conditions_checked` 与 `provenance_sha256`，把「继承」做成可核对的账而不是一句声明。",
+      "measured_2026_11_02": {
+        "rows_total": 717,
+        "per_run": {"california": {"rows": 393, "table_sha256": "9DF4C157FAACE7E21ADCF7AF030A1560C1FA1D1F278896560BA0337AD950386B", "table_file_sha256": "2B45CB9F6368130F9A08203C47CEE55A6C20D2F235BD35CEE26D74D62D04CF28", "validate_status": "FAIL", "validate_findings": ["fact_drift_proper_name_variant"], "prose_subclass": {"PROSE_SLOT_CLEAN": 353, "PROSE_SLOT_WITH_INJECTED_NAME": 40}, "migrated_by_identity": 108, "partial_binding_blocked": 0, "dataset_sha256_head": "7C2A05AFC574DCF1", "en_basis_counts": {"agent_draft": 382, "legacy_candidate_reuse": 11}}, "philippines": {"rows": 324, "table_sha256": "B3035D91CA9DCF9BBED8B3E43DCA06716B8C5CF826B590B5938B0988D0D63F4F", "table_file_sha256": "1CF5FD1FF18883BC8B86FAFCE7E488A75A854869A5777457D1665767F3F969C0", "validate_status": "PASS", "validate_findings": [], "prose_subclass": {"PROSE_SLOT_CLEAN": 319, "PROSE_SLOT_WITH_INJECTED_NAME": 5}, "migrated_by_identity": 61, "partial_binding_blocked": 0, "dataset_sha256_head": "DA9D770E9DC9FED3", "en_basis_counts": {"legacy_candidate_reuse": 308, "agent_draft": 16}}},
+        "evidence_sha256": "BB22B66A54CAE94CAC07FA146095EB6079F57E538F5E2927480AA69619A747D2",
+        "regeneration_history_2026_11_02": "这一格换过两次：15:19 那版（CA 表 A611F200…／PH 2A2A92DA…／证据 098D6E20…）之后，判定面补了两处**只增不改判**的字段（`partial_binding_blocked_ids` 与显示名修正行的 `addresses`，为的是让业主第 1 条的负测「同文不同地址不得连带迁移」有账可查），15:44 重跑同一工具得到现在登记的这三个摘要。行数、逐行中文/英文/地址/provenance 与两次之间**零差异**（test_every_row_is_a_registered_reuse_not_a_fresh_draft 逐行复算），变的只是表级 provenance 的 generated_at。",
+        "why_a_digest_moves_on_rebuild": "`table_sha256` 覆盖表级 provenance（含 generated_at），所以**每次重生成都会换摘要**。因此这里钉的 sha 认的是「眼前这一份构建」，不充当内容身份：内容的可审面是行数＋逐行五条件复用比对＋finding 多重集，三条都在测试里现算。谁要是把这条读成「sha 不同＝内容变了」，就会去改表而不是改时间戳。",
+        "html_unchanged_since_seal42": {"california": true, "philippines": true}
+      },
+      "finding_dispositions_after_migration": {
+        "prose_side": [{"entry_id": "feb55e59b0d", "address": "restaurants[14].note", "code": "fact_drift_proper_name_variant", "tokens": "Ciopinno↔Cioppino（距离 2）", "disposition": "留在 717 表里继续阻断；错在中文原格 ⇒ 只改英文不结案"}],
+        "display_name_side": [{"entry_id": "f90009bf57d", "address": "itinerary[40][4]", "code": "display_name_proper_name_variant", "tokens": "Cathy↔Cathys（距离 1）", "disposition": "按身份绑定离开 prose，改由 DISPLAY_NAME 通道发英文；缺陷跟着 owner 走，落在显示名修正清单上继续阻断该通道"}],
+        "total_defects": 2,
+        "zero_is_a_migration_defect": "迁移后总缺陷数成 0 ⇒ 判**迁移缺陷**（缺陷被换 owner 的动作洗掉了），不是判修好。工具 mte1_candidate_table.py 把这条写死成 abort：prose 1 ＋ display-name 1 ＝ 2，两侧各自逐条点名。",
+        "registered_findings_2026_11_02": {
+          "california": [{"code": "fact_drift_proper_name_variant", "entry_id": "feb55e59b0d", "address": "restaurants[14].note", "cn_token": "Ciopinno", "en_token": "Cioppino", "distance": 2, "side_at_fault": "source", "why": "错在中文原格 restaurants[14][10]，英文侧拼法对 ⇒ 只改英文不算结案；这一条不许因为换 owner 而消失（它本来就在 prose）。"}],
+          "philippines": [],
+          "display_name": [{"code": "display_name_proper_name_variant", "entry_id": "f90009bf57d", "address": "itinerary[40][4]", "cn_token": "Cathy", "en_token": "Cathys", "distance": 1, "side_at_fault": "translation", "why": "身份绑定 unique ⇒ 迁给 DISPLAY_NAME；英文从此由登记面发（attractions[37][1] 的 tier1 名对 Cathys Corner Mt Hollywood Dr），缺陷跟着 owner 走，落在显示名修正清单上继续阻断该通道。"}]
+        }
+      },
+      "not_a_pass": "MT-E1 生成 ≠ MT-E 通过：两地表仍全部 `owner_review_pending`，dataset 一个字节没写，交付 HTML 未重建（与 seal-42 逐字节相同已在证据里核过），MT-F 独立语义复核未做，英文正式交付判 FAIL，`apply_table` 仍被 finding 挡住。",
+      "gates_run": "每张表写完按**盘上字节**读回跑 `validate_table`：MT-C 结构门 + 所有权 worklist 分母（717 面）+ 形状门 + prose_reconcile 九类 + 重复键 + table_sha256 排除自身复算；出货判据是 finding 集合**恰好等于登记**（多一条 fail、少一条也 fail），不是「零 finding」。"
+    },
+    "mt_e0_candidate_tables_2026_11_01": {
+      "status": "GENERATED_NOT_APPLIED",
+      "history_status": "SUPERSEDED_BY_MT_E1（2026-11-02）：这一整块是**历史面**——886 行是按列所有权判出来的 prose 面，MT-E1 用身份绑定把 169 条真显示名槽移出去之后当前面是 `mt_e1_candidate_tables_2026_11_02`。两块表与两份证据账都原样留在盘上，不删不改名：MT-F0 盲审包、MT-F1 校准与这颗所有权雷的实物出处都在 886 那一版里。历史叙述里的 886 不做机械替换。",
+      "owner_authorisation": "业主 2026-11-01：完成两处门牙修正后，无需再次等确认即可进入 MT-E0；\n但翻译表**应用**、渲染器切换与两地重建仍需等 31 槽位、PH 165 条与 runtime legacy-key 账收口。",
+      "per_run_independent": "CA 与 PH 各自取数、各自成表、各自一套 provenance；不跨地去重（同文跨地重复两侧都保留），所以两张表条数之和就是表长 886。",
+      "tables": {
+        "california": "MT1_translation/artifacts/MTE0_CANDIDATE_TABLE_california.json",
+        "philippines": "MT1_translation/artifacts/MTE0_CANDIDATE_TABLE_philippines.json"
+      },
+      "evidence": "MT1_translation/artifacts/MTE0_CANDIDATE_EVIDENCE.json",
+      "tool": ".temp/v422_honest_map/MT1_translation/tooling/mte0_candidate_table.py",
+      "en_basis_vocabulary": ["registered_display_name", "legacy_candidate_reuse", "agent_draft"],
+      "en_basis_meaning": {
+        "registered_display_name": "原文整串等于登记面上有英文名的实体／目的地名，英文取那一对登记名（display_names.read_pairs 或 dataset.destinations），有来源。",
+        "legacy_candidate_reuse": "英文取自**今天读者实际看到**的那条 D.en_text_replacements 值。source_registered=false：MT-D2 已查实那张表没有来源登记，复用它是复用现状，不是给它的英文补血缘；必须先过漂移门才许用。",
+        "agent_draft": "本会话模型起草（method=controlled_machine_translation，engine 与 engine_version 登记在表头 provenance，可被业主独立核对）。"
+      },
+      "gates_run": "每张表写完都按**盘上字节**读回，再跑 scripts/translate_prose.py::validate_table：MT-C 结构门 + 所有权 worklist 分母 + 形状门 + prose_reconcile 九类事实漂移（数字／日期／币种／URL／实体名／目的地／固定措辞／单位制式／同对内专名形状）+ 重复键检测 + table_sha256 排除自身复算。任何一条 finding 都不许出厂（工具非零退出）。",
+      "not_a_pass": "MT-E0 生成 ≠ MT-E 通过：review_status 全部 owner_review_pending，dataset 没写一个字节，交付 HTML 未重建（构建前后 SHA 相同已在证据里核过），MT-F 独立语义复核未做，英文正式交付判 FAIL。渲染槽位未拆之前，这张表即使 apply 也到不了读者眼前。",
+      "self_review_2026_11_01": {
+        "what": "把两地每一条 agent_draft 出货的中文与英文逐行读完并对照（不是抽样）：CA 387＋PH 16＝403 行。",
+        "why": "八类漂移门只查**结构事实**。原文没有数字／拉丁 token／登记名的纯散文行，中文说圣莫尼卡、英文写圣塔芭芭拉时一个码都不会触发——实测 CA 403 行起草里 237 行属于这块盲区。",
+        "findings_total": 24,
+        "finding_classes": "draft_mispair_shifted_line 2／place_replaced_by_different_place 2／toponym_swapped_for_nearby_registered_place 7／registered_name_injected_where_source_names_it_shorter 8／proper_name_misspelled 1／source_fact_dropped 1／english_defect 3（逐条 id 登记在 MTE0_CANDIDATE_EVIDENCE.json::agent_draft_self_review.findings_by_class）",
+        "how_the_first_two_were_caught": "不是靠人眼：第一版建表把『id 不在 worklist』和『id 形状不对』只落成文件报了没拦，f7f2c88041e 的串位正是从这条缝里活到交付面的；同一句英文出现在两行是它的机械指纹。",
+        "gates_added_this_round": "建表工具新增两条阻断（MTE0_DRAFT_california_part2.txt 的两条坏 id 已按注释原样保留，不再静默丢弃）＋一条账实相等检查（勘误分卷的 id 集合必须与登记 findings 的 id 集合完全相等，两个方向都查）。",
+        "negative_probes": ".temp/v422_honest_map/MT1_translation/artifacts/MTE0_GATE_PROBE.json——四案（id 不在 worklist／id 形状不对／同文异中文／勘误未登记）在**副本目录**里逐案造出来，且必须被**它点名的那道门**拦下；案 C 前两版分别被『缺英文』和『勘误未登记』先拦，那种绿不算数。",
+        "weaker_than_mt_f": "自审由起草的同一模型重读，抓得住串位、专名替换与英文自身写坏，抓不住语义平淡的漏译与反义。MT-F 独立复核仍未做；全部条目保持 owner_review_pending。"
+      },
+      "artifact_history_2026_11_01": "同一轮建表跑过三次：run1＝有两条串位与两条挂不上的草稿 id（已 *_run1_superseded 保留原样，不删）；run2＝串位已修但 bad-id 只报不拦（已 *_run2_superseded）；现行版＝三道阻断齐备，886 行、两地 validate_table PASS、drift_rejected 5＋9 与 run1 同数（修的是串位与草稿卫生，没有放宽门）。",
+      "digest_field_meaning": "证据里 **table_file_sha256＝整份 JSON 文件字节 SHA**，**declared_table_sha256＝表内声明的 canonical 摘要（排除摘要字段自身）**，declared_table_sha256_recomputed 是 validate_table 对盘上字节的复算；两者口径不同、**不互相比对**，相等检查只做『声明⇄复算』。第一版把文件字节叫 table_sha256，与表内声明同名摘要混在一个字段名里＝下一个读账的人只能猜。",
+      "measured_2026_11_01": {
+        "rows_total": 886,
+        "per_run": {"california": 501, "philippines": 385},
+        "en_basis_counts": {
+          "california": {"agent_draft": 387, "legacy_candidate_reuse": 11, "registered_display_name": 103},
+          "philippines": {"agent_draft": 16, "legacy_candidate_reuse": 308, "registered_display_name": 61}
+        },
+        "source_attempts_rejected_by_drift_gate": {"california": 5, "philippines": 9},
+        "rejected_note": "这 14 条是**门的战果不是门的故障**：5 条登记显示名里不含目的地英文名（例：'圣塔芭芭拉墨西哥地道塔克' 的登记名 La Super-Rica Taqueria 里没有 Santa Barbara），9 条 PH 读者面 legacy 英文把数字改写或漏掉（例：'游出10米' 写成 ten meters、'25-31℃' 写成 77-88°F 一类）。它们一律降级到 agent_draft 并登记 codes。"
+      },
+      "ruler_change_this_round": "MT-E0 现场暴露并修掉一处尺子缺陷：currencies_in 让 '美元' 里的 '元' 重复计费（5 条 CA 价格行同时被要求 USD 与 CNY）。修法＝长令牌优先并遮字，登记在 references/prose-glossary.json::currency_token_overlap_measured，并由 legacy 面 835 条『修前修后行为差＝0』与两条负测钉住；第 1 版尺子的行为只留在测试侧（_currencies_before_fix），实现不引用它。",
+      "registered_findings_2026_11_02_proper_name_variant": {
+        "added_by_round": "MT-F4/#119（业主 2026-11-02 第 2 条授权窄范围入树）",
+        "what": "九类尺子的『同对内专名形状』按盘上字节重跑，咬到这张 886 候选表的 2 条真缺陷。表的字节一个都没动，动的是尺子，所以这张表今天 validate_table 报 2 条——预期红，不是回归，也不许为了让门变绿而放宽尺子或删豁免。",
+        "history_scope_note": "上面 artifact_history_2026_11_01 里『两地 validate_table PASS』量的是**当时的八类尺子**，那句话作为历史账原样保留；按今天的九类尺子，california 是 2 条 finding、philippines 是 0 条。",
+        "expected": {
+          "california": [
+            {"code": "fact_drift_proper_name_variant", "entry_id": "f90009bf57d", "address": "itinerary[40][4]", "cn_token": "Cathy", "en_token": "Cathys", "distance": 1, "side_at_fault": "translation", "why": "中文原格写 Cathy's，英文把撇号写坏了 ⇒ 该改的是表里的 en。"},
+            {"code": "fact_drift_proper_name_variant", "entry_id": "feb55e59b0d", "address": "restaurants[14].note", "cn_token": "Ciopinno", "en_token": "Cioppino", "distance": 2, "side_at_fault": "source", "why": "错在**中文原格**（restaurants[14][10] 写 Ciopinno），英文侧拼法是对的 ⇒ 只改英文不算结案，须连数据集中文原格一起处置；该词在 display_names 与 prose-glossary 都查不到，没有登记面权威可依据。"}
+          ],
+          "philippines": []
+        },
+        "how_the_test_uses_it": "双向：validate_table 的 code 多重集必须与登记集合**完全相等**（多一条没登记的码 fail；登记的一条消失也 fail），并且逐条 (entry_id, cn_token, en_token) 由盘上表字节经 prose_reconcile.proper_name_conflicts 现算复现。只断言『有这 2 条』挡不住把阈值调松到咬不到东西——那种放宽会让登记项归零而门照样绿。",
+        "disposition": "两条都不是本轮可结案项：#119 明文只产 finding、不自动改中文或英文，且 MT-E apply／重建交付物仍禁止。表保持 GENERATED_NOT_APPLIED，review_status 全部 owner_review_pending。",
+        "not_a_semantic_claim": "本门只说『同一语义对里两个拉丁专名形状不一致』，不说谁作准；配对是否与真值相符要按来源裁，不由这道形状门猜。"
+      },
+      "history_face_findings_2026_11_02": {
+        "added_by_round": "MT-E1（业主 2026-11-02 执行顺序第 2 步：169 条 owner 迁移入树）",
+        "what": "把这两张 **886 历史表**按今天的在树规则重跑 `validate_table` 的实测账。它合法地变红：多出来的 `entry_for_blocked_fragment` 恰好是身份绑定（unique）迁走的那 169 行（CA 108／PH 61），而专名形状那 2 条仍在原地。这不是表坏了，是 owner 判据变了——历史**留证**，不是历史失效。",
+        "expected": {
+          "california": {"entry_for_blocked_fragment": 108, "fact_drift_proper_name_variant": 2},
+          "philippines": {"entry_for_blocked_fragment": 61}
+        },
+        "status": "FAIL",
+        "blocked_ids_equal_migrated_ids": "判据不是条数差不多：从每条 `entry_for_blocked_fragment` 的 detail 里取出被点名的 entry id，与该 run **今天**的 `slot_identity_migration.migrated_row_ids` 比集合，必须逐字相等。多一条＝有行不是身份绑定迁走的却跟着变红了；少一条＝迁移面变了而这张账没重跑。这条把「886 − 717 = 169 只有一个来源」从叙述变成可复算的断言。",
+        "why_this_is_registered_instead_of_fixed": "业主明令历史面不删不改名、也不许机械替换其中的 886；同理不许为了让这两张表重新 PASS 而把 fragment 塞回去。登记成期望的红，是「历史账按当前尺子读会报什么」的实物答案。"
+      },
+      "history_artifact_pins_2026_11_02": {
+        "what": "历史面三个文件的**文件级** SHA-256（表内摘要之外再钉一层字节），以及钉它们的位置在本文件里——被钉的文件自己不能钉自己，否则改一条就能连摘要一起改。",
+        "table_files": {
+          "california": "9910A36A27EEB05FC10AB59C9F49551ACBF32850E369FB0B121E88AE748C9086",
+          "philippines": "4D4446D4762BEBEEFDD208735DEC2159B2D77EB68CD329FBFC1E5833AB45F016"
+        },
+        "table_sha256_declared": {
+          "california": "960F798594428C9A6E540F7368CBA0C4DA0DF4DAEE55AF4AF42AFE009539D732",
+          "philippines": "D5293E39D1AC2F950B5425476E2120D57A92E06A26273CB9D9E23AA7AA7403BE"
+        },
+        "evidence_file": "9F3E4702A8F282275AD2C5DA838C245EA62EA44863E65C8B1787434B6AF0E947",
+        "measured_at": "2026-11-02（MT-E1 迁移入树之后现场复算）。可证的范围要说清：两张**表文件**的字节在 MT-E0 证据账里就记了 file sha，本轮复算与之相同 ⇒ 历史表确实一字未动；`MTE0_CANDIDATE_EVIDENCE.json` 自己那一层的 SHA 此前没有任何在册出处（文件不能钉自己），本登记是**今天起的第一个基线**，只能证明下一轮没改，不能倒推证明它 11-01 之后没被改过。",
+        "not_a_proof": "不许把这条读成「历史账已被双向证明从未被动过」——证据文件自身的旧基线不存在，缺的就是缺。"
+      }
+    },
+    "mt_e_table_length_frozen_at": {
+      "status": "FROZEN",
+      "frozen_by_round": "MT-D2 第 7 步（业主 2026-11-01 对 #99 的裁决第 7 条：再冻结 MT-E 实际表长；不要求凑成 357、506 或 513）冻结出 886；MT-E1（业主 2026-11-02 执行顺序第 2 步：169 条 owner 迁移入树）改冻 **717**，886 整块移入 history_superseded_2026_11_02，不在当前值里留着仿佛从未存在。",
+      "preconditions_measured": {
+        "mixed_owner_blocked": {"california": 0, "philippines": 0},
+        "unresolved_owner_blocked": {"california": 0, "philippines": 0},
+        "identity_holds_both_runs": true,
+        "export_matches_worklist_both_runs": true,
+        "cli_exit_codes": {"california": 0, "philippines": 0}
+      },
+      "per_run": {
+        "california_v420": {"raw_fragments": 516, "prose_required": 393, "owned_non_prose": 123, "mixed_owner_blocked": 0, "unresolved_owner_blocked": 0, "prose_subclass": {"PROSE_SLOT_CLEAN": 353, "PROSE_SLOT_WITH_INJECTED_NAME": 40}},
+        "philippines_v419": {"raw_fragments": 385, "prose_required": 324, "owned_non_prose": 61, "mixed_owner_blocked": 0, "unresolved_owner_blocked": 0, "prose_subclass": {"PROSE_SLOT_CLEAN": 319, "PROSE_SLOT_WITH_INJECTED_NAME": 5}}
+      },
+      "total_entries_required": 717,
+      "history_superseded_2026_11_02": {
+        "what": "MT-D2 第 7 步冻到的 886＝CA 501＋PH 385，是**按列所有权**判出来的 prose 面；MT-E1 用身份绑定把 169 条真显示名槽移出去之后，当前值就是 717。旧数留在这里，不当前值用，也不假装它没发生过。",
+        "value": 886,
+        "per_run": {"california_v420": {"raw_fragments": 516, "prose_required": 501, "owned_non_prose": 15, "mixed_owner_blocked": 0, "unresolved_owner_blocked": 0}, "philippines_v419": {"raw_fragments": 385, "prose_required": 385, "owned_non_prose": 0, "mixed_owner_blocked": 0, "unresolved_owner_blocked": 0}},
+        "frozen_at": "2026-11-01（MT-D2 第 7 步）",
+        "superseded_at": "2026-11-02（MT-E1，业主执行顺序第 2 步）",
+        "artifacts_kept_on_disk": "MT-E0 那两张 886 行候选表与其证据账**原样保留**（`mt_e0_candidate_tables_2026_11_01` 整块降为历史面，文件不删不改名）：它们是 MT-F0 盲审、MT-F1 校准与这颗所有权雷的实物出处。",
+        "delta_explained": "886 − 717 = 169 = CA 108 ＋ PH 61，全部由身份绑定（unique）迁移；两桶（MIXED／UNRESOLVED）迁移前后都是 0，所以差额只有一个来源，不是「顺带清掉了一批没人认领的行」。"
+      },
+      "denominator": "prose_translation_worklist 的 PROSE_REQUIRED 行数——--export、validate_table、apply_table 共用同一张清单（见 single_implementation）；表长不是「HTML 上还印着 pending 的串数」，那是交付面观测口径。",
+      "no_cross_run_dedup": "717 = 393 + 324：每 run 单独核算，同一中文串在两地各算一条。MT-E1 现场重测：两地新 worklist 恰有 1 条同形串（跨地去重会得到 716），与 886 时代量到的差额形状一致——这个数是量出来的，不是设想的风险。跨 run 去重会把两张表合成一张没人能对账的表，而且 apply 是按 run 写的。（886 = 501 + 385 的原始测量留在 history_superseded_2026_11_02。）",
+      "arithmetic_from_mt_d_observation": "CA 506 →（slot 改判 −15）491 →（candidate_only 回散文 +10）501；PH 7 →（+378）385。所以 prose 之和 513 → 886。",
+      "measured_by": {
+        "matrix": ".temp/v422_honest_map/MT1_translation/artifacts/MTD_OWNERSHIP_MATRIX.json",
+        "rows": [".temp/v422_honest_map/MT1_translation/artifacts/MTD_OWNERSHIP_ROWS_california.json", ".temp/v422_honest_map/MT1_translation/artifacts/MTD_OWNERSHIP_ROWS_philippines.json"],
+        "command": "python scripts/translate_prose.py --run-dir <run> --dataset <ds> --ownership-report <out> --export <worklist>（退出码 0 已入册）",
+        "hash_direction": "单向钉：矩阵里登记 contract.sha256 == 本文件当前字节（矩阵必须跟着合同重跑）；本文件只指矩阵**路径**、不钉矩阵哈希——两头互钉就成环，改任何一面都会「只有另一面是旧的」，那种结构最后总被人用「只改一边」蒙过去。表长的真判据是现场复算（test_v422_prose_ownership.py），不是文件里的数字互相点头。"
+      },
+      "not_a_gate": {"357": "seal-42 交付面 visible pending 源串观测（CA 350 + PH 7）", "506": "MT-D 前半的 CA prose 观测（改判与降级之前的那一步）", "513": "MT-D 前半两地 prose 之和（506 + 7）"},
+      "not_a_gate_rule": "冻结之后，谁都不许再拿这三个数当门限去解释差额；要改表长必须重跑矩阵并按本块登记，不是在旧数上调口径。",
+      "what_frozen_means": "MT-E 一次生成 717 条 entry：缺任一条即 fragment_missing_from_table 整表阻断；禁部分应用（MT-C 起 apply 只在 PASS 时写盘，且每条都要过第 6 步的对账门）。",
+      "what_frozen_does_not_mean": "不代表这 717 条已翻译、已人工复核；不冻结 4 条 tier2 显示名（归 display-name-channel），也不冻结 MT-F 的复核范围。本轮 MT-E 仍 **BLOCKED**（渲染槽位未拆、unservable 165 条未处置），英文正式交付仍判 FAIL。",
+      "arithmetic_mt_e1": "CA 501 →（身份绑定 unique −108）393；PH 385 →（−61）324。owned_non_prose 同时 CA 15→123、PH 0→61，恒等式两边一起动，没有第三条通道偷偷消化行数。子类（要看英文面）：CA 393＝353 CLEAN＋40 INJECTED、PH 324＝319＋5，合计 717＝672＋45。"
+    },
+    "verified_by": "scripts/test_v422_prose_ownership.py",
+    "shape_alias_table": {
+      "registry": "references/dataset-shape-alias.json",
+      "alias_table_version_read_at_runtime": true,
+      "single_adapter": "scripts/translate_prose.py::shape_adapter（所有权判定与 worklist 共用同一个适配器；第二处自己换算下标算违规）",
+      "proven_pairs": "只登记 transport_nodes 的 [0]↔place 与 [3]↔type——两棵载荷共同证明的那两对；下标 1/2/4/5 与 name/name_en/coords/source_status 一概不登记，「空着」是登记面的边界而不是遗漏。",
+      "forbidden": "读单元格内容猜字段（值像机场≠证据）；为了整齐把整个数组 schema 补完；在适配器里顺手重排行/补默认值。",
+      "block_when": "行长不足最大别名下标、arity 与登记不符、对象行缺被别名字段、同一 block 混用对象与数组、别名字段没有任何通道认领、同一槽被两条别名重复认领 ⇒ dataset_shape_blocked；形状坏了不判所有权（宁可不判，也不按错位的主人写盘）。"
+    },
+    "slot_identity_migration_2026_11_02": {
+      "status": "ENROLLED",
+      "added_by_round": "MT-E1（业主 2026-11-02 执行顺序第 2 步：正式落地 169 条 owner 迁移，复算确认 prose 分母 717）",
+      "owner_ruling": "TRUE_DISPLAY_NAME_SLOT=169 移出 prose 归 DISPLAY_NAME；PROSE_SLOT_CLEAN=672 继续归 prose；PROSE_SLOT_WITH_INJECTED_NAME=45 **继续归 prose，不能转成 display-name**；逐地址证据不足时不许整桶迁移。",
+      "why_not_a_column_flip": "itinerary[*][4] 同一列里实测同时住着 237 个身份标签格与 32 个真散文标题格；把整列改判 DISPLAY_NAME 会把那 32 条散文从读者眼前拿走。列只能登记成**候选面**（有资格被检验），迁移与否逐 fragment 由身份绑定决定。",
+      "eligible_slots": [
+        {"block": "itinerary", "slot": 4, "why": "MT-D3 实测候选面：这一列 269 个 prose 地址里 237 个唯一绑定到本记录的 map_target 标签＋坐标、32 个绑不上；两半都在同一列，所以列级一刀切必然错。"}
+      ],
+      "identity_binding_criterion": "本格中文与某个 map_targets 键的尾段（label）**逐字相同**，且该 target 的 coords 在本记录行内某个格子上**逐字出现**（坐标形状只认 dataset 里 map_targets[*].coords 的写法）。这是渲染器 mapLinks(label, coords, dest, enName) 画按钮用的同一组事实，不是相似度阈值。",
+      "identity_verdicts": ["unique", "ambiguous", "label_without_coord", "no_binding", "no_coord", "address_unparsable", "row_out_of_range"],
+      "migrate_only_when": ["unique"],
+      "never_migrates_on": ["ambiguous", "label_without_coord", "no_binding", "no_coord", "address_unparsable", "row_out_of_range"],
+      "never_migrates_on_rule": "只有 unique 一条通向 DISPLAY_NAME。多命中＝歧义，不许取第一条；同名不同坐标＝label_without_coord，那是靠字符串猜配对；绑不上＝留在 prose 等语义复核。",
+      "partial_binding_is_not_migration": "同一句中文在一个地址唯一绑定、在另一个地址绑不上 ⇒ 整行判 MIXED_OWNER_BLOCKED，**谁也没迁走**。判定把这种行单独点名成 `slot_identity_migration.partial_binding_blocked_ids`，不计入 `migrated_row_ids`（迁走＝这一行真的换了主人）。业主第 1 条要求的负测「同文不同地址不得连带迁移」就落在这里：迁移按**逐地址证据**发生，行级主人由四桶互斥裁决，绝不因为「有一格绑上了」就把整行搬走。现场两地 mixed=0，所以这一档今天是空的——空是量出来的，不是判据没写。",
+      "owner_after_claim": "DISPLAY_NAME",
+      "min_registered_english_len": 4,
+      "min_registered_english_len_why": "借名检测只认 4 个字符以上的登记英文名：Bar/Cafe/In 这类短串会在任何一句散文里命中，把 CLEAN 全染成 INJECTED。这一档只影响 prose 子类分桶，不影响 owner 迁移。",
+      "precedence_relative_to_alias": "别名迁移（列级事实）先走；别名之后仍是 prose 的地址才试身份绑定（行级事实）。两者都不成立就还是 PROSE_TABLE。",
+      "injected_stays_prose": "PROSE_SLOT_WITH_INJECTED_NAME 的处置是**重新生成忠于原中文的译文、删掉无依据注入**，不是换 owner：把借来的品牌名当成显示名槽＝用翻译错误倒推所有权。个别行若逐地址证据证明它其实是实体名称槽，单独重分类，禁止整桶迁移。",
+      "prose_subclass_vocabulary": ["PROSE_SLOT_CLEAN", "PROSE_SLOT_WITH_INJECTED_NAME"],
+      "prose_subclass_needs_the_english_face": "CLEAN／INJECTED 的判据要看这一行实际发出去的英文（草稿或 legacy 值），fragment 只有中文；所以子类分桶由建表／审计侧调用 scripts/translate_prose.py::prose_slot_subclass，owner 判定不依赖译文，避免「等译文出来再决定这格归谁」。",
+      "display_name_channel_carries_its_own_finding": "迁移不等于结案：这一格的英文从此由登记面发（display_names.read_pairs／tier2 机读名），所以 #119 的专名形状门改比「中文标签 ↔ 登记英文名」。发码 display_name_proper_name_variant（在册 blocking）。",
+      "coordinate_shape": "^-?\\d+\\.\\d+,-?\\d+\\.\\d+$（与 dataset 里 map_targets[*].coords 同形；CA 实测 7 位小数、PH 6 位，把位数写死会让一整批真标签格读成 no_coord）",
+      "measured_2026_11_02": {
+        "per_run": {
+          "california": {"raw_fragments": 516, "prose_required": 393, "owned_non_prose": 123, "mixed_owner_blocked": 0, "unresolved_owner_blocked": 0, "migrated_by_identity": 108, "eligible_sites_checked": 178, "identity_unique_sites": 160, "display_name_corrections": 1},
+          "philippines": {"raw_fragments": 385, "prose_required": 324, "owned_non_prose": 61, "mixed_owner_blocked": 0, "unresolved_owner_blocked": 0, "migrated_by_identity": 61, "eligible_sites_checked": 91, "identity_unique_sites": 77, "display_name_corrections": 0}
+        },
+        "prose_total": 717,
+        "identity_unique_sites_total": 237,
+        "row_bucket_reproduction": "169 TRUE_DISPLAY_NAME ＋ 45 PROSE_SLOT_WITH_INJECTED_NAME ＋ 672 PROSE_SLOT_CLEAN ＋ 0 AMBIGUOUS ＝ 886（旧的 prose 行全集）；717 ＝ 672＋45。逐行子类要英文面，由建表／审计侧调用 prose_slot_subclass 复现（MTE1_CANDIDATE_EVIDENCE.json 里逐桶可查）。",
+        "arithmetic_to_final": "CA 501 →（身份绑定 −108）393；PH 385 →（−61）324。CA owned_non_prose 15 → 123（+108），PH 0 → 61。恒等式 raw = prose + owned_non_prose + mixed + unresolved 两地都闭合，两桶仍是 0。",
+        "display_name_correction_rows": ["f90009bf57d（itinerary[40][4]，中文标签 Cathy's Corner…，登记英文 Cathys Corner Mt Hollywood Dr，编辑距离 1）"],
+        "prose_side_findings_after_migration": "feb55e59b0d（restaurants[14].note）仍在 717 里，仍报 fact_drift_proper_name_variant ⇒ 迁移后总缺陷仍 2：prose 1 ＋ display-name 1。若这里数成 0，就是迁移把缺陷洗掉了，判迁移缺陷。"
+      },
+      "not_a_semantic_gate": "本判据只回答「这格是不是它所属记录自己的名字标签」，不回答「这段散文翻译得对不对」。语义正确性仍归 MT-F 复核与业主裁决。"
+    },
+    "slot_migration": {
+      "rule": "地址同时被 RENDERED_COLUMNS（按位置）与某个语义通道（经别名表证明是同一格）认领时，判给语义通道：类别→CATEGORY_LEXICON、专名→DISPLAY_NAME、金额/度量→MONEY_FORMATTER。",
+      "why_rendered_columns_stays_registered": "撤销列登记会把已知结构重新伪装成「未登记数据」——那是另一种假账。列留在 RENDERED_COLUMNS 里，但在这里让位；两棵载荷里同一列不再归不同主人。",
+      "not_a_general_escape": "没有别名证明的双主张（含成证 replacement 与 prose 地址相撞）仍然判 MIXED_OWNER_BLOCKED，这一步不替谁消解冲突。",
+      "measured_2026_11_01": "CA 15 条改判（9→DISPLAY_NAME、6→CATEGORY_LEXICON），prose 面 506→491；PH 0 条（对象行本来就按字段登记）。",
+      "measured_2026_11_01_arithmetic_to_final": "491 是**这一步单独**的结果，不是 MT-E 的表长：同轮 candidate_only 降级又把 10 条原先 OWNER_UNRESOLVED_BLOCKED 的 CA 格送回散文（10 条全是 leg_title，逐条可在 MTD_OWNERSHIP_ROWS_california.json 里按「PROSE_REQUIRED 且 cn 命中 legacy 键」复算），最终 prose 501。PH 侧同理 7→385（+378）。两个数各自是两件事的账，混着写就会出现「491 与 501 差 10 没人解释」那种洞。"
+    },
+    "legacy_en_text_replacements": {
+      "disposition": "candidate_only",
+      "disposition_allowed": ["candidate_only", "owner_claim"],
+      "ruled_by": "业主 2026-11-01 对 #99 的裁决第 1 条",
+      "why_not_bulk_provenance": "它不是一个语义通道，而是混装了完整散文、路线标题、类别词、专名、金额/时长/日期与行程交通说明。给整张表补一份统一 provenance，就是把「历史上已有一段英文」冒充成「来源已核验」——伪血缘。",
+      "per_address_migration": "每一条按**它自己的地址槽位**迁移：类别→CATEGORY_LEXICON，专名→DISPLAY_NAME，金额/度量→MONEY_FORMATTER，真正散文→PROSE_TABLE，无法确认→继续 OWNER_UNRESOLVED_BLOCKED。清册见 .temp/v422_honest_map/MT1_translation/artifacts/MTD2_LEGACY_MIGRATION.json（逐条含槽位、判定 owner、旧英文是否只可作对照）。",
+      "inventory": {
+        "implemented_by": "scripts/translate_prose.py::legacy_migration_inventory（唯一实现；CLI: python scripts/translate_prose.py --legacy-migration-report <dataset.json>）",
+        "artifact": ".temp/v422_honest_map/MT1_translation/artifacts/MTD2_LEGACY_MIGRATION.json",
+        "outcomes": [
+          "PROSE_TABLE",
+          "CATEGORY_LEXICON",
+          "DISPLAY_NAME",
+          "MONEY_FORMATTER",
+          "REGISTERED_EN_REPLACEMENT",
+          "MIXED_OWNER_BLOCKED",
+          "OWNER_UNRESOLVED_BLOCKED",
+          "UNLOCATABLE_NO_ADDRESS"
+        ],
+        "outcomes_note": "前五个就是 ownership.owners 那五个名字（LEGACY_INVENTORY_OUTCOMES 由 OWNER_VOCABULARY 拼出，不重抄一遍）；两个 BLOCKED 名与 fragment 四桶同名同义；UNLOCATABLE_NO_ADDRESS 是清册独有的一格。",
+        "identity": "legacy_entries = 八个迁移桶之和（互斥且穷尽）；对不上即 legacy_inventory_accounting_mismatch",
+        "two_denominators": "fragment 四桶（翻译表收谁）与 legacy 键迁移桶（历史英文归谁）**分母不同**：不成 fragment 的键进不了四桶，只能在清册里站着。谁把「四桶归零」读成「legacy 表已清完」，就是拿一张账替另一张账签字。",
+        "prose_claim_authority": "PROSE_TABLE 只能由采集器给出：fragment 命中的键复用 classify 判好的 owner；不成 fragment 的键即使能在数据里查到格子，也不许在这里凭空认一个散文主人（那等于绕过分母自己造一条工作项）。",
+        "shape_gate": "形状核验不干净时本清册直接返回 shape_blocked 并拒绝迁移——别名与数据脱节时「这一格归谁」本身就不可信，迁出来的桶数是一份看起来很齐的假账。",
+        "served_accounting": {
+          "why": "「拆入真实 owner」必须能兑现：把一条字符串判给类别面而词根拼不出英文，渲染层拆掉旧表后读者页就直接少一句。所以每个迁移桶再配一条 served 账，兑现不了的显式发 migrated_owner_cannot_serve，不让「已迁移」冒充「已交付」。",
+          "states": [
+            "served",
+            "cannot_serve",
+            "tier2_candidate",
+            "blocked_by_collision",
+            "pending_mt_e",
+            "render_side_unmeasured",
+            "not_migrated"
+          ],
+          "measured_by": "CATEGORY_LEXICON 走 scripts/category_lexicon.py::compose；DISPLAY_NAME／REGISTERED_EN_REPLACEMENT 走 scripts/display_names.py::read_pairs + read_machine_display_names（含撞名登记）。",
+          "deliberately_unmeasured": "PROSE_TABLE=pending_mt_e（MT-E 还没翻，本来就不该有英文）；MONEY_FORMATTER=render_side_unmeasured（金额解析住在渲染层 money()，Python 侧不冒充复现它，要在 MT-G 两地重建里量）；两个 BLOCKED 桶＋UNLOCATABLE=not_migrated（处置是补来源/补登记，不是给英文）。"
+        },
+        "unlocatable_semantics": "查不到任何数据地址的键＝无法确认：它可能是渲染层拼接出来的串（例如两格用连接符拼成的 DOM 文本），但那是**观测**，不是判定；本清册不给它编 owner，也不把它算进已迁完。"
+      },
+      "candidate_semantics": "旧英文只能当 MT-E 的**翻译对照候选**：账上留着「这里曾有一段英文」，但它不算本轮 machine_translation 的来源；正式译文必须重新过 MT-C 的 provenance 与 MT-F 的复核链。",
+      "measured_two_faces_2026_11_01": {
+        "why_two_faces": "同一张 legacy 表在盘上有两份不同大小：run 输入里那张，和读者 HTML 里那张。scripts/gen_travel_scope.py:730 自带一份 EN_TEXT_REPLACEMENTS 字面量表（实测 **95** 个键），line 497–498 把 run 输入并进它，line 2330 又把合并结果发给读者。所以只量输入侧会把生成器那张整张漏掉——而合同要停读的正是读者页那张。（行号是登记值，每次改动生成器都要按现场重测回写：上一版登记 727／494–495／2327，本轮实测 730／497–498／2330，由 .temp/v422_honest_map/ZH_RELEASE_1/tools/rewrite_prose_line_registers.py 现算写出。）",
+        "input_face": {"california": 16, "philippines": 819, "sum": 835},
+        "reader_face": {"california": 111, "philippines": 906, "sum": 1017},
+        "keys_only_on_reader_face": {"california": 95, "philippines": 87, "note": "CA 那 95 条正好等于生成器字面量表的键数（一条都没被输入侧覆盖）；PH 是 87，说明 95 条里有 8 条与 PH 输入侧同键。这是**观测**，不是「那 8 条来源就清楚了」。"},
+        "unlocatable_on_reader_face": {"california": 88, "philippines": 141},
+        "version_md_claim_is_stale": "VERSION.md:217 是 DOC-MTD2-COUNT-1 那条撤回行（原句里的固定「2,129 items」已撤回，不再换成另一个永久数字）。legacy 条数随 run 与 build 投影变化：2026-11-01 在 CA/PH 两份冻结样本上实测为输入面 835 条（CA 16／PH 819）、读者载荷面 1,017 条（CA 111／PH 906），与 2,129 都不符；逐条账与出处登记在本合同 ownership.legacy_en_text_replacements.measured_two_faces_2026_11_01 与 .temp 的 MTD2_LEGACY_MIGRATION.json。旧登记值写着 VERSION.md:198，且当时说「改 VERSION.md 属业主单独授权、本轮不动它」——业主 2026-11-04 R3H 已授权同步 VERSION.md／SKILL.md 的发布范围，那句作废：授权已行使，行号也随这次改动按现场重测回写。",
+        "measured_by": ".temp/v422_honest_map/MT1_translation/artifacts/MTD2_LEGACY_MIGRATION.json（双面账，逐条含槽位）+ scripts/test_v422_prose_ownership.py::LegacyMigrationEvidenceTests（现场复算并钉住 seal-43 锚点的 HTML SHA）"
+      },
+      "measured_render_call_sites_2026_11_01": {
+        "spa-layout.js": {"occurrences": 30, "explicit_en_argument": 25, "table_lookup_or_comment": 5, "sha256_12": "3BD942DCED23", "measured_at": "2026-11-03"},
+        "r3b_correction_2026_11_03": "R3B（业主 2026-11-03 第三轮裁「采用现有 designed_no_photo_state」）在 spa-layout.js 里加了正式无图槽位的 DOM 分支（sectionMediaState ＋ branch-visual.no-photo），该文件字节身份变了；三个计数由 mtd2_legacy_migration.py 现场重测——本次计数值不变（新增的不是 en_text_replacements 的调用点），变的是 SHA，所以登记格里的 sha256_12 按现场回写，旧值留在下面那条 superseded 里。",
+        "split-layout.js": {"occurrences": 2, "explicit_en_argument": 0, "table_lookup_or_comment": 2, "sha256_12": "0C46456F1E74", "measured_at": "2026-11-03"},
+        "why_this_number_matters": "25 处把表值当**第二个参数**传给 tr()：显式 en 在优先级第一位，改 tr() 内部的查表顺序一点也动不到它们。业主第 2 条「不许只调三行顺序」的实测根据就是这 25 处。（2026-11-03 更正登记：原登记 31／显式 26 是在 assets/spa-layout.js@5BD397D73B6D 上量的；MT-E1／#119 回合把该文件改成 32BAE54C0452（锚点 MTD2_SEAL46_ANCHOR.json 记了这次 before→after），但调用点数与「line 348 起」都没人重量，合同与 .temp 清册当时互相一致却双双过期——门比的是合同⇄清册，抓不到「两份一起过期」。本轮重跑 mtd2_legacy_migration.py 才由门抓出。现在按现场量登记，并把两个 JS 的 SHA 一起钉进登记格。）",
+        "verified_by": "scripts/test_v422_prose_ownership.py::LegacyMigrationEvidenceTests（把本合同登记的计数与 .temp 清册里的逐行清点对表，数不一致就红）"
+      },
+      "render_path_must_stop_reading_it": "正式渲染路径不得再全局读取这张表。spa-layout.js 不只在 tr() 内优先查它（line 351 起），还有一批调用点把 replacement 当**显式 en 参数**传入（tr(x[3], D.en_text_replacements?.[x[3]]) 等），所以只调 tr() 那三行顺序不根治——必须按渲染槽位逐点拆除。本轮**未完成**该项：拆除要连两地重建一起验证，而重建属 MT-G、当前 BLOCKED；只把调用点清点进证据，不假装已经拆干净。",
+      "measured_2026_11_01": "owner 身份撤销后，原先 388 条 owner_unprovenanced_blocked（CA 10 / PH 378）不再是阻断项：它们按地址回落真实通道。PH 的 378 条今天仍是靠这张表在发英文——这正是 MT-E 必须逐条重翻并补来源的原因，也是「先拆表再翻译」的顺序不能倒过来的原因。"
+    }
+  },
+  "identity_and_lineage_rule": {
+    "source_dataset_sha256_checked_at_apply": "apply 现场对 dataset 文件字节重算 SHA-256 并与 provenance 登记值比对；不等即阻断，因为「为 A 版数据翻的表」套在 B 版数据上＝把译文配错原句。",
+    "run_dir_must_match": "表里的 run 必须就是被写的这棵 run。",
+    "review_status_allowed": [
+      "owner_review_pending",
+      "owner_reviewed",
+      "owner_rejected"
+    ],
+    "review_status_value_now_required": "owner_review_pending",
+    "review_status_teeth_note": "光有闭集挡不住我自己：owner_reviewed 也在闭集里。所以校验比的是**当前必须等于哪一格**（表级与逐条都核），而不是「像不像一个合法值」。业主 2026-11-01 的话是「owner review 未完成前仍标候审」，翻完 357 条不构成完成；要放开这一格，得由业主把本登记值改掉，不许由写表的人顺手改。",
+    "candidate_version_constraint": "v4.2.2 是可审计候选版：业主独立复核完成前，任何 entry 或表级的 review_status 写成 owner_reviewed 都是假陈述，本合同按 finding 阻断。",
+    "provenance_is_audience_facing": "dataset.prose_en_provenance 会进读者载荷（gen_travel_scope.py 把 prose_en / prose_en_provenance / prose_en_required 一起交付），所以来源记录不是内部装饰：读者页上的英文有没有出处，业主能当场看到。"
+  },
+  "digest_rule": {
+    "field": "table_sha256",
+    "computed_over": "canonical JSON（json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(\",\", \":\"))）的 UTF-8 字节，其中**所有层级的 table_sha256 键先删掉**。",
+    "excluded_keys": [
+      "table_sha256"
+    ],
+    "self_exclusion_reason": "摘要字段若参与自己的摘要就永远对不上。业主要求「翻译表摘要排除摘要字段自身」，本实现按键名剔除而非按位置，防止有人在 provenance 里再塞一个同名字段绕过。",
+    "verified_at": "validate_table 现场重算并与文件值比对；不等即 table_sha256_mismatch（表被事后改过，或改的人没重算）。"
+  },
+  "no_new_facts": {
+    "rule": "译文不得引入原文没有的事实，也不得丢掉原文有的事实。",
+    "must_not_drift": [
+      "数字与数量级",
+      "币种与金额符号",
+      "年份与日期",
+      "时刻与班次",
+      "专名（人名/店名/地名/机构名）",
+      "目的地与线路名",
+      "评分、地址、承诺性表述"
+    ],
+    "enforced_by": "结构面由本文件负责（字段齐不齐、id 对不对、摘要算不算得上）；语义面由 MT-D 的 scripts/prose_reconcile.py + references/prose-glossary.json 负责，MT-F 再跑一遍独立复核。MT-C 先把「必须有这一层」登记下来，避免下一轮把语义对账当成可选项。",
+    "reconciliation_layer": {
+      "registered_at": "MT-D2 第 6 步（业主 2026-11-01 对 #99 的裁决第 6 条）",
+      "rule": "每一格 entry 的译文必须过「结构事实不漂移」对账；漂了就整表不合格，--apply 不落盘。",
+      "implemented_by": "scripts/prose_reconcile.py::reconcile_pair（唯一实现），validate_table 经 checker(dataset) 逐条调用；CLI：python scripts/prose_reconcile.py --dataset <ds> (--table <表> | --from-legacy-map) --report <out>",
+      "registry": "references/prose-glossary.json（检查项、币种码、月名、固定措辞与词边界、单位制式切换、假阳性回归样本）",
+      "checks_are_owned_by_the_glossary": "检查项闭集在术语表，本文件只登记「有这一层且它阻断」；两处各列一遍就会有两把尺子。",
+      "name_sources": "实体名读 display_names.read_pairs，目的地名读 dataset.destinations——术语表里不抄第二份名字表（源码扫描由 test_v422_prose_glossary.py::test_no_second_copy_of_name_tables 管）。",
+      "cross_module_emission": "本层发的 9 个 fact_drift_* 已进 blocking_findings：门会发**别的模块**造的码，所以闭合测试必须扫两个模块——只扫 translate_prose.py 抓不到，那条门就是纸面的。",
+      "measured_2026_11_01": {
+        "artifact": ".temp/v422_honest_map/MT1_translation/artifacts/MTD2_DRIFT_BASELINE.json",
+        "tool": ".temp/v422_honest_map/MT1_translation/tooling/mtd2_drift_baseline.py",
+        "what_was_measured": "legacy 候选英文（旧表 cn→en 对）的**双面**：run 输入那张 + 已封读者 HTML 那张。不是验收旧表，是给「旧英文能不能整表当本轮来源」一条实测答案。",
+        "california": {"input_pairs": 16, "input_flagged": 0, "reader_pairs": 111, "reader_flagged": 0},
+        "philippines": {
+          "input_pairs": 819, "input_flagged": 77, "reader_pairs": 906, "reader_flagged": 77,
+          "code_counts": {"fact_drift_entity": 66, "fact_drift_destination": 5, "fact_drift_number": 6}
+        },
+        "first_pass_then_narrowed": "第一版尺子在 PH 旧对上标了 83 条，其中 6 条是尺子自己的毛病：「约」当子串撞 预约/盟约 4 条，无金额却要求币种码 2 条。按登记面收窄（terms[].match=before_number + not_after 词边界、币种只查金额表达式）后重测＝77 条；那 6 条样本登记在 prose-glossary.json::false_positive_regressions，由 RulerPrecisionTests 逐条重放。",
+        "verdict_support": "77 条里 66 条是登记专名与旧英文互相冲突、5 条是目的地名被泛化、6 条是数字或区间整段丢失。这就是 #99 把旧表降级为 candidate_only、逐地址迁移、不得整表当来源的实测依据。CA 读者面那 111 条形状全干净，但形状干净不等于语义对（反义/漏译归 MT-F）。"
+      },
+      "measured_2026_11_02_proper_name_variant": {
+        "added_by_round": "MT-F4（业主 2026-11-02 第 2 条授权 #119 窄范围入树）",
+        "tool": "python scripts/prose_reconcile.py --dataset <ds> --table <MTE0 候选表>",
+        "california_table": {"pairs": 501, "flagged_pairs": 2,
+                             "codes": {"fact_drift_proper_name_variant": 2},
+                             "rows": ["P0097 entry f90009bf57d（Cathy↔Cathys：撇号被写坏）",
+                                      "P0283 entry feb55e59b0d（Ciopinno↔Cioppino：错在中文原格）"]},
+        "philippines_table": {"pairs": 385, "flagged_pairs": 0, "codes": {},
+                              "why_zero": "唯一的形状冲突 P0803 entry fb00a037ac5（Flat White↔Flat Whites）按业主裁决登记为**这一个 pair** 的允许复数差异；不是把整类复数放行"},
+        "legacy_faces_unchanged": "CA 16 条与 PH 819 条 legacy 候选对重测＝0 条新增码，83→77 那笔历史账不受影响（分母与结论同源复核过）",
+        "consequence_for_the_sealed_table": "MT-E0 那张 886 候选表现在**过不了** validate_table：多出 2 条阻断。这是预期结果，不是回归——它意味着 #88 的 apply 被两笔真缺陷钉住，且 Ciopinno 那条必须连中文原格一起改。【同日更正（MT-E1，169 条 owner 迁移入树）】这句话量的是**当天上午**的账：迁移之后，同一张历史表按今天的尺子多报的不是 2 条而是 110 条（CA 108 条 entry_for_blocked_fragment ＋ 原来那 2 条专名形状），点名集合恰等于迁走的 108 行——见 `mt_e0_candidate_tables_2026_11_01.history_face_findings_2026_11_02`。当前面（717 行）上这条后果改成：CA 报 1 条（feb55e59b0d，留在 prose）、PH 报 0 条，另 1 条跟着 owner 迁进显示名修正清单（f90009bf57d），总缺陷仍 2。",
+        "pairs_are_the_then_current_table": "上面 `california_table.pairs` 501／`philippines_table.pairs` 385 是**当时那张 886 表**的行数（现属历史面）；今天的 prose 面是 393／324，登记在 `mt_e1_candidate_tables_2026_11_02.measured_2026_11_02`。两处的 pairs 都由测试从盘上表字节现算，不靠这格文字。",
+        "known_loophole": "本检查只保证**同一对内两面对齐**。若把英文改成跟着中文一起错（en→Ciopinno），形状一致 ⇒ 本门不再报，那不是修好。补它的办法是把专名按来源登记（tier1/tier2 或 prose-glossary），不是把这条检查写成猜对错的裁判。"
+      },
+      "known_residual": "词边界表（约 的 not_after）来自两地语料实测的 6 个前字；中文分词没做，所以新的复合词写法仍可能漏检或误报——出现时必须带着该条实测原文加进登记面，不许顺手放宽整条检查。"
+    },
+    "not_enforced_here": "本合同不判断「翻得好不好」，也不给任何一条译文做事实背书的假象：它是机器译文，来源写着谁是来源。"
+  },
+  "forbidden_workarounds": [
+    "把缺来源的表当「先写了再说」：provenance 缺失或占位 ⇒ --apply 直接失败，dataset 字节不变。",
+    "把 entries 退回 {id: \"英文串\"} 的省事形态：entry_shape_not_object 阻断。",
+    "只翻能翻的、剩下的留空：missing_entries_block，禁部分写盘。",
+    "拿旧数据的表套新数据（陈旧项）：stale_entries_block + source_dataset_sha256 现场重算。",
+    "为了让 gate 变绿把 review_status 写成 owner_reviewed：candidate_version_constraint 阻断。",
+    "把 4 条 tier2 专名塞进 prose 表冒充散文：prose 表只接 collect_fragments 产出的 fragment，专名归 display-name-channel。",
+    "用 Path.write_text 写发布/证据文件（Windows 会把 LF 写成 CRLF）：write_discipline 阻断。"
+  ],
+  "write_discipline": {
+    "bytes_only": "一律 Path.write_bytes(utf-8 编码后的字节)，禁止 write_text。",
+    "line_endings": "LF only；写完立刻读回字节，出现 \\r\\n 即报错（Windows 换行翻译会把整份 dataset 的哈希改掉而内容语义不变，那种「没人改过却哈希变了」的账最坑）。",
+    "post_write_recompute": "写完重读文件字节复算 SHA-256，与将要写入的字节复算值比对；report 里必须给出 before_sha256 / after_sha256 / written_bytes。",
+    "round_trip": "重读后的 JSON 必须与内存对象逐键相等（防止 indent/ensure_ascii/键序之外的任何改写）。"
+  },
+  "blocking_findings": [
+    "table_not_object",
+    "missing_top_level_field",
+    "schema_version_mismatch",
+    "provenance_not_object",
+    "provenance_missing_fields",
+    "provenance_placeholder_fields",
+    "review_status_not_allowed",
+    "run_dir_mismatch",
+    "source_dataset_sha256_mismatch",
+    "entries_not_object",
+    "entry_shape_not_object",
+    "entry_missing_fields",
+    "entry_provenance_not_object",
+    "entry_provenance_missing_fields",
+    "entry_provenance_placeholder_fields",
+    "entry_provenance_inconsistent_with_table",
+    "entry_id_digest_mismatch",
+    "entry_cn_mismatch",
+    "entry_kind_unregistered",
+    "entry_addresses_empty",
+    "entry_en_empty",
+    "entry_en_contains_cjk",
+    "duplicate_entry_id",
+    "duplicate_entry_cn",
+    "fragment_missing_from_table",
+    "stale_entry_id",
+    "table_sha256_mismatch",
+    "mixed_owner_for_content_id",
+    "no_registered_owner_for_address",
+    "owner_unprovenanced_blocked",
+    "display_name_proper_name_variant",
+    "entry_for_blocked_fragment",
+    "ownership_accounting_mismatch",
+    "dataset_shape_blocked",
+    "array_row_shorter_than_max_alias_index",
+    "array_row_arity_mismatch",
+    "dict_row_missing_aliased_field",
+    "mixed_row_shapes_in_one_dataset",
+    "alias_field_not_registered_in_any_channel",
+    "alias_index_double_claimed",
+    "legacy_entry_unlocatable",
+    "legacy_inventory_accounting_mismatch",
+    "migrated_owner_cannot_serve",
+    "fact_drift_number",
+    "fact_drift_date",
+    "fact_drift_currency",
+    "fact_drift_url",
+    "fact_drift_entity",
+    "fact_drift_destination",
+    "fact_drift_term",
+    "fact_drift_unit_system",
+    "fact_drift_proper_name_variant"
+  ],
+  "measured_before_this_contract": {
+    "was": "apply_table 里 provenance 的取法是 `(table_raw.get(\"provenance\") if isinstance(table_raw, dict) else None) or \"unlabelled translation table\"`——缺失或空值都落到一个**字符串**上；而 gen_travel_scope.py:453 只在 `isinstance(payload.get(\"provenance\"), dict)` 时才把它并进载荷。",
+    "consequence": "字符串来源被构建侧静默丢弃：读者页可以带着整套没有出处记录的英文散文出货，台账上一片安静。data-model.json::english_gap_verdicts 的 must_not_be_closed_by 里那句「prose_en_provenance 为空时 --apply 自己报错」当时是**一纸空文**。",
+    "detected_by": "本轮通读 translate_prose.py 与 gen_travel_scope.py 的取用面，未先改代码；MT-C 负测（provenance 缺失 / 字符串占位 / 单字段占位）负责把这条钉住，防止它从别处回来。"
+  }
+}

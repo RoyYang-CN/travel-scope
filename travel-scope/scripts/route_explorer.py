@@ -10,6 +10,9 @@ import json
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[1]
+POLICY = json.loads((ROOT / "references/run-quality-policy.json").read_text(encoding="utf-8"))
+
 
 def _names(items: list[Any]) -> set[str]:
     return {str(x).strip() for x in items if str(x).strip()}
@@ -109,14 +112,24 @@ def main() -> int:
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--allow-uncovered", action="store_true")
+    parser.add_argument("--min-corridors", type=int, default=POLICY["country_run_min_routes"], help="Minimum distinct country-level candidate corridors")
     args = parser.parse_args()
     result = explore(json.loads(args.input.read_text(encoding="utf-8")))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     uncovered = result["coverage"]["uncovered"]
     classic_uncovered = result["classic_coverage"]["uncovered"]
-    if (uncovered or classic_uncovered) and not args.allow_uncovered:
-        print(json.dumps({"status": "FAIL", "uncovered": uncovered, "classic_uncovered": classic_uncovered}, ensure_ascii=False))
+    signatures = [tuple(item.get("nodes") or []) for item in result["corridors"]]
+    incomplete = [item.get("corridor_id") for item in result["corridors"] if float(item.get("continuity", 0)) < 100]
+    route_errors = []
+    if len(signatures) < args.min_corridors:
+        route_errors.append(f"候选路线少于 {args.min_corridors} 条")
+    if len(set(signatures)) != len(signatures):
+        route_errors.append("候选路线节点序列重复")
+    if incomplete:
+        route_errors.append(f"候选路线存在未连通交通边: {incomplete}")
+    if ((uncovered or classic_uncovered) and not args.allow_uncovered) or route_errors:
+        print(json.dumps({"status": "FAIL", "uncovered": uncovered, "classic_uncovered": classic_uncovered, "route_errors": route_errors}, ensure_ascii=False))
         return 2
     print(json.dumps({"status": "PASS", "corridors": len(result["corridors"]), "subcorridors": len(result["subcorridors"]), **result["coverage"], **result["classic_coverage"]}, ensure_ascii=False))
     return 0

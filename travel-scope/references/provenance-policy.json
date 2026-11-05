@@ -1,0 +1,21 @@
+{
+  "policy_version": "1.0.0",
+  "target_version": "5.0.0",
+  "strict_self_containment": true,
+  "banned_path_patterns": [
+    "travel_scope_run_.*_v410",
+    "travel_scope_run_.*_v411",
+    "travel_scope_run_.*_v412",
+    "travel-scope-v4.0.10",
+    "travel-scope-v4.0.11",
+    "travel-scope-v4.0.12",
+    "travel-scope-v4.0.13"
+  ],
+  "authoritative_delivery_gate_relpath": "outputs/delivery-gate.json",
+  "disallowed_legacy_gate_reports": [
+    "evidence/delivery_gate.json"
+  ],
+  "banned_version_markers": [
+    "v413"
+  ]
+}

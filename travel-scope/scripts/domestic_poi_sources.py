@@ -16,6 +16,11 @@ from typing import Any
 
 import requests
 
+try:
+    from api_cache import ApiCache
+except ImportError:  # pragma: no cover
+    from scripts.api_cache import ApiCache
+
 
 AMAP_SEARCH_URL = "https://restapi.amap.com/v3/place/text"
 BAIDU_SEARCH_URL = "https://api.map.baidu.com/place/v2/search"
@@ -98,7 +103,7 @@ def dedupe_poi_candidates(pois: list[dict[str, Any]], expected_city: str = "", e
 class DomesticPoiSources:
     """AMap primary + Baidu secondary structured POI provider."""
 
-    def __init__(self, cache_path: str | Path | None = None):
+    def __init__(self, cache_path: str | Path | None = None, cache_db: str | Path | None = None):
         self.amap_key = _text(os.environ.get("TRAVEL_SCOPE_AMAP_KEY"))
         self.baidu_key = _text(os.environ.get("TRAVEL_SCOPE_BAIDU_KEY"))
         self.baidu_mode = _text(os.environ.get("TRAVEL_SCOPE_BAIDU_MODE", "core")) or "core"
@@ -109,6 +114,20 @@ class DomesticPoiSources:
         self.cache: dict[str, Any] = {}
         if self.cache_path and self.cache_path.exists():
             self.cache = json.loads(self.cache_path.read_text(encoding="utf-8"))
+        self.sqlite_cache = ApiCache(cache_db) if cache_db else None
+        self.daily_limit = int(os.environ.get("TRAVEL_SCOPE_DOMESTIC_DAILY_LIMIT", "100"))
+        self.monthly_limit = int(os.environ.get("TRAVEL_SCOPE_DOMESTIC_MONTHLY_LIMIT", "1000"))
+
+    def _sqlite_get(self, provider: str, operation: str, key: str):
+        return self.sqlite_cache.get(provider, operation, key) if self.sqlite_cache else None
+
+    def _sqlite_request(self, provider: str, operation: str, key: str):
+        if not self.sqlite_cache:
+            return None
+        call_id = self.sqlite_cache.start_call(provider, operation, key, self.daily_limit, self.monthly_limit)
+        if not call_id:
+            raise RuntimeError(f"{provider} daily quota safety limit reached: {self.daily_limit}")
+        return call_id
 
     def _save(self) -> None:
         if self.cache_path:
@@ -119,15 +138,28 @@ class DomesticPoiSources:
         if not self.amap_key:
             raise RuntimeError("缺少 TRAVEL_SCOPE_AMAP_KEY，不能执行高德结构化 POI 查询")
         key = _cache_key("amap", name, city)
+        sqlite_result = self._sqlite_get("amap", "place_search", key)
+        if sqlite_result is not None:
+            return sqlite_result
         if key in self.cache:
             return self.cache[key]
-        data = requests.get(AMAP_SEARCH_URL, params={
-            "key": self.amap_key, "keywords": name, "city": city,
-            "offset": 5, "page": 1, "extensions": "all",
-        }, timeout=25).json()
+        call_id = self._sqlite_request("amap", "place_search", key)
+        try:
+            data = requests.get(AMAP_SEARCH_URL, params={
+                "key": self.amap_key, "keywords": name, "city": city,
+                "offset": 5, "page": 1, "extensions": "all",
+            }, timeout=25).json()
+            if self.sqlite_cache:
+                self.sqlite_cache.finish_call(call_id, "success")
+        except Exception as exc:
+            if self.sqlite_cache:
+                self.sqlite_cache.finish_call(call_id, "error", str(exc))
+            raise
         pois = data.get("pois") or []
         result = pois[0] if pois else None
         if result:
+            if self.sqlite_cache:
+                self.sqlite_cache.put("amap", "place_search", key, result)
             self.cache[key] = result
             self._save()
         time.sleep(0.12)
@@ -145,12 +177,24 @@ class DomesticPoiSources:
         if not self.baidu_key:
             raise RuntimeError("缺少 TRAVEL_SCOPE_BAIDU_KEY，不能执行百度结构化 POI 查询")
         key = _cache_key("baidu", name, city)
+        sqlite_result = self._sqlite_get("baidu", "place_search", key)
+        if sqlite_result is not None:
+            return sqlite_result
         if key in self.cache:
             return self.cache[key]
-        data = requests.get(BAIDU_SEARCH_URL, params={
-            "ak": self.baidu_key, "query": name, "region": city,
-            "output": "json", "scope": 2, "page_size": 10,
-        }, timeout=25).json()
+        call_id = self._sqlite_request("baidu", "place_search", key)
+        try:
+            data = requests.get(BAIDU_SEARCH_URL, params={
+                "ak": self.baidu_key, "query": name, "region": city,
+                "output": "json", "scope": 2, "page_size": 10,
+            }, timeout=25).json()
+            if self.sqlite_cache:
+                self.sqlite_cache.put("baidu", "place_search", key, data)
+                self.sqlite_cache.finish_call(call_id, "success")
+        except Exception as exc:
+            if self.sqlite_cache:
+                self.sqlite_cache.finish_call(call_id, "error", str(exc))
+            raise
         if data.get("status") not in (0, "0"):
             raise RuntimeError(f"百度地点检索失败：status={data.get('status')}，message={data.get('message', '')}")
         results = data.get("results") or []
@@ -163,6 +207,8 @@ class DomesticPoiSources:
             if detail.get("status") not in (0, "0"):
                 raise RuntimeError(f"百度地点详情失败：status={detail.get('status')}，message={detail.get('message', '')}")
             result["detail_response"] = detail
+            if self.sqlite_cache:
+                self.sqlite_cache.put("baidu", "place_search", key, result)
             self.cache[key] = result
             self._save()
         time.sleep(0.12)

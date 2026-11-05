@@ -1,0 +1,3 @@
+# The sealed Skill tree is byte-addressed by product-origin.json.
+# Disable checkout/add EOL conversion so a GitHub clone verifies identically.
+travel-scope/** -text

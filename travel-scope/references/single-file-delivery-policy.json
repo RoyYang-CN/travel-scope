@@ -1,0 +1,1111 @@
+{
+  "id": "v4.2.2-single-file-delivery-1",
+  "registered_at": "2026-10-30",
+  "purpose": "V0-L11：『单文件自包含』不是一个形容词，是读者手机上要下载完才能读的那串字节。本文件登记唯一的字节口径、唯一的内联上限，以及由实测推出来的回归围栏；发布树里任何第二份 4*1024*1024 之类的硬编码预算都算口径漂移。",
+  "measured_anchors": {
+    "measured_on": "2026-10-30",
+    "measured_by": ".temp/v422_honest_map/V5_nonmap/tooling/v5d_self_contained_evidence.py（真渲染 + 真浏览器 + 只读历史成品；本文件每个数字都出自那次实跑，seal 6140F107DA1893FA）",
+    "delivered_artifacts": [
+      {
+        "artifact": "runs/travel_scope_run_202701_usa_california_v420_001/outputs/usa-california-travel-guide.html",
+        "file_bytes": 2011235,
+        "inline_blob_texts": 4,
+        "duplicate_blob_texts": 1,
+        "note": "v4.2.0 交付基线：同一段 base64 在文件里出现两次（v4.2.1 SS5 才改成 D.asset_blobs 内容寻址）"
+      },
+      {
+        "artifact": "runs/travel_scope_run_202702_philippines_visayas_v419_001/outputs/philippines-visayas-guide-travel-guide.html",
+        "file_bytes": 511998,
+        "inline_blob_texts": 0,
+        "note": "v4.1.9 交付基线：0 段内联字节——所谓自包含其实要靠旁边的 assets 目录，单独发这个 HTML 读者看不到图"
+      },
+      {
+        "artifact": ".temp/v421/seal_run/outputs/usa-california-travel-guide.html",
+        "file_bytes": 4609946,
+        "inline_blob_texts": 25,
+        "duplicate_blob_texts": 0,
+        "dead_blobs": 0,
+        "dangling_asset_refs": 0,
+        "note": "v4.2.1 已接受的全内联成品，即 §16.2 记的 4.39MB；下面的围栏由它的实测字节推出来"
+      }
+    ],
+    "candidate_inline_sweep": [
+      {
+        "dataset": "V2R california_v420",
+        "media_delivery_mode": "inline",
+        "max_inline_kb": 120,
+        "file_bytes": 3884276,
+        "inline_blob_texts": 4,
+        "decoded_blob_bytes": 374304,
+        "container_bytes": 3385108,
+        "dom_images": 25,
+        "dom_inline_images": 3,
+        "dom_file_ref_images": 18,
+        "dom_placeholder_images": 4,
+        "audit_codes": [
+          "SFD_MEDIA_CAP_DIFFERS"
+        ]
+      },
+      {
+        "dataset": "V2R california_v420",
+        "media_delivery_mode": "inline",
+        "max_inline_kb": 200,
+        "file_bytes": 6908789,
+        "inline_blob_texts": 18,
+        "decoded_blob_bytes": 2641200,
+        "container_bytes": 3386759,
+        "dom_images": 25,
+        "dom_inline_images": 16,
+        "dom_file_ref_images": 5,
+        "dom_placeholder_images": 4,
+        "audit_codes": [
+          "SFD_FILE_BYTES_OVER_FENCE",
+          "SFD_MEDIA_CAP_DIFFERS"
+        ]
+      },
+      {
+        "dataset": "V2R california_v420",
+        "media_delivery_mode": "inline",
+        "max_inline_kb": 400,
+        "file_bytes": 11367643,
+        "inline_blob_texts": 30,
+        "decoded_blob_bytes": 5984048,
+        "container_bytes": 3388185,
+        "dom_images": 25,
+        "dom_inline_images": 25,
+        "dom_file_ref_images": 0,
+        "dom_placeholder_images": 0,
+        "audit_codes": [
+          "SFD_FILE_BYTES_OVER_FENCE"
+        ],
+        "note": "唯一做到 DOM 0 张走文件的一档，代价是 11,367,643 字节 = 已接受成品的 2.47 倍"
+      },
+      {
+        "dataset": "V2R california_v420",
+        "media_delivery_mode": "linked",
+        "max_inline_kb": null,
+        "file_bytes": 4391514,
+        "inline_blob_texts": 3,
+        "decoded_blob_bytes": 754819,
+        "container_bytes": 3385017,
+        "dom_images": 25,
+        "dom_inline_images": 2,
+        "dom_file_ref_images": 22,
+        "dom_placeholder_images": 1,
+        "audit_codes": []
+      },
+      {
+        "dataset": "V2R philippines_v419",
+        "media_delivery_mode": "inline",
+        "max_inline_kb": 120,
+        "file_bytes": 3021568,
+        "inline_blob_texts": 0,
+        "decoded_blob_bytes": 0,
+        "container_bytes": 3021568,
+        "dom_images": 24,
+        "dom_inline_images": 0,
+        "dom_file_ref_images": 20,
+        "dom_placeholder_images": 4,
+        "audit_codes": [
+          "SFD_MEDIA_CAP_DIFFERS"
+        ],
+        "note": "与同数据集 linked 档字节数完全相同（只差上限标记内容）：120KB 档对菲律宾事实上就是 linked 交付"
+      },
+      {
+        "dataset": "V2R philippines_v419",
+        "media_delivery_mode": "inline",
+        "max_inline_kb": 200,
+        "file_bytes": 3281982,
+        "inline_blob_texts": 1,
+        "decoded_blob_bytes": 195201,
+        "container_bytes": 3021691,
+        "dom_images": 24,
+        "dom_inline_images": 2,
+        "dom_file_ref_images": 18,
+        "dom_placeholder_images": 4,
+        "audit_codes": [
+          "SFD_MEDIA_CAP_DIFFERS"
+        ]
+      },
+      {
+        "dataset": "V2R philippines_v419",
+        "media_delivery_mode": "inline",
+        "max_inline_kb": 400,
+        "file_bytes": 5583904,
+        "inline_blob_texts": 7,
+        "decoded_blob_bytes": 1921042,
+        "container_bytes": 3022347,
+        "dom_images": 24,
+        "dom_inline_images": 13,
+        "dom_file_ref_images": 7,
+        "dom_placeholder_images": 4,
+        "audit_codes": []
+      },
+      {
+        "dataset": "V2R philippines_v419",
+        "media_delivery_mode": "linked",
+        "max_inline_kb": null,
+        "file_bytes": 3021568,
+        "inline_blob_texts": 0,
+        "decoded_blob_bytes": 0,
+        "container_bytes": 3021568,
+        "dom_images": 24,
+        "dom_inline_images": 0,
+        "dom_file_ref_images": 20,
+        "dom_placeholder_images": 4,
+        "audit_codes": []
+      }
+    ],
+    "sweep_reading": "这张表就是 V0-L11 的内容：加州要 DOM 里 0 张走文件，必须把上限放到 400KB，代价是单文件 11,367,643 字节（已接受成品 4,609,946 的 2.47 倍，围栏 5,762,432 直接被顶穿）；压到 200KB 省到 6,908,789 但仍有 5 张走文件，且因为与登记值不一致先触发 SFD_MEDIA_CAP_DIFFERS。菲律宾没有任何一档能同时做到全自包含与不超围栏：400KB 档仍有 7 张走文件，120KB 档与 linked 档字节数完全相同。另外走文件的图并不只是『缺图』——它们加载失败后被 JS 画成生成的假封面（每档 4 张），读者看到的是一张编出来的图。",
+    "sweep_caveat": "上限档位表用两棵冻结 run 的在盘 rendition（只读）现渲，渲染到没有 assets 目录的临时目录，V6 候选 run 走完整媒体管线后数字会变；这张表说明的是『上限—体积—自包含是否失效』的三角关系，不是本次交付的最终体积。",
+    "open_owner_decision": "V6 交付用哪一档上限（或改 rendition 集，或明确改为『HTML + assets』的多文件交付并另立门禁语义）必须由业主裁决并登记。本版只把代价摆出来并让超限无法静默通过，不替业主选。"
+  },
+  "measurement": {
+    "file_bytes": "os.stat 的真实字节数（不是字符数）：这就是读者要下载的那个数。",
+    "blob_text_bytes": "文件内 data:image/...;base64,… 整段文本的字节合计：内联图片在文件里实际占的位子是它，不是解码后的大小。",
+    "decoded_blob_bytes": "把 base64 解码后的图片字节合计：图片本身的大小。",
+    "container_bytes": "file_bytes - blob_text_bytes：文字、脚本、样式与 dataset JSON 的开销，与图片无关，srcset 一类手段动不到它。",
+    "inflation_note": "base64 每 3 字节膨胀成 4 个字符，所以 1MB 图片进文件要占约 1.33MB。报告必须同时给 blob_text_bytes 与 decoded_blob_bytes，只给一个就会把代价读错。",
+    "blob_identity": "以解码后字节的 sha256 认定同一张图；D.asset_blobs 的键是 digest，dataset 字段用 asset://sha256:<digest> 引用。",
+    "dead_blob": "进了 D.asset_blobs 却没有任何 asset://sha256: 引用指向它：读者下载了但永远画不出来。",
+    "dangling_asset_ref": "dataset 里有 asset://sha256:<digest> 引用，但 D.asset_blobs 里没有这个键：页面上那张图只能走 error 兜底。",
+    "single_implementation": "scripts/self_contained_audit.py 是发布树里唯一做单文件字节对账与结构引用对账的地方；scripts/local_media_gate.py:attest_delivered_images 仍唯一持有『按 digest 比对交付字节与清单/在盘文件』的规则，本模块不重算摘要链；visual_qa 的图片预算同样从这里读，不允许再各写一个常数。"
+  },
+  "media_delivery": {
+    "default_max_inline_kb": 400,
+    "declared_in_html": "<meta name=\"travel-scope-media-cap\" content=\"<本次构建使用的内联上限 KB>\">；linked 档不做内联，但仍写登记值，用来证明构建参数而不是事后猜",
+    "why": "上限以前只写在渲染器默认值里，产物自己不声称用了哪一档；于是 11.4MB 的成品和 3.9MB 的成品看着像同一次构建。",
+    "gate_semantics": "产物自称的档位与登记值不一致 = SFD_MEDIA_CAP_DIFFERS 阻断：这是『构建参数与配置已经漂移』，不是小差异。想试别的档位必须先改登记（业主裁决），不能只改调用参数。"
+  },
+  "budgets": {
+    "max_delivered_file_bytes": 5762432,
+    "derivation": "v4.2.1 已接受的全内联成品实测 4,609,946 字节，×1.25 = 5,762,432。围栏是回归探测器，不是产品体验预算：超过它必须显式解释或经业主裁决改登记；没超过也不代表体积合适。",
+    "hero_inline_budget_bytes": 90112,
+    "total_inline_budget_bytes": 1954314,
+    "budget_note": "这两个是 DOM 侧预算（首屏单图 / 全页内联图片解码字节），v4.2.1 一直硬编码在 visual_qa.py 里；本文件把它们收成一个来源。它们与 max_delivered_file_bytes 量的是不同东西：前者只数浏览器真要解码的图，后者数读者要下载的整个文件。",
+    "max_delivered_image_width_px": 1000,
+    "max_dead_blob_share_of_image_text": 0.0,
+    "dead_blob_rule": "死字节按登记份额 0 判定：出现即阻断，因为那部分是读者付了钱却看不到的内容。",
+    "total_inline_budget_history": {
+      "previous_value": 4194304,
+      "why_changed": "旧值 4,194,304 与同一登记里的 max_delivered_file_bytes 5762432 自相矛盾：按 4/3 内联膨胀后光图片就 5,592,405B，加本轮实测容器 3,156,172B ＝ 8.75MB，必然破围栏。两个数以前各写各的，谁也没被拿去对账（V0-L11 的另一种形态）。现在总预算由围栏减容器反推，只有一个来源。（ladder-2 又把总预算从 4194304 收到 1954314：container 上界按真管线 8 次渲染重算为 3156680B。）",
+      "changed_at": "2026-10-30"
+    },
+    "hero_inline_budget_history": {
+    "previous_value": 81920,
+    "current_value": 90112,
+    "formula": "ceil(86906 / 8192) × 8192 ＝ 90112（下一个 8 KiB 档，不是按需贴身的数）",
+    "measured_first_screen_bytes": 86906,
+    "measured_headroom_bytes": 3206,
+    "authorized_by": "业主 2026-11-04 裁示：只把首屏单图预算抬到 88 KiB 档；其余图像参数、总预算与文件围栏全部不变；不降画质、不改宽度、不换来源、不伪造声明宽度",
+    "authorized_at": "2026-11-04",
+    "why_changed": "R3D 全量重派生后，首屏图（assets/editorial/sf_golden_gate.jpg，声明宽 1600）今天必须由 API 的 1920 档经归一桥产出；同一交付档（hero＝w1000 q52 4:2:2）重编码后交付字节从 78,047 涨到 86,906，越过旧门 4,986 B。这是验收门与实际交付形态的口径错位，不是画质问题：改门不改字节。",
+    "not_a_permanent_backstop": "Commons 当前修订或许可再变，仍会触发重新核验并按新门重测；本值不构成『以后任何首屏图都能过』的兜底",
+    "unchanged_in_the_same_ruling": {
+      "hero_tier": "w1000 / jpeg_quality 52 / subsampling 1（4:2:2）",
+      "total_inline_budget_bytes": 1954314,
+      "max_delivered_file_bytes": 5762432,
+      "max_delivered_image_width_px": 1000,
+      "max_delivered_image_decoded_bytes": 409600
+    },
+    "measured_totals_at_ruling_time": {
+      "staging_delivered_image_bytes_total": 1857173,
+      "total_inline_headroom_bytes": 97141,
+      "staging_html_bytes": 3536450,
+      "file_filing_headroom_bytes": 2225982
+    }
+  },
+  "hero_inline_budget_note": "DOM 侧首屏单图预算与 chosen 档实测最大单张交付图字节是两个判据，不互相折算：前者数浏览器真要解码的首屏单图，后者数交付档落在盘上的字节。两个数都留在报告里。首屏预算的当前值与历史见 hero_inline_budget_history（81920→90112，业主 2026-11-04）。"
+  },
+  "reason_codes": {
+    "SFD_POLICY_MISSING": "blocking",
+    "SFD_FILE_MISSING": "blocking",
+    "SFD_FILE_UNREADABLE": "blocking",
+    "SFD_FILE_BYTES_OVER_FENCE": "blocking",
+    "SFD_DEAD_BLOB": "blocking",
+    "SFD_DANGLING_ASSET_REF": "blocking",
+    "SFD_STATIC_EXTERNAL_IMG_REF": "blocking",
+    "SFD_MASKED_IMG_REF": "blocking",
+    "SFD_MEDIA_CAP_UNMARKED": "blocking",
+    "SFD_MEDIA_CAP_DIFFERS": "blocking",
+    "SFD_BLOB_OVER_REGISTERED_CAP": "blocking",
+    "SFD_ACCOUNTING_NOT_IN_REPORT": "blocking",
+    "IMG_RENDERED_UNREGISTERED": "blocking",
+    "IMG_RENDERED_EXTERNAL_REF": "blocking",
+    "IMG_RENDERED_NO_FILE_BLOB": "blocking",
+    "IMG_RENDERED_FALLBACK_PLACEHOLDER": "blocking",
+    "IMG_MANIFEST_ABSENT": "blocking",
+    "IMG_MANIFEST_NOT_RENDERED": "advisory",
+    "IMG_DATASET_SLOT_EMPTY": "advisory",
+    "SFD_DELIVERED_TOTAL_OVER_BUDGET": "blocking",
+    "IMG_DELIVERED_OVER_INLINE_CAP": "blocking",
+    "IMG_DELIVERED_LADDER_UNREGISTERED": "blocking",
+    "IMG_RENDERED_NO_PHOTO_SLOT_UNMARKED": "blocking",
+    "IMG_RENDERED_NO_PHOTO_STATE_MISMATCH": "blocking",
+    "IMG_RENDERED_NO_PHOTO_HAS_IMAGE": "blocking",
+    "IMG_RENDERED_NO_PHOTO_LABEL_MISSING": "blocking"
+  },
+  "severity_note": "blocking 会挡下交付；advisory 只登记事实、不挡交付，但必须出现在报告里，不允许因为『不算违规』就从证据里消失（与 V5-B 汇率口径同一处理）。",
+  "non_goals": {
+    "network_transfer": "本版不声称测过真实网络首屏字节（V0-L10 仍 OPEN：file:// 下 transferSize=0，要业主给部署环境）。",
+    "cdn_or_lazy": "不引入 CDN、外链图床或按需拉图；自包含的定义就是读者拿到的那一个文件里有他要看的图。",
+    "auto_downgrade": "超限不自动改上限、不自动删图，只把代价报出来并阻断，避免用『看起来更小』的假象换掉真实内容。",
+    "duplicate_digest_rule": "重复内联的判定归 local_media_gate.attest_delivered_images（按 digest），本文件不再登记第二套重复判定码。"
+  },
+  "delivered_rendition_ladder": {
+    "ratified_by": "业主 2026-10-30 裁决：交付档位矛盾（CA 全内联但超围栏 / PH 在围栏内但 7 张走文件、4 张被画成假封面）不用抬围栏或改多文件交付解决，改为重编交付图。围栏 5,762,432B、单文件交付形态、两条门禁的判据都不动。",
+    "id": "v4.2.2-delivered-rendition-ladder-4",
+    "configured_at": "2026-10-30",
+    "implemented_by": [
+      "scripts/single_file_policy.py::rendition_ladder（唯一读取入口）",
+      "scripts/prepare_media.py::prepare_asset（按登记 slots+encode 产图，并把 ladder id 与编码旗标写进 transform）"
+    ],
+    "enforced_by": [
+      "scripts/self_contained_audit.py::findings",
+      "scripts/local_media_gate.py::check_delivered_rendition_budget",
+      "scripts/test_v422_delivered_rendition_ladder.py"
+    ],
+    "slots": {
+      "hero": {
+        "max_width_px": 1000,
+        "jpeg_quality": 52,
+        "tiers": [
+          {
+            "label": "w1000",
+            "max_width_px": 1000,
+            "jpeg_quality": 52
+          }
+        ]
+      },
+      "destination_atmosphere": {
+        "max_width_px": 700,
+        "jpeg_quality": 46,
+        "tiers": [
+          {
+            "label": "w700",
+            "max_width_px": 700,
+            "jpeg_quality": 46
+          }
+        ]
+      }
+    },
+    "encode": {
+      "subsampling": 1,
+      "optimize": true,
+      "progressive": true,
+      "why_registered": "JPEG 编码旗标决定在盘字节，也决定读者看到的色彩细节，所以它和尺寸/质量一样属于交付档；以前它只是 prepare_media 里的裸参数（PIL 默认值），没有任何地方登记，于是『交付档』这句话只说了三分之二。",
+      "measured_consequence": "subsampling=2（4:2:0，PIL 在 quality<95 时的默认）把加州 assets/section/sf_cafes.jpg（File:San Francisco Panorama from Twin Peaks 2013.jpg，Tuxyso/CC BY-SA 3.0）的 color entropy 从源图 4.5196 压到交付档 4.4959，跌破 media-policy.json::authenticity_gate.min_color_entropy=4.5，真照片被真实性门判成『合成线框/模板占位图』，正式生成 exit 2——读者拿不到这张图。改 subsampling=1（4:2:2）后同一张 4.5112（余量 +0.0112），两棵树 54 张全过。",
+      "alternatives_measured": "4:4:4 也让真图全过，但加州交付图从 1,514,181B 涨到 1,780,752B，产物文件 5,849,914B 超围栏 87,482B；按业主裁决围栏不动，所以 4:4:4 出局。4:2:2 在同尺寸同质量下产物 5,643,350B（围栏余量 119,082B），是唯一一条既不误杀真图、又不让读者看到更低尺寸/更低质量的档。",
+      "gate_untouched": "真实性阈值 4.5、『在交付字节上量』这条口径、围栏 5,762,432B、单图上限 409,600B、总预算 1,954,314B 全部原样；本轮只改产图侧编码旗标，没有任何门禁数字被放宽。",
+      "residual_risk": "加州最低熵那张离下限只有 0.0112，且整组余量薄（离总预算 89,927B、离围栏 119,082B）。这条已写进 measured_sweep.reading，任何再降尺寸/质量的改动都可能同时踩破两处，由门禁当场拦下而不是靠人记。"
+    },
+    "min_delivered_geometry": {
+      "width_px": 640,
+      "height_px": 360,
+      "ratified_by": "Checklist §11 V6 端到端候选 run 实测缺陷 + V6-R（本登记把下限从媒体门的裸数收为唯一来源；数值与 v4.2.1 起生效的 640×360 一致，未放宽）",
+      "why_registered": "V6-R 之前这条下限只存在于 scripts/local_media_gate.py 的 `width < 640 or height < 360` 两个裸数里，产图模块读不到它。等比缩档按宽度出档，遇到极宽全景源就会自己产出被媒体门拒绝的交付图——两侧都『按自己的规则办事』，代价落在读者身上。登记成一处后 prepare_media 用它钳制宽度，local_media_gate 用它判定，同一把尺子。",
+      "read_by": [
+        "scripts/prepare_media.py",
+        "scripts/local_media_gate.py",
+        "scripts/spa_renderer.py",
+        "scripts/visual_qa.py"
+      ],
+      "clamp_rule": "source_height ≥ height_px 时，交付宽度不得超过 floor_width = ceil(height_px × source_width / source_height)；源本身低于下限的绝不 upscale（插值不还给读者细节），改走媒体缺口登记，不靠压像素蒙过门。",
+      "width_cap_conflict": {
+        "rule": "交付宽度上限 max_delivered_image_width_px 与本下限可能对同一张源图无法同时成立。视觉门的 IMG_TOO_WIDE 因此放行「收回上限就会让等比高度跌破下限」的那一类：判据是 height × max_delivered_image_width_px / width < height_px，两个数都取自本登记，不放行条件不引入第三个数。其余超宽（压回上限后高度仍高于下限）照旧 blocking。",
+        "why_registered": "不登记的话，这条放行就是 visual_qa 里的一个 if；下轮有人看到 1081px 就会当成漏判、把裸数 1000 抬大，或者把钳制档删掉——两种改法都破坏本登记。登记成规则后它和钳制是同一条交付档的两面，可被测试复算。",
+        "measured_consequence": "加州 assets/editorial/big_sur_bixby_bridge.jpg 交付 1081×360：360×1000/1081=333.0 < 360 → 放行；负样本 2000×1500 → 750 ≥ 360 与 1001×400 → 399.6 ≥ 360 仍判 IMG_TOO_WIDE。",
+        "read_by": [
+          "scripts/visual_qa.py"
+        ]
+      },
+      "measured_consequence": "加州 assets/editorial/big_sur_bixby_bridge.jpg 源 1600×533：不钳制出 1000×333/46,449B（媒体门判 too small，读者拿不到这张照片）；钳到 floor_width=1081 出 1081×360/53,454B，净增 +7,005B。全树仅此一张被钳（菲律宾无）。assets/editorial/sf_twin_peaks.jpg 源 1600×186 本身低于下限，钳制不适用（不放大），按业主 2026-10-30 裁决与两张无登记图一起剔出读者页并登记媒体缺口。",
+      "measurement": ".temp/v422_honest_map/V6_candidate_run/artifacts/v6p_diag2.txt 与 V6r_clamp_measurement（本轮实跑 prepare_media 记录）"
+    },
+    "tier_count_note": "每槽只出一档。单文件全内联时 srcset 不省字节（v4.2.1 实测），第二档照样进 blob 表，是读者付了钱却看不到的死字节——与本登记 max_dead_blob_share_of_image_text=0 冲突。",
+    "budgets": {
+      "max_delivered_image_decoded_bytes": 409600,
+      "max_delivered_image_derivation": "= media_delivery.default_max_inline_kb × 1024。交付档必须『天生可内联』：只要有一张图比内联上限大，单文件交付就必然在 DOM 侧留下走文件的引用——PH 现行 7 张（最大 927KB）就是这么破的。",
+      "total_delivered_image_decoded_bytes_max": 1954314,
+      "total_budget_derivation": "=(max_delivered_file_bytes 5762432 − 真管线实测最大 container_bytes 3156680) × 3/4 ＝ 1954314。被比较的量是 self_contained_audit 的 decoded_blob_bytes＝产物里全部内联 blob 解码后的字节，不是 asset-manifest 交付档之和：本轮实测加州内联解码 1,864,387B（其中 257,844B 是不进清单的内联图，主题图/占位 SVG/credit 图），清单交付档之和只有 1,606,543B，两者差 257,844B。文本/解码实测膨胀系数 1.3338（4/3 加 data URI 前缀），容器对同一棵树不随图片编码变化。",
+      "budget_quantities": {
+        "registered_ceiling_bytes": 1954314,
+        "quantity_judged_by_self_contained_audit": "decoded_blob_bytes（产物内全部内联图解码字节）",
+        "quantity_judged_by_local_media_gate": "在盘交付档字节之和（asset-manifest 的 renditions）",
+        "measured_choice_rows": {
+          "california_v422": {
+            "artifact_decoded_bytes": 1864387,
+            "manifest_delivered_bytes": 1606543,
+            "not_in_manifest_inline_bytes": 257844,
+            "margin_to_ceiling": 89927,
+            "file_bytes": 5643350,
+            "margin_to_fence": 119082
+          },
+          "philippines_v422": {
+            "artifact_decoded_bytes": 745828,
+            "manifest_delivered_bytes": 785199,
+            "not_in_manifest_inline_bytes": -39371,
+            "margin_to_ceiling": 1208486,
+            "file_bytes": 4018882,
+            "margin_to_fence": 1743550
+          }
+        },
+        "why_one_ceiling_for_both": "两个量都受同一条上限约束是刻意的：谁也不能『我量的不是那个量』就绕过预算。但两者不相等（PH 清单和 785,199B 比产物内联 745,828B 还大——有交付档根本没被渲染用到），所以每行实测把两个数都记下来，避免再出现按纸面路径登记、出货路径违约的第二次事故。"
+      }
+    },
+    "measured_sweep": {
+      "measurement": [
+        ".temp/v422_honest_map/V6_candidate_run/artifacts/V6g_encode_ladder_grid.json",
+        ".temp/v422_honest_map/V6_candidate_run/artifacts/V6h_chosen_encode_authenticity.json",
+        ".temp/v422_honest_map/V6_candidate_run/artifacts/V6i_chosen_ladder_full_measurement.json"
+      ],
+      "path": "prepare_media.prepare_run -> install_run_media -> render_spa_document -> self_contained_audit + 真浏览器 DOM(1440x900) + local_media_gate.check_image_authenticity 逐张判定；每档从只读历史 run 复制全新临时 run 根，历史 run 与候选树都不写",
+      "rows": [
+        {
+          "run": "california_v422",
+          "ladder_name": "real_w1000q52_w700q46",
+          "ladder": {
+            "hero": [
+              1000,
+              52
+            ],
+            "destination_atmosphere": [
+              700,
+              46
+            ]
+          },
+          "encode": {
+            "subsampling": 2,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 36,
+          "delivered_files": 36,
+          "delivered_decoded_bytes": 1514181,
+          "max_single_delivered_image_bytes": 110637,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 36,
+          "authenticity_failing": [
+            "assets/section/sf_cafes.jpg"
+          ],
+          "rendered_file_bytes": 5534550,
+          "container_bytes": 3156680,
+          "decoded_blob_bytes_in_artifact": 1782781,
+          "blob_text_bytes_in_artifact": 2377870,
+          "over_fence": false,
+          "fence_margin_bytes": 227882,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 25,
+            "inline": 25,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": false
+        },
+        {
+          "run": "california_v422",
+          "ladder_name": "real_sub422_w1000q52_w700q46",
+          "ladder": {
+            "hero": [
+              1000,
+              52
+            ],
+            "destination_atmosphere": [
+              700,
+              46
+            ]
+          },
+          "encode": {
+            "subsampling": 1,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 36,
+          "delivered_files": 36,
+          "delivered_decoded_bytes": 1606543,
+          "max_single_delivered_image_bytes": 117582,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 36,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 5643350,
+          "container_bytes": 3156680,
+          "decoded_blob_bytes_in_artifact": 1864387,
+          "blob_text_bytes_in_artifact": 2486670,
+          "over_fence": false,
+          "fence_margin_bytes": 119082,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 25,
+            "inline": 25,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true,
+          "budget_margin_vs_artifact_decoded": 89927,
+          "inflation_text_over_decoded": 1.3338,
+          "authenticity_min_entropy": 4.5112,
+          "authenticity_entropy_margin": 0.0112
+        },
+        {
+          "run": "california_v422",
+          "ladder_name": "real_sub444_w1000q52_w700q46",
+          "ladder": {
+            "hero": [
+              1000,
+              52
+            ],
+            "destination_atmosphere": [
+              700,
+              46
+            ]
+          },
+          "encode": {
+            "subsampling": 0,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 36,
+          "delivered_files": 36,
+          "delivered_decoded_bytes": 1780752,
+          "max_single_delivered_image_bytes": 131106,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": true,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 36,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 5849914,
+          "container_bytes": 3156680,
+          "decoded_blob_bytes_in_artifact": 2019305,
+          "blob_text_bytes_in_artifact": 2693234,
+          "over_fence": true,
+          "fence_margin_bytes": -87482,
+          "audit_status": "FAIL",
+          "audit_codes": [
+            "SFD_DELIVERED_TOTAL_OVER_BUDGET",
+            "SFD_FILE_BYTES_OVER_FENCE"
+          ],
+          "dom": {
+            "total": 25,
+            "inline": 25,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": false
+        },
+        {
+          "run": "california_v422",
+          "ladder_name": "real_sub444_w1000q50_w700q44",
+          "ladder": {
+            "hero": [
+              1000,
+              50
+            ],
+            "destination_atmosphere": [
+              700,
+              44
+            ]
+          },
+          "encode": {
+            "subsampling": 0,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 36,
+          "delivered_files": 36,
+          "delivered_decoded_bytes": 1728529,
+          "max_single_delivered_image_bytes": 127346,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": true,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 36,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 5791214,
+          "container_bytes": 3156680,
+          "decoded_blob_bytes_in_artifact": 1975281,
+          "blob_text_bytes_in_artifact": 2634534,
+          "over_fence": true,
+          "fence_margin_bytes": -28782,
+          "audit_status": "FAIL",
+          "audit_codes": [
+            "SFD_DELIVERED_TOTAL_OVER_BUDGET",
+            "SFD_FILE_BYTES_OVER_FENCE"
+          ],
+          "dom": {
+            "total": 25,
+            "inline": 25,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": false
+        },
+        {
+          "run": "california_v422",
+          "ladder_name": "real_sub444_w1000q48_w700q42",
+          "ladder": {
+            "hero": [
+              1000,
+              48
+            ],
+            "destination_atmosphere": [
+              700,
+              42
+            ]
+          },
+          "encode": {
+            "subsampling": 0,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 36,
+          "delivered_files": 36,
+          "delivered_decoded_bytes": 1678005,
+          "max_single_delivered_image_bytes": 123949,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 36,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 5733514,
+          "container_bytes": 3156680,
+          "decoded_blob_bytes_in_artifact": 1932001,
+          "blob_text_bytes_in_artifact": 2576834,
+          "over_fence": false,
+          "fence_margin_bytes": 28918,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 25,
+            "inline": 25,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true
+        },
+        {
+          "run": "california_v422",
+          "ladder_name": "real_sub444_w940q52_w660q46",
+          "ladder": {
+            "hero": [
+              940,
+              52
+            ],
+            "destination_atmosphere": [
+              660,
+              46
+            ]
+          },
+          "encode": {
+            "subsampling": 0,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 36,
+          "delivered_files": 36,
+          "delivered_decoded_bytes": 1608992,
+          "max_single_delivered_image_bytes": 116919,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 36,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 5656614,
+          "container_bytes": 3156680,
+          "decoded_blob_bytes_in_artifact": 1874332,
+          "blob_text_bytes_in_artifact": 2499934,
+          "over_fence": false,
+          "fence_margin_bytes": 105818,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 25,
+            "inline": 25,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true
+        },
+        {
+          "run": "california_v422",
+          "ladder_name": "real_sub422_w1000q50_w700q44",
+          "ladder": {
+            "hero": [
+              1000,
+              50
+            ],
+            "destination_atmosphere": [
+              700,
+              44
+            ]
+          },
+          "encode": {
+            "subsampling": 1,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 36,
+          "delivered_files": 36,
+          "delivered_decoded_bytes": 1560461,
+          "max_single_delivered_image_bytes": 114337,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 36,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 5591786,
+          "container_bytes": 3156680,
+          "decoded_blob_bytes_in_artifact": 1825703,
+          "blob_text_bytes_in_artifact": 2435106,
+          "over_fence": false,
+          "fence_margin_bytes": 170646,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 25,
+            "inline": 25,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true
+        },
+        {
+          "run": "philippines_v422",
+          "ladder_name": "real_w1000q52_w700q46",
+          "ladder": {
+            "hero": [
+              1000,
+              52
+            ],
+            "destination_atmosphere": [
+              700,
+              46
+            ]
+          },
+          "encode": {
+            "subsampling": 2,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 18,
+          "delivered_files": 18,
+          "delivered_decoded_bytes": 742823,
+          "max_single_delivered_image_bytes": 65973,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 18,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 3964578,
+          "container_bytes": 3024035,
+          "decoded_blob_bytes_in_artifact": 705099,
+          "blob_text_bytes_in_artifact": 940543,
+          "over_fence": false,
+          "fence_margin_bytes": 1797854,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 24,
+            "inline": 24,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true
+        },
+        {
+          "run": "philippines_v422",
+          "ladder_name": "real_sub422_w1000q52_w700q46",
+          "ladder": {
+            "hero": [
+              1000,
+              52
+            ],
+            "destination_atmosphere": [
+              700,
+              46
+            ]
+          },
+          "encode": {
+            "subsampling": 1,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 18,
+          "delivered_files": 18,
+          "delivered_decoded_bytes": 785199,
+          "max_single_delivered_image_bytes": 69580,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 18,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 4018882,
+          "container_bytes": 3024035,
+          "decoded_blob_bytes_in_artifact": 745828,
+          "blob_text_bytes_in_artifact": 994847,
+          "over_fence": false,
+          "fence_margin_bytes": 1743550,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 24,
+            "inline": 24,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true,
+          "budget_margin_vs_artifact_decoded": 1208486,
+          "inflation_text_over_decoded": 1.3339,
+          "authenticity_min_entropy": 7.0978,
+          "authenticity_entropy_margin": 2.5978
+        },
+        {
+          "run": "philippines_v422",
+          "ladder_name": "real_sub444_w1000q52_w700q46",
+          "ladder": {
+            "hero": [
+              1000,
+              52
+            ],
+            "destination_atmosphere": [
+              700,
+              46
+            ]
+          },
+          "encode": {
+            "subsampling": 0,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 18,
+          "delivered_files": 18,
+          "delivered_decoded_bytes": 868469,
+          "max_single_delivered_image_bytes": 76156,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 18,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 4125678,
+          "container_bytes": 3024035,
+          "decoded_blob_bytes_in_artifact": 825916,
+          "blob_text_bytes_in_artifact": 1101643,
+          "over_fence": false,
+          "fence_margin_bytes": 1636754,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 24,
+            "inline": 24,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true
+        },
+        {
+          "run": "philippines_v422",
+          "ladder_name": "real_sub444_w1000q50_w700q44",
+          "ladder": {
+            "hero": [
+              1000,
+              50
+            ],
+            "destination_atmosphere": [
+              700,
+              44
+            ]
+          },
+          "encode": {
+            "subsampling": 0,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 18,
+          "delivered_files": 18,
+          "delivered_decoded_bytes": 841045,
+          "max_single_delivered_image_bytes": 73931,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 18,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 4090806,
+          "container_bytes": 3024035,
+          "decoded_blob_bytes_in_artifact": 799767,
+          "blob_text_bytes_in_artifact": 1066771,
+          "over_fence": false,
+          "fence_margin_bytes": 1671626,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 24,
+            "inline": 24,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true
+        },
+        {
+          "run": "philippines_v422",
+          "ladder_name": "real_sub444_w1000q48_w700q42",
+          "ladder": {
+            "hero": [
+              1000,
+              48
+            ],
+            "destination_atmosphere": [
+              700,
+              42
+            ]
+          },
+          "encode": {
+            "subsampling": 0,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 18,
+          "delivered_files": 18,
+          "delivered_decoded_bytes": 811982,
+          "max_single_delivered_image_bytes": 71345,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 18,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 4053930,
+          "container_bytes": 3024035,
+          "decoded_blob_bytes_in_artifact": 772112,
+          "blob_text_bytes_in_artifact": 1029895,
+          "over_fence": false,
+          "fence_margin_bytes": 1708502,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 24,
+            "inline": 24,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true
+        },
+        {
+          "run": "philippines_v422",
+          "ladder_name": "real_sub444_w940q52_w660q46",
+          "ladder": {
+            "hero": [
+              940,
+              52
+            ],
+            "destination_atmosphere": [
+              660,
+              46
+            ]
+          },
+          "encode": {
+            "subsampling": 0,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 18,
+          "delivered_files": 18,
+          "delivered_decoded_bytes": 778659,
+          "max_single_delivered_image_bytes": 67986,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 18,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 4011754,
+          "container_bytes": 3024035,
+          "decoded_blob_bytes_in_artifact": 740475,
+          "blob_text_bytes_in_artifact": 987719,
+          "over_fence": false,
+          "fence_margin_bytes": 1750678,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 24,
+            "inline": 24,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true
+        },
+        {
+          "run": "philippines_v422",
+          "ladder_name": "real_sub422_w1000q50_w700q44",
+          "ladder": {
+            "hero": [
+              1000,
+              50
+            ],
+            "destination_atmosphere": [
+              700,
+              44
+            ]
+          },
+          "encode": {
+            "subsampling": 1,
+            "optimize": true,
+            "progressive": true
+          },
+          "manifest_rows": 18,
+          "delivered_files": 18,
+          "delivered_decoded_bytes": 760590,
+          "max_single_delivered_image_bytes": 67605,
+          "images_over_per_image_cap": 0,
+          "over_total_budget": false,
+          "over_total_budget_manifest_basis": false,
+          "budget_quantity_note": "over_total_budget 按门禁真正比较的量（产物内联解码字节）判定；*_manifest_basis 是在盘交付档之和，两个量都记，不再各说各话",
+          "authenticity_judged": 18,
+          "authenticity_failing": [],
+          "rendered_file_bytes": 3987630,
+          "container_bytes": 3024035,
+          "decoded_blob_bytes_in_artifact": 722390,
+          "blob_text_bytes_in_artifact": 963595,
+          "over_fence": false,
+          "fence_margin_bytes": 1774802,
+          "audit_status": "PASS",
+          "audit_codes": [],
+          "dom": {
+            "total": 24,
+            "inline": 24,
+            "file": 0,
+            "external": 0,
+            "fallback": 0
+          },
+          "self_contained_in_dom": true,
+          "prepare_status": "PASS",
+          "install_status": "PASS",
+          "viable": true
+        }
+      ],
+      "chosen": "real_sub422_w1000q52_w700q46",
+      "viable_ladders_by_run": {
+        "california_v422": [
+          "real_sub422_w1000q52_w700q46",
+          "real_sub444_w1000q48_w700q42",
+          "real_sub444_w940q52_w660q46",
+          "real_sub422_w1000q50_w700q44"
+        ],
+        "philippines_v422": [
+          "real_w1000q52_w700q46",
+          "real_sub422_w1000q52_w700q46",
+          "real_sub444_w1000q52_w700q46",
+          "real_sub444_w1000q50_w700q44",
+          "real_sub444_w1000q48_w700q42",
+          "real_sub444_w940q52_w660q46",
+          "real_sub422_w1000q50_w700q44"
+        ]
+      },
+      "reading": "栅格 14 行＝7 组（编码旗标 × 尺寸/质量）× 2 棵树。加州只有 4 行可行，其中唯一不改尺寸也不改质量的是 chosen 这行（4:2:2 + w1000q52/w700q46）；sub444_q48_q42 与 sub444_w940q52_w660q46 要靠降质量/降尺寸换字节，sub420 那行会误杀真图（1 张 authenticity 失败），sub444 原尺寸超总预算也超围栏。PH 7 行都可行，余量 1.2MB 以上。chosen 的加州余量是真的薄：离总预算 89,927B、离围栏 119,082B、离真实性下限 0.0112 熵——三项都登记在表里，不靠『看起来还能过』。"
+    },
+    "non_goals": [
+      "不抬围栏、不改单文件交付形态",
+      "不删图、不降分辨率到不可辨认：宽 1200/800 不变，只调 JPEG 质量",
+      "不承诺网络节省——单文件交付里省的就是读者下载的字节"
+    ],
+    "revision_history": [
+      {
+        "id": "v4.2.2-delivered-rendition-ladder-1",
+        "configured_at": "2026-10-30",
+        "withdrawn": "档位与总预算用「手工重编 manifest 在盘 32 个文件」的口径登记；真管线 prepare_media→install→render 带 36 条登记与 srcset 档位，同一条 chosen 档超总预算 143,606B，prepare_media 直接 exit 2。数字不能按纸面路径登记。"
+      },
+      {
+        "id": "v4.2.2-delivered-rendition-ladder-2",
+        "configured_at": "2026-10-30",
+        "measurement": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6c2_real_pipeline_ladder_measurement.json",
+        "note": "本档每一行都来自真产图路径（prepare_run→install_run_media→render_spa_document）与真浏览器 DOM，两棵 run 各 4 档。"
+      },
+      {
+        "id": "v4.2.2-delivered-rendition-ladder-2",
+        "configured_at": "2026-10-30",
+        "withdrawn": "尺寸/质量与总预算都成立，但编码旗标没登记，吃的是 PIL 在 quality<95 的默认 4:2:0，把一张真全景照的 color entropy 压到登记下限之下（4.4959 < 4.5），真实性门在正式生成时把这张图判成占位图，候选 run 直接 exit 2。V6-D 第一次端到端跑就是在这一刻暴露的：登记只说了尺寸和质量，没说读者实际拿到的那次编码。",
+        "evidence": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6f_encode_flag_real_pipeline.json"
+      },
+      {
+        "id": "v4.2.2-delivered-rendition-ladder-3",
+        "configured_at": "2026-10-30",
+        "withdrawn": "编码旗标登记了，但交付几何下限仍只是 local_media_gate 里的裸数 640×360，产图侧读不到。V6-D 端到端实跑（seal-27）里 prepare_media 把 1600×533 的 Bixby 大桥全景等比压成 1000×333，媒体门随即按同一登记判 too small——档位自己产出一张读者拿不到的图。登记与判定必须共用一个数，所以补 min_delivered_geometry 与宽度钳制。",
+        "evidence": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6d_candidate_build.json 与 v6p_diag2.txt"
+      },
+      {
+        "id": "v4.2.2-delivered-rendition-ladder-4",
+        "configured_at": "2026-10-30",
+        "note": "尺寸/质量 + 编码旗标 + 交付几何下限三项全部登记，且下限由 prepare_media 与 local_media_gate 共读同一处。槽位、单图上限 409,600B、总预算 1,954,314B、围栏 5,762,432B、真实性阈值 4.5 一律未动；钳制的实测代价是加州 +7,005B（一张）。",
+        "read_by_amended": "V6-T2 把 read_by 补全到现场实际读数：spa_renderer（V6-Q 用下限判 rendition 是否该剔出读者页）与 visual_qa（IMG_TOO_WIDE 需要同一个下限才能区分『钳制档』和『真超宽』）。登记里少写一个读者，等于那个读者日后退回裸数——这正是 V0-L11 的老路，所以补上并加了条 AST 测试：谁调用 delivered_geometry_floor() 就必须出现在 read_by 里。"
+      }
+    ]
+  },
+  "reason_code_note_r3b": "IMG_RENDERED_NO_PHOTO_* 四条由 visual_qa::check_rendered_image_registration 发，判据取自 media-policy::designed_no_photo_state.dom；语义是「读者页把正式无图槽位画成了什么」，与 IMG_DATASET_SLOT_EMPTY（advisory，真的空槽位）是两件事，不能互相顶名。"
+}

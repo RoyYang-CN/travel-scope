@@ -1,0 +1,300 @@
+{
+  "gate_version": "v422-map-gate-2",
+  "revision_history": {
+    "v422-map-gate-1": "V4-A/V4-B 首轮：严重性登记、角色适用矩阵、执行期零调用账本接线 formal_data_gate。",
+    "v422-map-gate-2": "V4-C 实跑后收紧（全部由真实数据或真实浏览器暴露出来的洞）：①§8.1 的 dataset/DOM 对账第一次有了唯一实现 dom_findings（此前只在登记里写着，没人执行）；②冲突状态本身整批阻断（GATE_HARD_CONFLICT_STATE），业主指令 §5 要的是『无按钮并整批阻断』，不是只查按钮；③§8.2 的 NONE/AMBIGUOUS/CONFLICT/UNRESOLVED 逐项名单由门禁产出（此前 itemized 只从 finding 文本里挑，NONE 行根本不在 findings 里）；④硬零指标加派生项 external_network_attempts=total−loopback，回环允许存在但必须带说明；⑤同一目标重复渲染必须同形（真实 PH 页 198 目标渲染出 265 颗按钮，只比集合会把『同目标不同 href』吞掉）。"
+  },
+  "contract_ref": "V4.2.2_ITERATION_CHECKLIST.md §8.1/§8.2/§8.3 + §9 + 业主 2026-10-29 指令 §5",
+  "purpose": "把『谁整批阻断、谁逐项暴露』从校验器里搬出来单独成册：data_model 只陈述事实（哪个字段缺、哪条声明无据），本文件只裁决严重性。v4.2.1 的做法是把两者写在一起，结果 278 条空角色的酒店被当成与『虚报 VERIFIED』同级的错误，真正的硬冲突反而看不见。",
+  "finding_authority": {
+    "validator": "scripts/data_model.py::validate_map_targets",
+    "selector": "scripts/map_link_selector.py::select",
+    "renderer": "scripts/spa_renderer.py::_project_reader_map_links",
+    "this_file_only_classifies": true,
+    "codes_are_not_copied_here_note": "本文件的 code 名单是从 scripts/data_model.py 现场解析出来的（load_gate 逐条比对），不是第二份登记：校验器新增一个 code 而未登记严重性，门禁当场报错，不会出现『静默第三类』。"
+  },
+  "severity": {
+    "blocking": "§8.3 整批 FAIL：已知错链、系统级合同违规、状态与按钮不一致、无来源的声明。",
+    "exposed": "§5.2/§8.3 局部：逐项进交付报告与行程正文并计数，不自动拖垮整份攻略；不得为好看而删除条目。",
+    "no_third_bucket": true
+  },
+  "classification": {
+    "blocking_exact": [
+      "MAP_TARGETS_CONTAINER_INVALID",
+      "MAP_TARGET_NOT_OBJECT",
+      "MAP_TARGET_ID_MISSING",
+      "MAP_TARGET_ID_DUPLICATE",
+      "MAP_TARGET_ID_KEY_MISMATCH",
+      "MAP_ENUM_INVALID",
+      "MAP_FIELD_NOT_EXPLICIT",
+      "RESOLVER_USED_NOT_EXPLICIT",
+      "RESOLVER_VERSION_WITHOUT_RESOLVER",
+      "CLASSIFIER_VERSION_STALE",
+      "CLASSIFIER_VERSION_UNKNOWN",
+      "PLACE_ID_UNPROVENANCED_QUARANTINE",
+      "GOOGLE_OBSERVATION_UNSANCTIONED",
+      "IDENTITY_REF_KIND_NOT_ENTITY",
+      "IDENTITY_STABLE_REF_INVALID",
+      "IDENTITY_VERIFIED_WITHOUT_QUALIFYING_EVIDENCE",
+      "IDENTITY_VERIFIED_WITHOUT_EVIDENCE",
+      "IDENTITY_VERIFIED_WITHOUT_POLICY_VERSION",
+      "IDENTITY_VERIFIED_WITHOUT_EVALUATED_AT",
+      "COORD_STATE_CONTRADICTION",
+      "COORD_ABSENT_BUT_CLAIMED",
+      "COORD_CONTEXT_MISSING",
+      "COORD_VALUE_INVALID",
+      "COORD_DEFAULT_VALUE",
+      "NAMES_STRUCTURE_INVALID",
+      "NAMES_KEY_MISSING",
+      "NAMES_KEY_UNKNOWN",
+      "NAMES_VALUE_INVALID",
+      "NAMES_EN_NOT_LATIN",
+      "EVIDENCE_CONTAINER_INVALID",
+      "EVIDENCE_MEMBER_NOT_OBJECT",
+      "EVIDENCE_STATUS_UNKNOWN",
+      "EVIDENCE_SOURCE_TYPE_UNKNOWN",
+      "EVIDENCE_STATUS_UNUSABLE",
+      "EVIDENCE_INCOMPLETE",
+      "EVIDENCE_SOURCE_UNCLASSIFIABLE",
+      "EVIDENCE_SOURCE_APPROVAL_PENDING",
+      "EVIDENCE_SELF_ATTESTATION",
+      "EVIDENCE_SEARCH_URL",
+      "EVIDENCE_HOMEPAGE_ONLY",
+      "EVIDENCE_COORDINATE_ONLY",
+      "LINK_CONTEXT_MISSING",
+      "LINK_PROVIDER_UNKNOWN",
+      "LINK_NAMED_ENTITY_COORDINATE",
+      "LINK_COORDINATE_UNVERIFIED",
+      "LINK_DECLARED_URL_INVALID",
+      "LINK_DECLARED_URL_NOT_ENTITY",
+      "LINK_DECLARED_URL_PROVIDER_MISMATCH",
+      "LINK_DECLARED_URL_SHAPE_INVALID",
+      "LINK_EVIDENCE_MISSING",
+      "LINK_EVIDENCE_PROVIDER_MISMATCH",
+      "LINK_EVIDENCE_SELF_REFERENCE",
+      "LINK_EVIDENCE_PAGE_NOT_ENTITY"
+    ],
+    "exposed_exact": [
+      "CRITICAL_NOT_VERIFIED",
+      "CRITICAL_ROLE_MISSING",
+      "ROLE_APPLICABILITY_CATEGORY_UNKNOWN",
+      "ROLE_APPLICABILITY_CATEGORY_UNREGISTERED",
+      "NAME_PLACEHOLDER",
+      "LEGACY_MIGRATION_UNDOCUMENTED",
+      "LEGACY_AUTO_MAPPING_FORBIDDEN"
+    ],
+    "blocking_prefixes": ["MAP_TARGET_", "EVIDENCE_", "LINK_", "IDENTITY_VERIFIED_WITHOUT_",
+                          "GATE_"],
+    "exposed_prefixes": ["ROLE_APPLICABILITY_"],
+    "split_codes": ["MAP_FIELD_MISSING"],
+    "emitted_via_registry": ["ROLE_APPLICABILITY_CATEGORY_UNKNOWN"],
+    "emitted_via_registry_note": "这个 code 由 data-model.json::required_location_role_applicability.unknown_category.finding 供给，源码里是变量而不是字面量，AST 扫不到；登记在这里由 load_gate 反向核对『注册表里确实写着它』，两边少一边都报错。",
+    "field_split_codes": {
+      "MAP_FIELD_MISSING": {
+        "blocking_when_missing_fields": [
+          "target_id", "entity_type", "criticality", "identity_status", "coordinate_status",
+          "link_mode", "google_resolution_status", "policy_version", "evaluated_at",
+          "classifier_version", "resolver_used"
+        ],
+        "exposed_when_missing_fields": [
+          "category", "display_name", "names", "country_code", "destination_scope",
+          "address_status"
+        ],
+        "why": "四维状态、版本链与 resolver_used 缺失＝无法证明这一行是什么（§8.2 要求 100% 明确），整批阻断；描述性字段缺失只是这一条目标信息不全，诚实降级为 NONE 后逐项暴露即可（§5.3 不得为覆盖率造名称，也不得为它拖垮全份攻略）。",
+        "mixed_row_rule": "一行同时缺两类字段 ⇒ 按 blocking 计（更严的那一侧说话）",
+        "no_fields_token_rule": "finding 里没有 fields= 稳定片段 ⇒ 判 unclassified（门禁宁可自己 FAIL，也不替这条猜测严重性）"
+      }
+    },
+    "note": "blocking_exact 与 exposed_exact 是穷举名单；prefix 只兜住动态拼接的 code（如 IDENTITY_VERIFIED_WITHOUT_{gate}）。两条规则同时命中时以 exact 为准。"
+  },
+  "hard_conflict_invariants": {
+    "rule": "§8.1：以下情形必须『既无按钮、又整批阻断』，不允许只暴露不阻断。",
+    "identity_status_blocking": ["CONFLICT"],
+    "resolution_status_blocking": ["WRONG_ENTITY"],
+    "known_cross_city_or_wrong_branch": "quarantine/flags 命中 map-link-selection.json::known_bad_link_markers 或 blocking_quarantine_reason_codes",
+    "assertion": "上面任一成立时 link_mode 必须是 NONE；给出按钮即系统级违规（GATE_HARD_CONFLICT_HAS_BUTTON）。冲突状态本身同样整批阻断（GATE_HARD_CONFLICT_STATE）——业主 2026-10-29 指令 §5 要的是『无按钮并整批阻断』，老实地不给按钮并不把这一条降级成暴露项；是否继续交付由 delivery gate 按 §8.3 就行程可执行性单独裁决。"
+  },
+  "zero_call_gate": {
+    "required_metrics": [
+      "google_billable_api_calls",
+      "google_api_keys_used",
+      "google_maps_scrape_attempts",
+      "paid_fallback_attempts"
+    ],
+    "must_all_be_zero": true,
+    "evidence_source": "execution_interceptor",
+    "source_scan_alone_is_not_evidence": true,
+    "ledger_authority": "scripts/zero_call_sentinel.py::ledger",
+    "required_interceptors": [
+      "socket.connect",
+      "http.client.HTTPConnection.request",
+      "urllib.request.urlopen",
+      "credential_env_read"
+    ],
+    "refuse_when_not_armed": true,
+    "credential_env_names": [
+      "GOOGLE_MAPS_API_KEY", "GOOGLE_API_KEY", "GCLOUD_API_KEY",
+      "GOOGLE_APPLICATION_CREDENTIALS", "QGCLOUD_MAPS_KEY"
+    ],
+    "host_classification": {
+      "billable_hosts": ["maps.googleapis.com", "places.googleapis.com", "geocode.googleapis.com",
+                         "mapsplatform.googleapis.com", "distancesoftware.googleapis.com"],
+      "scrape_hosts": ["maps.google.com", "google.com/maps", "www.google.com/maps"],
+      "paid_fallback_hosts": ["api.yelp.com", "places.api.geocontrol", "api.geoapify.com",
+                              "api.opencagedata.com", "api.positionstack.com", "restapi.amap.com"],
+      "loopback_hosts": ["127.0.0.1", "localhost", "::1"],
+      "note": "分类名单只住这里；哨兵自己不许内置任何主机判断（§6.3 同源规则的同一手法）。"
+    },
+    "hard_zero_extra_metrics": ["external_network_attempts"],
+    "hard_zero_extra_note": "external_network_attempts 是哨兵账本里 total−loopback 的派生读数（§11 V4 四项之外的第五道牙）：任何真正想离开本机的尝试都必须为 0，而本机回环（驱动浏览器的 CDP 连接）单记 local_loopback_attempts，既不算违规也不许拿来宣称『零 socket』。",
+    "reported_metrics": ["network_attempts_total", "local_loopback_attempts", "credential_reads_total", "external_network_attempts"],
+    "loopback_rule": "local_loopback_attempts > 0 时账本必须带 loopback_explanation，否则 GATE_ZERO_CALL_LOOPBACK_UNEXPLAINED——回环要有说明，不能靠它把总数说成 0。",
+    "loopback_rule": "本机回环（浏览器驱动 CDP 等）单独计 local_loopback_attempts，不计入四项，但必须出现在账本里——不许把『零调用』说成『零 socket』。",
+    "note": "§11 V4 明令：四项零计数必须来自执行日志/拦截器。哨兵未装齐时本门禁拒绝输出 0，而不是报一个好看的空账。"
+  },
+  "consistency_checks": {
+    "dataset_vs_report": {
+      "rule": "dataset 的单值 link_* 字段必须等于 link_selection_report.jsonl 里同 target、primary provider 的记录",
+      "fields_ref": "data-model.json::map_link_output_fields.fields",
+      "fixed_denominator_ref": "本报告行数 == target 数 × 已登记 provider 数"
+    },
+    "dataset_vs_dom": {
+      "rule": "DOM 里出现的 map href 集合必须等于 dataset 中 link_mode != NONE 的 map_link_url 集合；provider 集合必须等于 ui.rendered_providers",
+      "reader_payload_ref": "map-link-selection.json::ui.rendered_providers",
+      "checked_by": "scripts/map_gate_v422.py::dom_findings（唯一比对实现）；发布路径由 scripts/visual_qa.py::check_map_dom_dataset_consistency 用真实浏览器取数后调用，测试路径由 scripts/test_v422_map_execution.py 用同一个 MAP_DOM_ROWS_JS 取数后调用（§9：不得只扫源码，也不得各写一套规则）",
+      "single_authority_rule": "QA 与测试都只允许取值，不允许持有 provider 主机名单或路径正则；比对只在 dom_findings 里做一次。文案同样只从 map-link-selection.json::ui.button_copy 取，DOM 文案不等于登记值即 GATE_DOM_COPY_DIFFERS。",
+      "codes": ["GATE_DOM_HREF_MISSING", "GATE_DOM_HREF_UNEXPECTED", "GATE_DOM_HREF_DIFFERS",
+                "GATE_DOM_LINK_MODE_DIFFERS", "GATE_DOM_COPY_DIFFERS", "GATE_DOM_STATUS_DIFFERS",
+                "GATE_DOM_PROVIDER_UNREGISTERED", "GATE_DOM_TARGET_ID_MISSING",
+                "GATE_DOM_DUPLICATE_CONFLICT",
+                "GATE_DOM_ALIAS_TARGET_MISSING", "GATE_DOM_ALIAS_CYCLE",
+                "GATE_DOM_ALIAS_CONFLICT", "GATE_DOM_ALIAS_UNREGISTERED",
+                "GATE_DOM_ALIAS_NOT_DECLARED",
+                "GATE_DOM_PROVENANCE_MISSING_FORMAL", "GATE_DOM_PROVENANCE_VERSION_STALE"],
+      "duplicate_rule": "同一 (target_id, provider) 在页面里出现多次是合法的（同一 POI 会同时出现在住宿清单与每日行程），但多次必须同形；不同形即 GATE_DOM_DUPLICATE_CONFLICT。真实 PH 读者页 198 个目标产出 265 颗按钮，这条是被实测定出来的，不是猜的。",
+      "alias_contract": {
+        "ratified_by": "业主 2026-10-31 V6-R 窄指令第 1 条：对加州五组已证明业务字段一致的双键记录建立显式 alias_of 合同，205 target = 200 canonical render identities + 5 aliases；alias 必须逐项登记，不允许按坐标或名称运行时猜测。",
+        "field": "alias_of",
+        "semantics": "空/缺省 = 该行自己是 canonical；非空 = 该行是所指 canonical_key 的别名，其读者按钮由 canonical 的那颗覆盖。别名行的状态、href、link mode 仍留在 dataset 里逐行可审，报告继续逐项 205 行。",
+        "implemented_by": "scripts/map_gate_v422.py::resolve_aliases（唯一校验实现）+ ::alias_identity（唯一一致性判据）+ ::expected_dom_links(alias_by_id)",
+        "pairing_provenance": "配对与指纹由 .temp/v422_honest_map/V6_candidate_run/tooling/v6r_register_aliases.py 从真浏览器 DOM 测出：谁没按钮＝DOM 取值面说了算；canonical＝同 provider 同 href 且 18 项被比较字段逐项相等、且自己已渲染的唯一同伴。候选不唯一或为 0 个时工具直接报错，绝不落一条猜出来的配对。",
+        "validation": [
+          "目标存在：alias_key 与 canonical_key 都必须在 dataset 的 map_targets 里；缺一即 GATE_DOM_ALIAS_TARGET_MISSING，且该配对不获豁免",
+          "无环：自指与链式回环都算 GATE_DOM_ALIAS_CYCLE，整条链不获豁免",
+          "两处一致：dataset 行的 alias_of 必须等于登记；登记有而数据没声明＝GATE_DOM_ALIAS_NOT_DECLARED，数据声明了而登记没有＝GATE_DOM_ALIAS_UNREGISTERED",
+          "完全一致：23 项被比较字段（V6-R1 起含 canonical_name / display_name / names / link_notices / evidence）+ 逐 provider 的 (link_mode, map_link_url) 视图必须逐项相等，且与登记的 identical_fields_digest 现算相符；对象/数组按规范化 JSON 比（键序无关、数组保序、「缺格」与「空值」不同），否则 GATE_DOM_ALIAS_CONFLICT",
+          "不过不豁免：任何一条校验失败，该 alias 行回到「DOM 应有按钮」的期望集，缺口按 GATE_DOM_HREF_MISSING 继续整批阻断"
+        ],
+        "normalization": {
+          "implemented_by": "scripts/map_gate_v422.py::normalized_field_value",
+          "rule": "对象按 key 排序后 JSON 编码、数组保持原序、标量按 JSON 字面量；『这格不存在』折成不带引号的 absent，与『存在但为空』（[] / {} / null）是两种状态。禁止用 str(dict)：Python 的 repr 把键写入顺序当值的一部分，同一份数据换个顺序就换指纹，反过来也可能把嵌套结构里的真差异糊成相同。",
+          "arrays_are_ordered": "link_notices 的次序就是读者看到提示的次序，所以数组重排算不同——这是收紧，不是宽松。",
+          "measured_2026_10_31": "五组配对在 23 项全字段下逐组相等（本工具现算，任一不等即停手）"
+        },
+        "scope_field": "country",
+        "compared_fields": ["entity_type", "category", "criticality", "country_code", "destination_scope", "coords", "link_mode", "map_link_url", "identity_status", "coordinate_status", "google_resolution_status", "address_status", "resolver_used", "lineage_group", "policy_version", "link_builder_version", "link_selection_version", "map_query_name_source", "canonical_name", "display_name", "names", "link_notices", "evidence"],
+        "not_compared": [{"field": "target_id", "reason": "配对的两行本来就是两个 target_id——它是「谁是谁的别名」这条关系的载体，不是业务状态。比它等于要求合同永远配不出对子。", "measured_2026_10_31": "五组配对各 2 值，逐组不同（不同即本行身份）"}, {"field": "alias_of", "reason": "只有 alias 行带这个键，canonical 行没有——它由本合同写入，比对它就是把判据自己当输入。关系正确性由 validation 的「两处一致」单独管。", "measured_2026_10_31": "五组：alias 行有值、canonical 行为 absent"}, {"field": "migration", "reason": "迁移审计轨迹里逐条写着该行自己的 dataset 路径（derivations 指到本行），所以它按构造就不同；把它纳进指纹只会让任何配对都恒判 CONFLICT，等于假判据。", "measured_2026_10_31": "五组都不同，差异全部落在路径里的自身行名（无业务字段差）"}, {"field": "quarantine", "reason": "同上：隔离记录的 detail 内嵌本行 target 路径，逐行不同属审计轨迹而非业务状态。", "measured_2026_10_31": "五组都不同，差异仅在自身行路径字符串"}, {"field": "unresolved_fields", "reason": "同上：待办清单按行了结，记录里带本行地址。", "measured_2026_10_31": "五组都不同，差异仅在自身行地址"}],
+        "not_compared_why": "V6-R1 实测后的正面说法：五组真实配对的 canonical_name / display_name / names 两侧相同（names 是 dict，逐键一致），link_notices 与 evidence 也相同；真正逐行不同的只有 map_targets 的字典键与 target_id，以及内嵌了自身行路径的迁移审计轨迹（migration / quarantine / unresolved_fields）。因此这五个字段进指纹，排除面只剩下面 not_compared 里那五项，逐项带理由与实测值。",
+        "withdrawn_claim": {
+          "was": "旧登记文字主张「别名与 canonical 的差别本来就在名字（英文键行 vs 中文键行）」，并据此把名字类字段排除在比对之外。",
+          "why_wrong": "那句话没被量过。本轮逐组核五对真实行：名字三项两侧相同，差别实际只在字典键与 target_id。照旧说法办事，名字被改错的一对行照样能拿到豁免——收紧判据要防的正是这个。",
+          "measured_2026_10_31": "五个字段 × 五组配对 = 25 项比较，全部相同（见 .temp/v422_honest_map/V6_candidate_run/artifacts/V6r1_alias_tightening.json 的 pairs.newly_compared_values_equal）"
+        },
+        "entries": [
+          {
+            "alias_key": "旧金山|Apple Park Visitor Center",
+            "alias_target_id": "旧金山|Apple Park Visitor Center",
+            "canonical_key": "旧金山|Apple Park 访客中心与屋顶咖啡露台",
+            "canonical_target_id": "旧金山|Apple Park 访客中心与屋顶咖啡露台",
+            "scope": "美国",
+            "identical_fields_digest": "F02FFB9BC1B2CA9C25025C3B066165EDFC8B16E4DDF364C819B383266964D33C"
+          },
+          {
+            "alias_key": "旧金山|Chase Center Golden State Warriors NBA Game",
+            "alias_target_id": "旧金山|Chase Center Golden State Warriors NBA Game",
+            "canonical_key": "旧金山|金州勇士队主场比赛与大通中心",
+            "canonical_target_id": "旧金山|金州勇士队主场比赛与大通中心",
+            "scope": "美国",
+            "identical_fields_digest": "747728EC4834CF770F1CF32C45ECCB45E5CCFD46C8573DA968590E4E49858F95"
+          },
+          {
+            "alias_key": "旧金山|Stanford University Main Quad and Memorial Church",
+            "alias_target_id": "旧金山|Stanford University Main Quad and Memorial Church",
+            "canonical_key": "旧金山|斯坦福大学主方院与纪念教堂",
+            "canonical_target_id": "旧金山|斯坦福大学主方院与纪念教堂",
+            "scope": "美国",
+            "identical_fields_digest": "52DF300D7ADA8660E7E47A075B82993CB6E9AC31E1363CAC8D47C383280F8944"
+          },
+          {
+            "alias_key": "洛杉矶大都会区|Crypto.com Arena LA Lakers NBA Game",
+            "alias_target_id": "洛杉矶大都会区|Crypto.com Arena LA Lakers NBA Game",
+            "canonical_key": "洛杉矶大都会区|洛杉矶湖人队主场比赛与加密竞技场",
+            "canonical_target_id": "洛杉矶大都会区|洛杉矶湖人队主场比赛与加密竞技场",
+            "scope": "美国",
+            "identical_fields_digest": "39B1E2A9D1C4AE3E54659BEA5D8514BBB475657007BBF876D784ECE5AC7358C6"
+          },
+          {
+            "alias_key": "洛杉矶大都会区|Disneyland Resort and California Adventure",
+            "alias_target_id": "洛杉矶大都会区|Disneyland Resort and California Adventure",
+            "canonical_key": "洛杉矶大都会区|加州迪士尼乐园与迪士尼加州冒险乐园",
+            "canonical_target_id": "洛杉矶大都会区|加州迪士尼乐园与迪士尼加州冒险乐园",
+            "scope": "美国",
+            "identical_fields_digest": "8B0CD3DF41507D6BE8E74AF65CBED86FF48A381F6AB7EABA24114B9B1FC90537"
+          }
+        ],
+        "must_not_be_closed_by": [
+          "删除或合并同址双键的任一行（403/205/198 是合同固定分母，§12）",
+          "把 alias 行的 link_mode 改成 NONE 让期望集变小",
+          "让渲染器为 alias 行再产一颗按钮（DOM 会多出 GATE_DOM_HREF_UNEXPECTED，且读者看到两颗一样的）",
+          "把配对规则改成运行时按坐标或名称推断（业主要求逐项登记）"
+        ],
+        "measured_2026_10_31": {
+          "california": {"dataset_rows": 205, "canonical_render_identities": 200, "registered_aliases": 5, "dom_rows": 279, "findings_before_contract": 5, "findings_after_contract": 0, "compared_fields_count": 23, "amended_v6r1": "五字段进指纹后重新现算五个 digest；配对、行数、分母一字未动"},
+          "philippines": {"dataset_rows": 198, "canonical_render_identities": 198, "registered_aliases": 0, "dom_rows": 265, "findings_after_contract": 0},
+          "aliased_dataset_sha256": {"california": "7C2A05AFC574DCF14FC40D2957D54E57A2104B3E0CF5D3AC8C819448E2BA5334", "philippines": "DA9D770E9DC9FED31828CCD8CBD444C18016E11C438379911D20082935D725F9", "note": "两份 aliased dataset 各连跑两次逐字节一致；闭合测试按现算指纹逐条核对登记里的 5 个 identical_fields_digest，任何一个字段后来变过都会当场报 GATE_DOM_ALIAS_CONFLICT。"},
+          "measurement": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6r_alias_registration.json"
+        }
+      },
+      "alias_dataset_source": "候选 run 的输入是 primary_aliased/<label>/dataset_v422_aliased.json（= V2R 迁移 → V6-L 状态收口 → V6-R alias 登记），205/198 行数未变；V6-L 与 V2R 的产物保持只读。"
+    },
+    "selection_provenance_gate": {
+      "ratified_by": "业主 2026-10-31 V6-R 窄指令第 2 条：v4.2.2 live/formal run 缺少或携带错误 map_link_selection.selection_version 必须阻断；历史数据/夹具的 NOT_APPLICABLE 仅限非正式兼容路径。",
+      "rule": "正式 run 的载荷必须带本版 selection_version：缺失＝GATE_DOM_PROVENANCE_MISSING_FORMAL，版本不符＝GATE_DOM_PROVENANCE_VERSION_STALE，两者都整批阻断。非正式路径保持 applicability 的 enforced:false + reason，不拿本版规则去判上一版数据。",
+      "formal_marker_why": "正式与否由执行环境的显式标志决定，不看 dataset 的 demo_mode——v4.2.0 的历史成品也写 demo_mode=false，用产物字段当正式标志会把兼容路径误判成违规，而那正是「门自己把不该判的东西判死」的老毛病（同角色矩阵那次失误同源）。",
+      "formal_env_var": "TRAVEL_SCOPE_FORMAL_RUN",
+      "formal_env_value": "1",
+      "implemented_by": "scripts/map_gate_v422.py::is_formal_run + ::provenance_findings（唯一实现；visual_qa 只调用，不自建第二套）",
+      "codes": ["GATE_DOM_PROVENANCE_MISSING_FORMAL", "GATE_DOM_PROVENANCE_VERSION_STALE"],
+      "measured_2026_10_31": {
+        "candidate_pages_before_carry": "两棵候选页都报 NOT_V422_MIGRATED_NO_SELECTION_PROVENANCE / enforced:false —— 即 §8.1 在交付物上从未执行过",
+        "candidate_pages_after_carry": "enforced:true, reason:DECLARED_CURRENT（seal-33 实测，V6v_provenance_carry.json + V6d_delivery_gate_*.json）",
+        "not_applicable_scope": "非正式：仓库内回归用的历史 run 产物与 fixtures/demo.json（不带血缘，也不该带）"
+      }
+    },
+    "link_mode_vs_copy": {
+      "rule": "NAMED_SEARCH 的按钮文案必须含『落点未核验』；PUBLISHER_ENTITY_LINK 必须是『查看地点』；两者互换即整批阻断",
+      "copy_authority": "map-link-selection.json::ui.button_copy"
+    },
+    "no_promotion": {
+      "rule": "任何 link 生成路径不得改写 identity_status / coordinate_status / google_resolution_status",
+      "authority": "map-link-selection.json::no_promotion"
+    }
+  },
+  "reader_notice_requirements": {
+    "key_target_unverified": "§5.2：CRITICAL_ITINERARY + NAMED_SEARCH 必须带『地图落点未核验…』提示，且逐项进行程正文与报告",
+    "ambiguous_multiple_results": "§5.2：AMBIGUOUS 或登记在册的模糊连接信号必须带『可能有多个结果…』提示，且不计为已核验实体"
+  },
+  "reporting": {
+    "itemized_lists_required": ["NONE", "AMBIGUOUS", "CONFLICT", "UNRESOLVED", "exposed"],
+    "denominator_rule": "分母固定为 target 数与 provider 决策数，不得过滤失败行（§9）",
+    "google_entity_card_hit_rate": "NOT MEASURED / NOT A RELEASE GATE（§8.2）"
+  },
+  "closed_v4_items": {
+    "V4-A01": "已闭合（V4-B）：formal_data_gate.audit 现在调用 map_gate_v422.evaluate 并把 blocking 并入 errors、exposed 并入 warnings；§8.1 的 DOM 对账另由 visual_qa.check_map_dom_dataset_consistency 在发布路径上执行。牙在 scripts/test_v422_map_gate.py 与 scripts/test_v422_map_execution.py 里，不是只在文档里。",
+    "V4-B01": "已闭合（V4-C）：§8.1『dataset/DOM/href/link mode 不一致 = 0』此前只有登记没有实现——现在比对实现唯一住在 map_gate_v422.dom_findings，发布 QA 与浏览器用例都调它，两边都不持有 provider 主机名单。"
+  },
+  "open_v4_items": {
+    "V4-A02": "零调用四项要来自执行期拦截器：哨兵脚本已实现并在迁移+渲染全过程出账（本轮四项均为 0，负例对照证明钩子会响），但正式 run 的端到端执行属 V6，V6 报告必须带自己的哨兵账本，不接受沿用本轮账本。",
+    "V4-C02": "§8.1 的 dataset/DOM 对账在真实数据上咬出 8 条缺口（全部在加州树，菲律宾树 0 条）。根因已归因到数据卫生，不是渲染层：dataset 里同一实体被登记了两条（英文键与中文键各一条、coords 相同，CA 有 11 组共 23 条），renderer 每个坐标只能解析出一张卡片，于是英文键那条永远画不出按钮。缺口保持 blocking（§8.1 写的是不一致 = 0，降级它就是为了数字好看改门禁）；修法在生成阶段去重，属 V5/V6，且 §12 禁止用删行/改分母的方式让它变绿。证据：.temp/v422_honest_map/V4_gate/dom_gap_root_cause.json"
+  }
+}

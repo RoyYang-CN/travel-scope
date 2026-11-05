@@ -1,0 +1,138 @@
+{
+  "policy_version": "1.0.0",
+  "app_categories": {
+    "ride_hailing": {
+      "cn": "叫车与接送机",
+      "en": "Ride-Hailing & Transfers",
+      "description_cn": "网约车、摩托车、出租车呼叫及机场接送",
+      "description_en": "Ride hailing, motorbike taxis, metered cabs and airport transfers"
+    },
+    "maps_navigation": {
+      "cn": "地图与导航",
+      "en": "Maps & Navigation",
+      "description_cn": "步行、公交与自驾实时导航",
+      "description_en": "Walking, transit and driving navigation"
+    },
+    "food_discovery": {
+      "cn": "餐厅发现与评价",
+      "en": "Food Discovery & Reviews",
+      "description_cn": "本地探店、榜单、食客点评与菜单参考",
+      "description_en": "Local restaurant discovery, ratings and menus"
+    },
+    "food_delivery": {
+      "cn": "当地外卖",
+      "en": "Food Delivery",
+      "description_cn": "酒店夜宵与本地美食即时配送",
+      "description_en": "Late-night food delivery and local meals"
+    },
+    "intercity_booking": {
+      "cn": "城际票务与渡轮聚合",
+      "en": "Intercity & Ferry Booking",
+      "description_cn": "跨城大巴、火车、海岛轮渡班次查询与代订",
+      "description_en": "Intercity bus, train and island ferry booking aggregation"
+    },
+    "urban_transit": {
+      "cn": "城市轨道与公共交通",
+      "en": "Urban Transit",
+      "description_cn": "地铁、轻轨、运河公交及城市乘车路线",
+      "description_en": "Metro, sky train, canal boat and urban transit routes"
+    },
+    "translation": {
+      "cn": "语言翻译与识图",
+      "en": "Translation & OCR",
+      "description_cn": "菜单拍照翻译、语音双向互译",
+      "description_en": "Menu photo translation and two-way voice translation"
+    },
+    "communication": {
+      "cn": "当地通信与社交",
+      "en": "Local Communication",
+      "description_cn": "本地运营商流量卡管理及高频社交应用",
+      "description_en": "Local SIM/eSIM management and widely used messaging"
+    },
+    "official_tourism": {
+      "cn": "官方旅游服务",
+      "en": "Official Tourism Services",
+      "description_cn": "国家或地方旅游局官方信息发布与咨询",
+      "description_en": "National and regional tourism authority services"
+    },
+    "safety_emergency": {
+      "cn": "旅游警察及紧急服务",
+      "en": "Safety & Emergency",
+      "description_cn": "旅游警察一键报警、医疗救助与领保专线",
+      "description_en": "Tourist police alert, emergency medical and consular assistance"
+    },
+    "activities_booking": {
+      "cn": "活动与体验预订",
+      "en": "Activities & Tours",
+      "description_cn": "一日游、出海潜水及门票代订（商业平台）",
+      "description_en": "Day tours, diving trips and attraction ticket bookings"
+    },
+    "accommodation_booking": {
+      "cn": "住宿库存与比价复核",
+      "en": "Stay Inventory & Recheck",
+      "description_cn": "用于多渠道房态及价格复核，非唯一推荐",
+      "description_en": "Platform room inventory and price cross-checking"
+    },
+    "weather_environment": {
+      "cn": "天气、空气质量与灾害预警",
+      "en": "Weather & Environment",
+      "description_cn": "海况潮汐、焚风/季风与空气质量预报",
+      "description_en": "Tides, weather forecasts, air quality and storm advisories"
+    },
+    "currency_payment": {
+      "cn": "汇率换算与支付辅助",
+      "en": "Currency & Payments",
+      "description_cn": "汇率实时计算与当地电子钱包辅助提示",
+      "description_en": "Live FX conversion and local digital payment references"
+    }
+  },
+  "priorities": [
+    "essential",
+    "recommended",
+    "optional"
+  ],
+  "availability_statuses": [
+    "verified_active",
+    "conditional",
+    "regional",
+    "pending",
+    "retired"
+  ],
+  "coverage_statuses": [
+    "nationwide",
+    "regional",
+    "city_specific"
+  ],
+  "freshness_max_days": {
+    "mobility_app": 30,
+    "utility_app": 90,
+    "official_service": 180
+  },
+  "store_domain_patterns": {
+    "ios": "^https:\\/\\/apps\\.apple\\.com\\/[a-z]{2}\\/app\\/",
+    "android": "^https:\\/\\/play\\.google\\.com\\/store\\/apps\\/details\\?id="
+  },
+  "shortcut_module_bindings": {
+    "transport": [
+      "ride_hailing",
+      "urban_transit",
+      "intercity_booking"
+    ],
+    "food": [
+      "food_discovery",
+      "food_delivery"
+    ],
+    "stays": [
+      "accommodation_booking"
+    ],
+    "notes": [
+      "communication",
+      "safety_emergency"
+    ]
+  },
+  "essential_requires_store_link": true,
+  "service_only_categories": [
+    "safety_emergency",
+    "official_tourism"
+  ]
+}

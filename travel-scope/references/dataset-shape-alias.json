@@ -1,0 +1,71 @@
+{
+  "schema_version": "4.2.2",
+  "alias_table_version": "transport-node-shape-1",
+  "registered_by_round": "MT-D2（业主 2026-11-01 对 #99 的裁决第 2 条：建立登记过的 index↔field 映射，不撤销 RENDERED_COLUMNS）",
+  "purpose": "同一语义列在两棵载荷里用了不同形状：CA 的 transport_nodes 是位置数组，PH 的是对象。不登记这层对应关系，所有权判定就会让两棵载荷把同一列判给不同主人——这不是数据差异，是两套登记面各说各话。",
+  "rule": "只登记**已被数据证明**的对应；每条都要写明在两棵载荷里各看到了什么。禁止按「值看起来像机场/城市」动态猜字段；禁止为了好看把整个数组 schema 一次补完。",
+  "forbidden": [
+    "value_pattern_guessing：不许读单元格内容来判断它是 place 还是 type——值像什么不是证据，业主 2026-11-01 明令禁止。",
+    "bulk_schema_completion：没被两棵载荷共同证明的下标一律不登记；空着比猜满更接近事实。",
+    "silent_normalization：适配器只做「已登记对应关系的换形」，不许顺手重排行、补默认值或删键。"
+  ],
+  "single_adapter": "scripts/translate_prose.py::shape_adapter（所有权判定与 prose worklist 共用这一个；任何第二处「自己换算下标」都算违规，由 test_v422_dataset_shape_alias.py 的源码扫描抓）",
+  "datasets": {
+    "transport_nodes": {
+      "measured_2026_11_01": {
+        "california": {
+          "rows": 11,
+          "row_type": "list",
+          "arity_per_row": {
+            "6": 11
+          },
+          "evidence": ".temp/v422_honest_map/V6_candidate_run/primary_aliased/california_v420/dataset_v422_aliased.json::transport_nodes"
+        },
+        "philippines": {
+          "rows": 10,
+          "row_type": "dict",
+          "keys": [
+            "coords",
+            "name",
+            "name_en",
+            "place",
+            "source_status",
+            "type"
+          ],
+          "key_sets_per_row": {
+            "6-key": 10
+          },
+          "evidence": ".temp/v422_honest_map/V6_candidate_run/primary_aliased/philippines_v419/dataset_v422_aliased.json::transport_nodes"
+        }
+      },
+      "array_arity": 6,
+      "aliases": [
+        {
+          "index": 0,
+          "field": "place",
+          "proof": "CA 数组第 0 格是城市/区域名（旧金山、蒙特雷与卡梅尔），PH 对象 place 同义（宿务）；业主 2026-11-01 点名这一对成立。",
+          "owner_after_migration": "DISPLAY_NAME",
+          "why": "references/display-name-channel.json::name_only_columns 登记 transport_nodes.place＝只有中文名、没有同行英文格的显示名列 ⇒ 这一格归专名显示面，不归散文表。"
+        },
+        {
+          "index": 3,
+          "field": "type",
+          "proof": "CA 数组第 3 格是类别词（机场、公路枢纽），PH 对象 type 同义（机场、客运码头、公路客运站）；业主 2026-11-01 点名这一对成立。",
+          "owner_after_migration": "CATEGORY_LEXICON",
+          "why": "references/category-lexicon.json::category_columns 登记 transport_nodes.field=type＝类别列由词根组合出，进散文表就是给同一列建第二个来源。"
+        }
+      ],
+      "not_registered": "数组下标 1/2/4/5 与对象键 name/name_en/coords/source_status 的对应**没有**登记：PH 有独立 name_en 与 source_status，CA 第 2 格是不是 code、第 5 格是描述还是状态，两棵载荷证不了。留空是登记面的边界，不是遗漏。",
+      "block_when": [
+        "array_row_shorter_than_max_alias_index",
+        "array_row_arity_mismatch",
+        "dict_row_missing_aliased_field",
+        "mixed_row_shapes_in_one_dataset",
+        "alias_field_not_registered_in_any_channel",
+        "alias_index_double_claimed"
+      ]
+    }
+  },
+  "slot_migration_precedence": "当一个地址同时被 PROSE_TABLE（RENDERED_COLUMNS 按位置登记）与某个语义通道（经本别名表证明的同一格）认领时，判给**语义通道**：类别→CATEGORY_LEXICON、专名→DISPLAY_NAME、金额/度量→MONEY_FORMATTER。RENDERED_COLUMNS 不撤销登记——撤了就把已知结构伪装成「未登记数据」，那是另一种假账。真正的两个来源竞争（如未成证的 en_text_replacements 主张）仍判 MIXED_OWNER_BLOCKED。",
+  "verified_by": "scripts/test_v422_dataset_shape_alias.py"
+}

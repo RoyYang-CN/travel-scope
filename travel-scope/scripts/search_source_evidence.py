@@ -19,6 +19,11 @@ from urllib.parse import quote
 import requests
 from bs4 import BeautifulSoup
 
+try:
+    from api_cache import ApiCache
+except ImportError:  # pragma: no cover
+    from scripts.api_cache import ApiCache
+
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36"}
 
@@ -30,14 +35,26 @@ SEARCH_ENDPOINTS = {
 }
 
 
-def _search(query, engine, cache, cache_lock):
+def _search(query, engine, cache, cache_lock, sqlite_cache=None, daily_limit=200, monthly_limit=1000):
     cache_key = f"{engine}\n{query}"
+    if sqlite_cache:
+        sqlite_result = sqlite_cache.get("search_engine", engine, cache_key)
+        if sqlite_result is not None:
+            return sqlite_result
     with cache_lock:
         if cache_key in cache:
             return cache[cache_key]
     url = SEARCH_ENDPOINTS[engine] + quote(query)
-    response = requests.get(url, headers=HEADERS, timeout=20)
-    response.raise_for_status()
+    call_id = sqlite_cache.start_call("search_engine", engine, cache_key, daily_limit, monthly_limit) if sqlite_cache else None
+    if sqlite_cache and not call_id:
+        raise RuntimeError(f"search daily quota safety limit reached: {daily_limit}")
+    try:
+        response = requests.get(url, headers=HEADERS, timeout=20)
+        response.raise_for_status()
+    except Exception as exc:
+        if sqlite_cache:
+            sqlite_cache.finish_call(call_id, "error", str(exc))
+        raise
     soup = BeautifulSoup(response.text, "html.parser")
     results = []
     selectors = {
@@ -57,6 +74,9 @@ def _search(query, engine, cache, cache_lock):
         results.append({"engine": engine, "url": link.get("href", ""), "snippet": snippet})
     with cache_lock:
         cache[cache_key] = results
+    if sqlite_cache:
+        sqlite_cache.put("search_engine", engine, cache_key, results)
+        sqlite_cache.finish_call(call_id, "success")
     return results
 
 
@@ -66,7 +86,7 @@ def _extract(text):
     return (ratings[0] if ratings else ""), (counts[0].replace(",", "") if counts else "")
 
 
-def collect(row, engines, cache, cache_lock, max_relevant):
+def collect(row, engines, cache, cache_lock, max_relevant, sqlite_cache=None, daily_limit=200, monthly_limit=1000):
     kind, destination, name = row["kind"], row["destination"], row["name"]
     if kind == "restaurant":
         queries = [("大众点评", f'大众点评 "{name}" {destination}')]
@@ -84,9 +104,9 @@ def collect(row, engines, cache, cache_lock, max_relevant):
     for platform, query in queries:
         for engine in engines:
             try:
-                results = _search(query, engine, cache, cache_lock)
+                results = _search(query, engine, cache, cache_lock, sqlite_cache, daily_limit)
             except Exception as exc:
-                evidence.append({"platform": platform, "engine": engine, "query": query, "status": "error", "error": str(exc)})
+                evidence.append({"platform": platform, "engine": engine, "query": query, "status": "error", "evidence_level": "search_candidate", "error": str(exc)})
                 continue
             for result in results:
                 rating, count = _extract(result["snippet"])
@@ -105,6 +125,8 @@ def collect(row, engines, cache, cache_lock, max_relevant):
                     "point_relevant": point_hit,
                     "relevant": relevant,
                     "confidence": "medium" if rating or count else "low",
+                    "evidence_level": "search_candidate",
+                    "formal_coverage_eligible": False,
                 })
             if sum(1 for x in evidence if x.get("relevant")) >= max_relevant:
                 break
@@ -118,6 +140,8 @@ def main():
     parser.add_argument("--workers", type=int, default=6)
     parser.add_argument("--engines", default="google,baidu,bing", help="逗号分隔的搜索引擎顺序；Bing 可作为备用")
     parser.add_argument("--cache", default="", help="搜索结果缓存 JSON 路径")
+    parser.add_argument("--cache-db", default="", help="统一 SQLite 缓存/调用台账路径")
+    parser.add_argument("--daily-limit", type=int, default=200)
     parser.add_argument("--max-relevant", type=int, default=4, help="每个点位达到有效相关结果数后停止继续搜索")
     args = parser.parse_args()
     engines = [x.strip() for x in args.engines.split(",") if x.strip()]
@@ -131,10 +155,11 @@ def main():
         except FileNotFoundError:
             cache = {}
     cache_lock = threading.Lock()
+    sqlite_cache = ApiCache(args.cache_db) if args.cache_db else None
     rows = json.loads(open(args.input, encoding="utf-8").read())
     output = []
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = [pool.submit(collect, row, engines, cache, cache_lock, args.max_relevant) for row in rows]
+        futures = [pool.submit(collect, row, engines, cache, cache_lock, args.max_relevant, sqlite_cache, args.daily_limit) for row in rows]
         for index, future in enumerate(as_completed(futures), 1):
             output.append(future.result())
             if index % 25 == 0:
@@ -142,10 +167,12 @@ def main():
             time.sleep(0.03)
     output.sort(key=lambda x: (x["kind"], x["destination"], x["name"]))
     with open(args.output, "w", encoding="utf-8") as fh:
-        json.dump(output, fh, ensure_ascii=False, indent=2)
+        json.dump({"schema_version": 2, "purpose": "discovery_only", "formal_coverage_eligible": False, "records": output}, fh, ensure_ascii=False, indent=2)
     if args.cache:
         with open(args.cache, "w", encoding="utf-8") as fh:
             json.dump(cache, fh, ensure_ascii=False, indent=2)
+    if sqlite_cache:
+        sqlite_cache.close()
     print(json.dumps({"status": "PASS", "records": len(output), "output": args.output}, ensure_ascii=False))
 
 

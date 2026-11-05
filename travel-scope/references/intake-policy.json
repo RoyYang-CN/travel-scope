@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "questions": [
+    {"id": "q0_destination", "number": "Q0", "label_cn": "目的地/国家或自定义区域", "kind": "free", "hint_cn": "国家，或明确的自定义区域；例如：目标国家 / 目标区域东部"},
+    {"id": "q1_time", "number": "Q1", "label_cn": "出行月份/具体日期", "kind": "free", "hint_cn": "例如：2027年2月 / 2027-02-10 至 2027-02-21"},
+    {"id": "q2_days", "number": "Q2", "label_cn": "出行天数", "kind": "free", "hint_cn": "正整数；例如：12天"},
+    {"id": "q3_tier", "number": "Q3", "label_cn": "消费与住宿档次", "kind": "choice", "allow_detail_suffix": true, "allow_custom_range": true, "options": [{"value": "economy", "cn": "经济", "aliases": ["budget"], "price_range_cn": "约 ¥150~350/晚"}, {"value": "midrange", "cn": "中档", "aliases": ["mid-range"], "price_range_cn": "约 ¥350~700/晚"}, {"value": "comfortable", "cn": "舒适", "aliases": ["comfort"], "price_range_cn": "约 ¥700~1500/晚"}, {"value": "high_end", "cn": "高端", "aliases": ["high-end", "luxury"], "price_range_cn": "约 ¥1500~3500+/晚"}, {"value": "mixed", "cn": "混合", "aliases": ["mix"], "price_range_cn": "多种档次结合"}]},
+    {"id": "q4_transport", "number": "Q4", "label_cn": "交通方式", "kind": "choice", "options": [{"value": "self_drive", "cn": "自驾", "aliases": ["self-drive"]}, {"value": "non_self_drive", "cn": "非自驾", "aliases": ["non-self-drive"]}]},
+    {"id": "q5_arrival", "number": "Q5", "label_cn": "入境或抵达城市、机场、港口", "kind": "free", "hint_cn": "填写具体城市、机场或港口名称"},
+    {"id": "q6_departure", "number": "Q6", "label_cn": "离境或出发城市、机场、港口", "kind": "free", "hint_cn": "填写具体城市、机场或港口名称"},
+    {"id": "q7_depth", "number": "Q7", "label_cn": "研究深度", "kind": "choice", "options": [{"value": "concise", "cn": "精简", "aliases": ["shallow", "light"]}, {"value": "standard", "cn": "标准", "aliases": ["medium", "moderate", "经典", "classic"]}, {"value": "deep", "cn": "深度", "aliases": ["in-depth"]}, {"value": "ultra", "cn": "超级深度", "aliases": ["ultra-deep", "super-deep", "全景", "panorama"]}]},
+    {"id": "q8_pace", "number": "Q8", "label_cn": "行程节奏", "kind": "choice", "options": [{"value": "compact", "cn": "紧凑"}, {"value": "moderate", "cn": "适中", "aliases": ["适中（换宿率 ≤0.6）", "适中(换宿率<=0.6)"]}, {"value": "relaxed", "cn": "宽松", "aliases": ["慢速松弛", "松弛", "慢速", "leisurely"]}]}
+  ]
+}

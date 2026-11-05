@@ -1,0 +1,28 @@
+{
+  "modes": {
+    "domestic_self_drive": {"domestic": true, "travel_mode": "自驾", "guidance": "优先检查租车/自驾可行性、停车与道路风险"},
+    "domestic_non_self_drive": {"domestic": true, "travel_mode": "非自驾", "guidance": "优先提供高铁、公交、出租车、包车或渡轮等公共交通方案"},
+    "international_self_drive": {"domestic": false, "travel_mode": "自驾", "guidance": "优先检查租车、自驾、停车、道路和渡轮限制"},
+    "international_non_self_drive": {"domestic": false, "travel_mode": "非自驾", "guidance": "优先提供公共交通、打车、接送机和预约要求"}
+  },
+  "boolean_values": {"yes": ["是", "Yes", "yes", "true", "True"], "no": ["否", "No", "no", "false", "False"]},
+  "schedule": {
+    "source_priority": ["operator_booking_or_timetable", "airport_port_station_or_transport_authority", "official_notice", "corroborated_aggregator"],
+    "statuses": ["exact_date_verified", "published_reference", "on_demand", "future_unpublished", "unverified"],
+    "field_indexes": {"status": 16, "effective_period_cn": 17, "effective_period_en": 18, "checked_at": 19, "timetable_url": 20, "booking_url": 21, "outbound_departures": 22, "return_departures": 23},
+    "scheduled_mode_keywords": ["航班", "flight", "火车", "train", "轮渡", "ferry", "快艇", "fast craft", "客运", "bus", "接驳车", "shuttle"],
+    "rules": [
+      "Search every route-changing scheduled leg, not only named ferry operators.",
+      "Exact-date departures require a primary official source and a retrieval date.",
+      "Published reference departures must show their effective period and must not be presented as future commitments.",
+      "On-demand services do not require fabricated departure times.",
+      "Future unpublished and unverified statuses retain an explicit recheck notice."
+    ]
+  },
+  "currency_contract": {
+    "require_fare_local_currency": true,
+    "require_fare_local_value": true,
+    "require_exchange_rate_cny": true,
+    "disallow_raw_local_currency_strings_in_cny_columns": true
+  }
+}

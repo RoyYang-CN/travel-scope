@@ -1,0 +1,862 @@
+{
+  "_contract": "Travel-Scope v4.2.2 诚实地图链接选择机器合同。权威来源：V4.2.2_ITERATION_CHECKLIST.md §3（四维正交）、§4（链接选择状态机）、§5（关键目标文案诚实性）、§6（URL 构造）。实现：scripts/map_link_selector.py；执行与校验：scripts/data_model.py::validate_map_targets 与 scripts/formal_data_gate.py。渲染层不得再自行拼 URL 或判断主机（§9）。",
+  "selection_version": "v422-link-selection-1",
+  "configured_at": "2026-10-29",
+  "config_strictness": {
+    "missing_file": "BLOCK",
+    "missing_key": "BLOCK",
+    "unknown_provider": "NO_BUTTON_AND_REPORT",
+    "unknown_reason_code": "BLOCK",
+    "rule_primitives_unknown": "BLOCK",
+    "note": "配置缺失即阻断，不允许回退到代码内默认值。这是 v4.2.1 §16.4「规则住在代码里、文档追不上」的反向治理。"
+  },
+  "providers": {
+    "google": {
+      "registered": true,
+      "billing": "none",
+      "requires_key": false,
+      "entity_hosts": [
+        "google.com",
+        "www.google.com",
+        "maps.google.com",
+        "maps.app.goo.gl"
+      ],
+      "search_url_template": "https://www.google.com/maps/search/?api=1&query={QUERY}",
+      "coordinate_url_template": "https://www.google.com/maps/search/?api=1&query={COORDINATE}",
+      "query_separator": ", ",
+      "max_query_chars": 200,
+      "optional_identity_params": {
+        "query_place_id": "仅当数据集里存在具备合格来源与血缘的真实 ID 时才允许携带；选择器与渲染器一律不得生成、猜测或正则验证 Place ID/CID（§4 禁止动作、§6.2）"
+      },
+      "forbid_params_on_named_search": [
+        "query_place_id",
+        "ll",
+        "center",
+        "view",
+        "data=!4m"
+      ]
+    },
+    "apple": {
+      "registered": true,
+      "billing": "none",
+      "requires_key": false,
+      "entity_hosts": [
+        "maps.apple.com"
+      ],
+      "search_url_template": "https://maps.apple.com/?q={QUERY}",
+      "coordinate_url_template": "https://maps.apple.com/?q={COORDINATE}&ll={COORDINATE}&zoom=17",
+      "query_separator": ", ",
+      "max_query_chars": 200,
+      "optional_identity_params": {},
+      "forbid_params_on_named_search": [
+        "ll"
+      ]
+    }
+  },
+  "per_provider_isolation": {
+    "rule": "每个 provider 独立执行状态机；Google 的证据永远不得把 Apple 升级为实体直达，反之亦然（§4 前言、§17.4.5）。",
+    "shared_state_fields_must_be_per_provider": true
+  },
+  "query_field_priority": [
+    "sourced_canonical_name",
+    "sourced_branch_or_terminal_qualifier",
+    "sourced_street_address",
+    "sourced_destination",
+    "sourced_country"
+  ],
+  "query_rules": {
+    "only_sourced_fields": true,
+    "dedupe_after_normalization": true,
+    "normalize": "strip + 折叠连续空白；禁止字符级删除后拼接（§6.1）",
+    "forbid_empty_segments": true,
+    "forbid_literals": [
+      "undefined",
+      "None",
+      "null",
+      "[object Object]",
+      ""
+    ],
+    "require_name_present": true,
+    "forbid_scopes_when_no_entity_name": [
+      "city_only",
+      "province_only",
+      "country_only",
+      "route_corridor_only"
+    ],
+    "no_character_deletion_to_make_latin_name": true,
+    "keep_sourced_local_name_when_no_english": true,
+    "allow_sourced_local_name_in_query": true,
+    "local_name_query_ratified_by": "业主 2026-10-29 已接受 v4.2.2 诚实具名搜索合同；无可信英文名时保留有来源的本地正式名称。",
+    "local_name_query_decision": "清册 §4 禁止动作第 2 条原文：「不删除中文/本地文字后猜英文名；没有可信英文名时保留有来源的本地正式名称。」业主 2026-10-29 据此接受 v4.2.2 诚实具名搜索合同并放开本地正式名称进入搜索串（本字段就是那次接受的登记处，登记为空时 load_selection() 直接报错）。放开的同时守住三条：①名称只能取自 dataset 已有字段（names.en→display_name→canonical_name），②URL 用普通 percent-encoding 原样承载，不得删除任何中文/本地/假名/谚文字符，也不得括弧截断造英文名，③占位名/数字残片/走廊串/无名称仍然拒绝（R5）。海外地图 URL 含本地文字自 v4.2.2 起不再是地图错误；英文 UI 可见文字泄漏是独立门禁，不因此放松。"
+  },
+  "identity_status_allowed_for_named_search": [
+    "UNVERIFIED",
+    "AMBIGUOUS",
+    "UNRESOLVED",
+    "VERIFIED"
+  ],
+  "identity_status_interpretation_note": {
+    "VERIFIED": "清册 §3.1 只列举了 UNVERIFIED/AMBIGUOUS/UNRESOLVED 可与 NAMED_SEARCH 并存。把 VERIFIED 排除会让「身份已核验但没有合格发布方实体链」的目标既拿不到 PUBLISHER_ENTITY_LINK 又拿不到搜索按钮，与 §2.1「名称可用时提供搜索入口」直接矛盾，故本配置显式允许并单独记 reason code。此处是解释性收口，需业主确认；不改分母、不放宽任何门限。",
+    "CONFLICT": "永不搜索（§5.2）。",
+    "STALE": "永不自动搜索：证据已过期意味着名称/地址来源不可信，此时搜索串本身也失去来源依据。"
+  },
+  "resolution_status_blocking_named_search": [
+    "WRONG_ENTITY",
+    "NO_RESULT",
+    "BLOCKED",
+    "STALE"
+  ],
+  "multivalue_notice_states": {
+    "identity_status": [
+      "AMBIGUOUS"
+    ],
+    "google_resolution_status": [
+      "MULTIPLE_RESULTS"
+    ],
+    "note": "§3.1/§5.2：AMBIGUOUS 与 MULTIPLE_RESULTS 允许搜索，但必须显示多结果核对提示并逐项进入报告，且不得计为已核验实体。"
+  },
+  "known_bad_link_markers": {
+    "target_flags": [
+      "known_wrong_link",
+      "cross_city",
+      "cross_island",
+      "wrong_branch",
+      "wrong_terminal",
+      "hard_conflict"
+    ],
+    "quarantine_shape": "list_of_objects_with_reason_code",
+    "blocking_quarantine_reason_codes": [
+      "KNOWN_WRONG_ENTITY",
+      "WRONG_BRANCH_SELECTED",
+      "WRONG_TERMINAL_SELECTED",
+      "CROSS_CITY_OR_ISLAND_JOIN"
+    ],
+    "resolution_status_blocking": [
+      "WRONG_ENTITY"
+    ],
+    "note": "命中即 link_mode=NONE，且旧 URL 必须被隔离记录，不得静默删除（§4.1、§8.1）。W2 迁移留下的 quarantine 是列表（如 SELF_ATTESTATION_SOURCE_URL），那类是『这条 URL/名字不得当身份证据』而非『已知错链』，不得在这里被当成阻断条件——否则 403 条全部自证隔离会把新合同自己锁死。"
+  },
+  "name_residue_rules": {
+    "detection": [
+      "names.en 去掉 CJK 字符并与 names.cn 去 CJK 后的字母数字残片完全相同 ⇒ 判为删字符残留",
+      "具名形式整体被圆括号/方括号包裹（如 '(Union Station)'）⇒ 判为片段，不足以确定目标实体"
+    ],
+    "on_detection": "use_sourced_local_name",
+    "implemented_by": "state_machine[R4b].reason_code_overrides[name_residue_detected]",
+    "reason_code_authority": "本表不复制 reason code：唯一登记处是 reason_codes，唯一生效处是状态机。V1 前这里有一份游离副本且未登记，属于第二套权威，load_selection() 现在对此报错。",
+    "note": "§4 禁止『删除中文/本地文字后猜英文名』，同时要求『没有可信英文名时保留有来源的本地正式名称』。因此检测到残留时不是砍掉按钮，而是改用有来源的本地正式名称搜索，并单独记 reason code。"
+  },
+  "join_ambiguity_signals": {
+    "quarantine_reason_codes": [
+      "AMBIGUOUS_JOIN"
+    ],
+    "unresolved_reason_codes": [
+      "CATEGORY_JOIN_AMBIGUOUS"
+    ],
+    "implemented_by": "state_machine[R4].reason_code_overrides[join_ambiguity_signal]",
+    "notice": "ambiguous_multiple_results",
+    "note": "数据里 identity_status 仍是 UNVERIFIED（W2 没有把它改成 AMBIGUOUS）。本合同不把提示绑定在身份值上，而是绑定在已登记的模糊连接信号上：既不虚报 AMBIGUOUS，也不让 14 条真实模糊目标漏掉多结果提示。是否把这 14 条改判 identity_status=AMBIGUOUS 属业主裁决，V1/V2 不擅自动身份字段。V1R 收口：本节原来还复制了一份 reason code，那是不被任何代码读取的游离副本，已删除——reason code 的唯一生效处是状态机。"
+  },
+  "state_machine": [
+    {
+      "rule_id": "R1",
+      "when_any": [
+        {
+          "primitive": "known_bad_link"
+        },
+        {
+          "primitive": "identity_status_in",
+          "values": [
+            "CONFLICT"
+          ]
+        },
+        {
+          "primitive": "resolution_status_in",
+          "values": [
+            "WRONG_ENTITY"
+          ]
+        }
+      ],
+      "then": {
+        "link_mode": "NONE",
+        "reason_code": "SELECT_BLOCKED_KNOWN_ERROR_OR_CONFLICT"
+      },
+      "isolate_existing_url": true
+    },
+    {
+      "rule_id": "R2",
+      "when_all": [
+        {
+          "primitive": "publisher_entity_evidence_qualified"
+        },
+        {
+          "primitive": "declared_link_url_classifies_entity"
+        },
+        {
+          "primitive": "provider_matches_button_provider"
+        },
+        {
+          "primitive": "publisher_origin_is_entity_page"
+        }
+      ],
+      "then": {
+        "link_mode": "PUBLISHER_ENTITY_LINK",
+        "reason_code": "SELECTED_PUBLISHER_ENTITY_LINK"
+      },
+      "note": "复用 data_model.classify_reference 与 publisher 证据规则，渲染层不得另写判定（§9）。四条条件各自独立可断言：证据行资格、URL 形态、provider 一致、出处本身是发布方实体页。"
+    },
+    {
+      "rule_id": "R3",
+      "when_all": [
+        {
+          "primitive": "entity_type_is",
+          "value": "coordinate_landmark"
+        },
+        {
+          "primitive": "coordinate_status_is",
+          "value": "VERIFIED"
+        }
+      ],
+      "then": {
+        "link_mode": "COORDINATE",
+        "reason_code": "SELECTED_COORDINATE_LANDMARK"
+      },
+      "note": "§3.3/§17.4.3：仅现实中无标准名称且坐标已验证的坐标地标。"
+    },
+    {
+      "rule_id": "R4",
+      "when_all": [
+        {
+          "primitive": "entity_type_is",
+          "value": "named_entity"
+        },
+        {
+          "primitive": "name_usable_for_search"
+        },
+        {
+          "primitive": "identity_status_in_configured_allow_list"
+        },
+        {
+          "primitive": "resolution_status_not_blocking"
+        }
+      ],
+      "then": {
+        "link_mode": "NAMED_SEARCH",
+        "reason_code": "SELECTED_NAMED_SEARCH"
+      },
+      "reason_code_overrides": [
+        {
+          "if": {
+            "primitive": "join_ambiguity_signal"
+          },
+          "reason_code": "SELECTED_NAMED_SEARCH_AMBIGUOUS_JOIN_SIGNAL"
+        },
+        {
+          "if": {
+            "primitive": "identity_status_is",
+            "value": "AMBIGUOUS"
+          },
+          "reason_code": "SELECTED_NAMED_SEARCH_AMBIGUOUS_IDENTITY"
+        },
+        {
+          "if": {
+            "primitive": "identity_status_is",
+            "value": "UNRESOLVED"
+          },
+          "reason_code": "SELECTED_NAMED_SEARCH_UNRESOLVED_IDENTITY"
+        },
+        {
+          "if": {
+            "primitive": "identity_status_is",
+            "value": "VERIFIED"
+          },
+          "reason_code": "SELECTED_NAMED_SEARCH_VERIFIED_WITHOUT_ENTITY_LINK"
+        },
+        {
+          "if": {
+            "primitive": "resolution_status_is",
+            "value": "MULTIPLE_RESULTS"
+          },
+          "reason_code": "SELECTED_NAMED_SEARCH_MULTIPLE_RESULTS_OBSERVED"
+        }
+      ],
+      "note": "§4.4：具名搜索不要求身份先 VERIFIED；这正是 v4.2.2 与 v4.2.1 的核心差异。override 自上而下首个命中生效，join_ambiguity_signal 排在最前是因为『同一条记录既模糊又未核验』时，模糊提示比身份缺证更贴近读者风险。"
+    },
+    {
+      "rule_id": "R4b",
+      "when_all": [
+        {
+          "primitive": "entity_type_is",
+          "value": "named_entity"
+        },
+        {
+          "primitive": "name_state_is_local_only"
+        }
+      ],
+      "then": {
+        "link_mode": "NAMED_SEARCH",
+        "reason_code": "SELECTED_NAMED_SEARCH_LOCAL_NAME_RATIFIED"
+      },
+      "reason_code_overrides": [
+        {
+          "if": {
+            "primitive": "name_residue_detected"
+          },
+          "reason_code": "SELECTED_NAMED_SEARCH_LOCAL_NAME_AFTER_RESIDUE"
+        }
+      ],
+      "isolate_existing_url": false,
+      "note": "§4 禁止动作第 2 条（清册 line 102）＋业主 2026-10-29 登记：没有可信英文名时保留有来源的本地正式名称并给出具名搜索。这条规则单独计数，是为了让「本地名搜索」可回归、可审计——它与 R4 的拉丁名搜索在读者看到同一句「落点未核验」，但在来源上是两回事。被判定为删字残片/括弧片段的英文名（如 '(Union Station)'）绝不进入 URL：残片只触发降级到本地正式名称，reason code 用 SELECTED_NAMED_SEARCH_LOCAL_NAME_AFTER_RESIDUE 单独计数。占位名、纯数字串、走廊串、无名称一律仍走 R5 判 NONE。"
+    },
+    {
+      "rule_id": "R5",
+      "when_any": [
+        {
+          "primitive": "name_unusable_because_placeholder"
+        },
+        {
+          "primitive": "name_unusable_because_numeric_residue"
+        },
+        {
+          "primitive": "name_unusable_because_corridor"
+        },
+        {
+          "primitive": "name_absent"
+        }
+      ],
+      "then": {
+        "link_mode": "NONE",
+        "reason_code": "SELECT_BLOCKED_NAME_UNUSABLE"
+      },
+      "isolate_existing_url": true
+    },
+    {
+      "rule_id": "R6",
+      "when_all": [
+        {
+          "primitive": "identity_status_in",
+          "values": [
+            "STALE"
+          ]
+        },
+        {
+          "primitive": "name_usable_for_search"
+        }
+      ],
+      "then": {
+        "link_mode": "NONE",
+        "reason_code": "SELECT_BLOCKED_IDENTITY_STALE"
+      },
+      "isolate_existing_url": true
+    },
+    {
+      "rule_id": "R7",
+      "when_all": [
+        {
+          "primitive": "resolution_status_in",
+          "values": [
+            "NO_RESULT",
+            "BLOCKED",
+            "STALE"
+          ]
+        }
+      ],
+      "then": {
+        "link_mode": "NONE",
+        "reason_code": "SELECT_BLOCKED_OBSERVED_SEARCH_OUTCOME_USELESS"
+      },
+      "isolate_existing_url": true
+    },
+    {
+      "rule_id": "R8",
+      "when_all": [
+        {
+          "primitive": "fallback"
+        }
+      ],
+      "then": {
+        "link_mode": "NONE",
+        "reason_code": "SELECT_BLOCKED_NO_HONEST_ENTRY"
+      },
+      "note": "所有规则都不命中时的兜底：宁可不给按钮，也不构造城市/州/走廊级伪目标（§4 禁止动作）。"
+    }
+  ],
+  "deliverable_link_modes": {
+    "modes": [
+      "PUBLISHER_ENTITY_LINK",
+      "NAMED_SEARCH"
+    ],
+    "ratified_by": "业主 2026-10-30 裁决（V6-D 端到端跑逼出的门禁改向屏蔽）＋窄指令第 3 条诚实地图合同：「查看地点」（合格发布方实体链）与「搜索此地点（落点未核验）」（具名搜索）都是可出货状态；CONFLICT/WRONG_ENTITY/已知错链一律无按钮。",
+    "why_registered": "旧 map_contract 只认 legacy target_level（verified_*），于是 v4.2.2 诚实四维里identity_status=UNVERIFIED 的 403 条目标没有一条能过正式门禁——地图改向被 v4.2.1 门禁屏蔽。可出货状态集合必须登记在一个地方，由门禁读取，不能在门禁里再写一份判断。",
+    "identity_status_still_governs": "identity_status_allowed_for_named_search",
+    "blocking_conditions": [
+      "known_bad_link_markers",
+      "resolution_status_blocking_named_search",
+      "no_promotion"
+    ],
+    "note": "这条登记不降低任何断言：接受 NAMED_SEARCH 的同时要求该行当场重算的选择结论与出货字段一致，且 legacy 字段不得自称已核验（新旧状态互相矛盾就是错误）。"
+  },
+  "reason_codes": {
+    "SELECT_BLOCKED_KNOWN_ERROR_OR_CONFLICT": "已知错链或身份冲突：无按钮，旧 URL 隔离",
+    "SELECTED_PUBLISHER_ENTITY_LINK": "发布方声明的实体链接，血缘与 classifier 均合格",
+    "SELECTED_COORDINATE_LANDMARK": "无标准名称的坐标地标，坐标 VERIFIED",
+    "SELECTED_NAMED_SEARCH": "具名搜索（身份 UNVERIFIED）",
+    "SELECTED_NAMED_SEARCH_AMBIGUOUS_IDENTITY": "具名搜索 + 身份 AMBIGUOUS：必须显示多结果核对提示",
+    "SELECTED_NAMED_SEARCH_UNRESOLVED_IDENTITY": "具名搜索 + 身份 UNRESOLVED",
+    "SELECTED_NAMED_SEARCH_VERIFIED_WITHOUT_ENTITY_LINK": "身份 VERIFIED 但无合格发布方实体链，仍提供具名搜索",
+    "SELECTED_NAMED_SEARCH_MULTIPLE_RESULTS_OBSERVED": "存在独立观察记录 MULTIPLE_RESULTS：必须显示多结果核对提示",
+    "SELECTED_NAMED_SEARCH_AMBIGUOUS_JOIN_SIGNAL": "记录带已登记的模糊连接信号：允许搜索但必须显示多结果核对提示，且不计为已核验实体",
+    "SELECT_BLOCKED_NAME_UNUSABLE": "名称为占位/数字残片/走廊串或缺失：无按钮",
+    "SELECT_BLOCKED_IDENTITY_STALE": "身份证据过期：无按钮",
+    "SELECT_BLOCKED_OBSERVED_SEARCH_OUTCOME_USELESS": "已有独立观察表明搜索无结果/被阻断/过期：无按钮",
+    "SELECT_BLOCKED_NO_HONEST_ENTRY": "无法构造诚实入口：无按钮",
+    "SELECTED_NAMED_SEARCH_LOCAL_NAME_RATIFIED": "具名搜索：无有来源英文名，使用有来源的本地正式名称（§4 line 102，业主已登记）",
+    "SELECTED_NAMED_SEARCH_LOCAL_NAME_AFTER_RESIDUE": "具名搜索：英文名是删字/括弧残留片段，已弃用该片段并改用有来源的本地正式名称（§4 禁止字符级改名；这条与 RATIFIED 分开计数，便于审计 V0-L02/V0-L06 遗留面）"
+  },
+  "no_promotion": {
+    "identity_status": "生成 NAMED_SEARCH URL 绝不改变 identity_status；搜索串不是身份证据（§3.1、§8.2）。",
+    "google_resolution_status": "生成 NAMED_SEARCH URL 绝不写 CORRECT_ENTITY/MULTIPLE_RESULTS 等观察值；正式自动链保持 NOT_OBSERVED，除非存在独立观察记录（§3.4）。",
+    "coordinate_status": "URL 构造与坐标状态无关，不得因生成链接而把 MISSING 改为 VERIFIED。",
+    "enforcement": "selector 输出只允许写 link_mode/link_provider/link_builder_version/link_selection_reason/query_fields_used/isolated_link_url/notices 七类字段；写其它状态字段即 FAIL。"
+  },
+  "ui": {
+    "button_copy": {
+      "PUBLISHER_ENTITY_LINK": {
+        "cn": "在 Google Maps 查看地点",
+        "en": "View place in Google Maps",
+        "forbidden_phrases": [
+          "已由 Google 核验",
+          "Verified by Google",
+          "保证直达",
+          "guaranteed match"
+        ]
+      },
+      "NAMED_SEARCH": {
+        "cn": "在 Google Maps 搜索此地点（落点未核验）",
+        "en": "Search this place in Google Maps (landing not verified)",
+        "forbidden_phrases": [
+          "查看地点",
+          "View place",
+          "已核验",
+          "verified"
+        ]
+      },
+      "COORDINATE": {
+        "cn": "查看坐标位置",
+        "en": "View coordinate location",
+        "forbidden_phrases": [
+          "已核验地址"
+        ]
+      },
+      "NONE": {
+        "render_button": false,
+        "cn_note": "地图入口不可用",
+        "en_note": "Map entry unavailable"
+      }
+    },
+    "notices": {
+      "key_target_unverified": {
+        "cn": "地图落点未核验，请以订单、票证或运营方公布的地址、航站楼/码头信息为准。",
+        "en": "Map landing is not verified; rely on your booking, ticket, or the operator's published address, terminal or pier information.",
+        "applies_when": "criticality=CRITICAL_ITINERARY AND link_mode=NAMED_SEARCH"
+      },
+      "ambiguous_multiple_results": {
+        "cn": "可能有多个结果，请核对订单、票证或运营方信息。",
+        "en": "Multiple results are possible; check your booking, ticket, or operator information.",
+        "applies_when": "identity_status=AMBIGUOUS OR google_resolution_status=MULTIPLE_RESULTS OR 连接模糊信号（AMBIGUOUS_JOIN/CATEGORY_JOIN_AMBIGUOUS）"
+      }
+    },
+    "notice_authority": "§5.2 固定文案，不得改写为更乐观表述，也不得因排版而省略。",
+    "rendered_providers": [
+      "google"
+    ],
+    "primary_provider": "google",
+    "provider_rendering_note": "依据已接受 Checklist §7 的最小 reader 范围：§7 的文案表只登记了 Google 一种文案，Apple 侧没有登记过可上线的双语原文，所以 v4.2.2 读者页只出 Google 按钮；Apple 的决策仍然按 §3.3 逐 provider 记进 dataset 容器与逐 target 报告，只是不进 DOM。将来要恢复 Apple 按钮，先在这里登记 ui.button_copy.apple 的双语原文并经业主逐字确认。渲染层引用 legacy apple_url 或自行生成 Apple 按钮即为门禁 FAIL。（V3R 更正：本字段原写「业主裁决（2026-10-29，会话内）」，把一次会话内的选项回答说成了正式产品裁决，属不实归属；范围不变，出处改为 §7。）"
+  },
+  "dom_attributes": [
+    "data-target-id",
+    "data-entity-type",
+    "data-criticality",
+    "data-identity-status",
+    "data-coordinate-status",
+    "data-link-mode",
+    "data-google-resolution-status",
+    "data-provider"
+  ],
+  "dom_consistency": "DOM 属性、dataset 字段、门禁报告与最终 href 四处取值必须逐项一致（§7、§8.1）。",
+  "release_gate_non_goals": {
+    "google_entity_card_hit_rate": "NOT MEASURED / NOT A RELEASE GATE（§8.2）；任何报告字段不得填 100% 或估算值。"
+  },
+  "reader_payload_projection": {
+    "authority": "业主 2026-10-30 窄指令第 4 条：reader 不消费 provider 数据时，优先在渲染 payload 中剔除，而不是删审计记录。审计面（dataset 文件 + link_selection_report.jsonl 的 806 条 provider 决策）一条不减。",
+    "rule": "ui.rendered_providers 之外的 provider，其归属字段只留在审计面，不进读者载荷；rendered provider 的字段一律不动。字段归属由本块登记的 kind 名决定，渲染器不得自己猜。",
+    "implemented_by": "scripts/spa_renderer.py::_project_reader_map_links",
+    "enforced_by": [
+      "scripts/visual_qa.py::check_embedded_map_contract",
+      "scripts/test_v422_reader_payload_projection.py"
+    ],
+    "audit_only_field_kinds": [
+      {
+        "kind": "map_link_container_entry",
+        "field": "map_link_by_provider.{provider}",
+        "measured": {
+          "apple": {
+            "california_v420": {
+              "rows": 205,
+              "utf8_bytes": 112649
+            },
+            "philippines_v419": {
+              "rows": 198,
+              "utf8_bytes": 104680
+            }
+          }
+        }
+      },
+      {
+        "kind": "provider_url_field",
+        "field": "{provider}_url",
+        "measured": {
+          "apple": {
+            "california_v420": {
+              "rows": 205,
+              "utf8_bytes": 19384
+            },
+            "philippines_v419": {
+              "rows": 0,
+              "utf8_bytes": 0
+            }
+          }
+        }
+      },
+      {
+        "kind": "classifier_verdict_entry",
+        "field": "classifier_verdicts.{provider}_url",
+        "measured": {
+          "apple": {
+            "california_v420": {
+              "rows": 205,
+              "utf8_bytes": 74210
+            },
+            "philippines_v419": {
+              "rows": 0,
+              "utf8_bytes": 0
+            }
+          }
+        }
+      },
+      {
+        "kind": "quarantine_provider_rows",
+        "field": "quarantine[] where kind=={provider}_url or classifier.*.provider=={provider}",
+        "measured": {
+          "apple": {
+            "california_v420": {
+              "rows": 205,
+              "utf8_bytes": 136924
+            },
+            "philippines_v419": {
+              "rows": 0,
+              "utf8_bytes": 0
+            }
+          }
+        }
+      },
+      {
+        "kind": "isolated_link_url_provider_host",
+        "field": "isolated_link_url (host in providers.{provider}.entity_hosts)",
+        "measured": {
+          "apple": {
+            "california_v420": {
+              "rows": 0,
+              "utf8_bytes": 0
+            },
+            "philippines_v419": {
+              "rows": 0,
+              "utf8_bytes": 0
+            }
+          }
+        }
+      }
+    ],
+    "measured_totals_2026_10_30": {
+      "denominator": "两棵 run 的 map_targets 全集：CA 205 / PH 198 条目标",
+      "california_v420": {
+        "targets": 205,
+        "map_targets_utf8_bytes": 2922422,
+        "audit_only_provider_utf8_bytes": 343167,
+        "stripped_by_v3r_container_only_utf8_bytes": 112649,
+        "residual_additionally_stripped_utf8_bytes": 230518
+      },
+      "philippines_v419": {
+        "targets": 198,
+        "map_targets_utf8_bytes": 2449404,
+        "audit_only_provider_utf8_bytes": 104680,
+        "stripped_by_v3r_container_only_utf8_bytes": 104680,
+        "residual_additionally_stripped_utf8_bytes": 0
+      },
+      "combined_audit_only_utf8_bytes": 447847,
+      "combined_stripped_by_v3r_utf8_bytes": 217329,
+      "combined_residual_stripped_by_v6b_utf8_bytes": 230518,
+      "measurement": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6b_projection_field_measurement.json"
+    },
+    "owner_directive_number_reconciled": {
+      "directive_says_mb_approx": 0.6,
+      "measured_provider_only_bytes_both_runs": 447847,
+      "measured_process_record_bytes_both_runs": 4911485,
+      "reading": "业主按 ~0.6MB 记账；V6-B 只按 provider 归属测到 447,847B，差的那部分正是 provider-neutral 过程记录。V6-D 端到端实测 CA 成品超围栏 124,182B 之后，这笔账不再是文档问题而是交付问题：本轮把判据换成『渲染器读不读』，两棵 run 合计 4,911,485B 过程记录退出读者载荷，审计面一条不减。"
+    },
+    "not_projected": {
+      "provider_neutral_audit_fields": [
+        "evidence",
+        "qa_evidence",
+        "link_notices"
+      ],
+      "measured_utf8_bytes": {
+        "california_v420": 1598328,
+        "philippines_v419": 1488192,
+        "combined": 3086520
+      },
+      "why_untouched": "剩下这三条（evidence/qa_evidence/link_notices）仍然留在读者载荷里：前两条是 VERIFIED 档按钮的可核验证据引用，第三条直接决定读者看到的核对提示，渲染器逐条消费。V6-P 之前这里还列着 migration/unresolved_fields/selection_signals，理由是『窄指令第 4 条只授权剔 provider 数据』；业主 2026-10-30 Q1 裁决把判据改为『渲染器读不读』，这三条随之移入 process_record_fields。",
+      "withdrawn_by_v6p": [
+        "migration",
+        "selection_signals",
+        "unresolved_fields"
+      ]
+    },
+    "non_goals": [
+      "不删任何审计记录：dataset 文件与 link_selection_report.jsonl 保持完整容器",
+      "不动 rendered provider（google）的任何字段",
+      "不声称减少网络往返：单文件 HTML 里省下的就是读者必须下载的字节"
+    ],
+    "process_record_fields": [
+      {
+        "field": "migration",
+        "kind": "process_record",
+        "why_reader_does_not_consume": "W2 迁移血缘：每个字段从哪棵 run 的哪一行推导而来。渲染器只读 link_mode/map_link_url/状态四维度/名称/坐标/文案键，从不读 migration（spa-layout.js mapLinkRecord/mapLinkAudit 与 split-layout.js 逐字段核过）。",
+        "audit_surface_kept": "dataset.json（本 run 审计面，逐条原样保留）与 link_selection_report.jsonl（V2R 逐 target 判决记录）",
+        "measured": {
+          "california_v420": {
+            "rows": 205,
+            "utf8_bytes": 1395430
+          },
+          "philippines_v419": {
+            "rows": 198,
+            "utf8_bytes": 1215628
+          }
+        }
+      },
+      {
+        "field": "unresolved_fields",
+        "kind": "process_record",
+        "why_reader_does_not_consume": "迁移期未决字段清单，供 V2R 报告与后续工作包使用；渲染器不消费。",
+        "audit_surface_kept": "dataset.json（本 run 审计面，逐条原样保留）与 link_selection_report.jsonl（V2R 逐 target 判决记录）",
+        "measured": {
+          "california_v420": {
+            "rows": 205,
+            "utf8_bytes": 611473
+          },
+          "philippines_v419": {
+            "rows": 198,
+            "utf8_bytes": 616819
+          }
+        }
+      },
+      {
+        "field": "quarantine",
+        "kind": "process_record",
+        "why_reader_does_not_consume": "隔离记录（判决 + 理由 + 证据）。渲染器不读它：它只决定按钮形态，而按钮形态来自 link_mode/link_notices。",
+        "audit_surface_kept": "dataset.json（本 run 审计面，逐条原样保留）与 link_selection_report.jsonl（V2R 逐 target 判决记录）",
+        "measured": {
+          "california_v420": {
+            "rows": 205,
+            "utf8_bytes": 450892
+          },
+          "philippines_v419": {
+            "rows": 198,
+            "utf8_bytes": 222298
+          }
+        }
+      },
+      {
+        "field": "classifier_verdicts",
+        "kind": "process_record",
+        "why_reader_does_not_consume": "URL/reference 分类器逐字段判决日志。渲染器不读判决过程，只读判决结果 link_mode/map_link_url。",
+        "audit_surface_kept": "dataset.json（本 run 审计面，逐条原样保留）与 link_selection_report.jsonl（V2R 逐 target 判决记录）",
+        "measured": {
+          "california_v420": {
+            "rows": 205,
+            "utf8_bytes": 228985
+          },
+          "philippines_v419": {
+            "rows": 198,
+            "utf8_bytes": 169960
+          }
+        }
+      }
+    ],
+    "process_record_authority": "业主 2026-10-30 Q1 裁决：投影判据从「归属哪个 provider」改为「渲染器读不读」。本条 supersede V6-B non_goals 里『不动 rendered provider（google）的任何字段』中被点名的这 4 个过程记录字段（血缘/欠账/隔离/判决日志）（判决日志与隔离记录里属于 google 的那部分一并剔）；rendered provider 的决策容器 map_link_by_provider.google 与 URL/文案/状态字段一律不动。",
+    "process_record_measured_totals": {
+      "denominator": "两棵 run 的 map_targets 全集：CA 205 / PH 198 条目标",
+      "per_run": {
+        "california_v420": {
+          "targets": 205,
+          "rows_with_field": 820,
+          "utf8_bytes": 2686780
+        },
+        "philippines_v419": {
+          "targets": 198,
+          "rows_with_field": 792,
+          "utf8_bytes": 2224705
+        }
+      },
+      "combined_process_record_utf8_bytes": 4911485,
+      "reader_payload_effect_california": "5,886,614B → 预计约 3.18MB（登记围栏 5,762,432B）",
+      "measurement": ".temp/v422_honest_map/V6_candidate_run/artifacts/V6p_strip_measurement.json 与本脚本（同一把尺子：_utf8_len({field: value})）"
+    },
+    "kept_for_explicitness_contract": {
+      "fields": [
+        "address_status",
+        "criticality_derivation_reason",
+        "criticality_derived_from_field",
+        "criticality_source",
+        "evaluated_at",
+        "lineage_group",
+        "link_builder_version",
+        "link_selection_version",
+        "map_query_name_source",
+        "policy_version",
+        "resolver_used",
+        "selection_signals"
+      ],
+      "why_kept": {
+        "policy_version": "IDENTITY_VERIFIED_WITHOUT_POLICY_VERSION：VERIFIED 必须能引用规则版本与时间，门禁读的就是交付物这一份",
+        "evaluated_at": "判决时间戳与 policy_version 同组，§17.2.5 要求交付物可判",
+        "resolver_used": "RESOLVER_USED_NOT_EXPLICIT：必须显式 true/false（生产链不用 resolver 就是 false），留空即 FAIL，所以它属于交付物而不只是审计面",
+        "lineage_group": "MAP_FIELD_NOT_EXPLICIT：状态未知不等于没有，必须显式出现在交付物里",
+        "address_status": "MAP_FIELD_MISSING 的 §17.2.5 必填字段之一",
+        "link_builder_version": "LINK_CONTEXT_MISSING：链接上下文（构造版本）要求在交付物上可对账",
+        "link_selection_version": "LINK_CONTEXT_MISSING：链接上下文（选择版本）同上",
+        "selection_signals": "解释这颗按钮为什么出现，与 link_selection_reason 同组留在交付物上",
+        "criticality_derivation_reason": "关键性=读者可见的提醒强度，推导理由留在交付物上才可复核",
+        "criticality_derived_from_field": "同上",
+        "criticality_source": "同上",
+        "map_query_name_source": "V1R 裁决的落点：搜索串用了哪个有来源的名字，交付物上要能证明没编名"
+      },
+      "enforced_by": [
+        "scripts/map_gate_v422.py (payload_kind=reader)"
+      ],
+      "reading": "这些字段渲染器同样不读，但 §17.2.5/§8.2 要求「交付物本身」可判，所以不剔。V6-P 的剔除面因此是 4 条纯过程记录，而不是「凡渲染器不读一律删」。"
+    },
+    "selection_provenance_block_carried": {
+      "block": "map_link_selection",
+      "ratified_by": "V6-V（seal-31 端到端 run 的实测暴露，不是新裁决）：门禁自己的 applicability.follow_up 早已写明「V6 端到端候选 run 必须带本版血缘；不适用不等于通过」，本轮是第一次真的把它带上交付物。",
+      "why_carried": "§8.1「dataset/DOM/href/link mode 不一致 = 0」的适用性开关读的是交付载荷里的 map_link_selection.selection_version。load_demo_fixture 不 hydrate 这个键、export_runtime_dataset 不输出它，于是读者页永远拿 NOT_V422_MIGRATED_NO_SELECTION_PROVENANCE 退出——那条 0 从来不是「量到 0」，而是「没量」。这属于「0 要先证明取值面是活的」同一类错误。",
+      "carried_by": [
+        "scripts/gen_travel_scope.py::load_demo_fixture",
+        "scripts/gen_travel_scope.py::export_runtime_dataset"
+      ],
+      "contains_no_per_target_state": "块里只有 selection_version / round / implementation / per_provider_container / reason_code_authority / providers_decided / reader_primary_provider / inputs 两个 SHA-256 / targets 计数 / w3_resolver_used=false / historical_run_written=false；没有逐 target 的身份或核验状态，因此不构成 §8.2 禁止的「搜索串升格状态」。",
+      "measured_2026_10_31": {
+        "utf8_bytes_california": 994,
+        "utf8_bytes_philippines": 994,
+        "page_bytes_before": {"california": 2697703, "philippines": 1913365},
+        "share_of_page": "0.037%（加州）/ 0.052%（菲律宾），围栏 5,762,432B 未动",
+        "dom_rows": {"california": 279, "philippines": 265},
+        "expected_buttons": {"california": 205, "philippines": 198},
+        "findings_when_enforced": {"california": 5, "philippines": 0},
+        "finding_codes": {"GATE_DOM_HREF_MISSING": 5},
+        "what_the_5_are": "V4-C02 已登记的同址双键：一行英文键、一行中文键指向同一 POI，渲染器每卡片只解一个 target，另一行的 href 在 DOM 里不存在。放行 §8.1 就是把这块已知缺口如实报出来，而不是继续用「不适用」盖住它。",
+        "measurement": ".temp/v422_honest_map/V6_candidate_run/artifacts/v6v_provenance_carry.json"
+      },
+      "must_not_be_closed_by": [
+        "删掉同址双键里的任一行（分母 403 是合同固定值，§12）",
+        "把 selection_version 写成别的值让开关关掉",
+        "在 visual_qa 里再实现一套 href 比对（§8.1 唯一实现是 map_gate_v422.dom_findings）"
+      ],
+      "enforced_by": [
+        "scripts/visual_qa.py::check_map_dom_dataset_consistency",
+        "scripts/test_v422_selection_provenance_carry.py"
+      ]
+    }
+  },
+  "legacy_state_reconciliation": {
+    "ratified_by": "业主 2026-10-30 裁决（V6-D 正式生成逼出的新旧状态矛盾）：加州 151 条接回该行自己的名，同时把与四维诚实状态矛盾的 legacy 声明显式降级。不做外部查询、不升格任何身份状态、不删审计记录——原值一律留存在该行 migration 里。",
+    "rule": "legacy 字段只能被降到与四维诚实状态一致，绝不升高；名字只从 dataset 已有字段接回，禁止字符级修补。",
+    "implemented_by": "scripts/map_link_selector.py::reconcile_legacy_state",
+    "enforced_by": [
+      "scripts/map_contract.py::_target_errors",
+      "scripts/test_v422_legacy_state_reconciliation.py"
+    ],
+    "name_source_priority": [
+      "names.en",
+      "display_name",
+      "canonical_name"
+    ],
+    "downgrade_only_fields": [
+      "canonical_name",
+      "target_level",
+      "verification_status",
+      "source_url"
+    ],
+    "level_vocabulary_after": {
+      "named_search": "search_candidate",
+      "publisher_entity_link_verified": "verified_platform_url",
+      "none": "search_candidate"
+    },
+    "verification_status_after": "unverified",
+    "self_attestation_reason_code": "SELF_ATTESTATION_SOURCE_URL",
+    "template_name_reason_code": "LEGACY_TEMPLATE_NAME",
+    "provenance_kept": "migration.legacy_state_reconciliation（逐字段 before/after + rule + reason）",
+    "non_goals": [
+      "不接回任何需要外部核验的名字（零抓取零 Key）",
+      "不把 UNVERIFIED 升成 VERIFIED",
+      "不删除 W2 的 quarantine/unresolved_fields 记录",
+      "不改 403 条固定分母，只改状态值"
+    ],
+    "selection_rederivation": {
+      "after_downgrade": true,
+      "fields": [
+        "link_mode",
+        "link_provider",
+        "link_builder_version",
+        "link_selection_reason",
+        "link_selection_version",
+        "map_link_url",
+        "query_fields_used",
+        "link_notices",
+        "isolated_link_url",
+        "map_query_name_source",
+        "selection_signals",
+        "map_link_by_provider",
+        "google_url",
+        "apple_url"
+      ],
+      "assembly_point": "scripts/map_link_selector.py::select_all_providers（容器唯一装配点，单值字段取 primary_provider）",
+      "why": "legacy 名字接回之后，行里存的 map_link_url 仍然是用旧假名拼出来的搜索串。门禁要求「存的结论必须等于当场重算」，所以收口必须一次做完：改完名字就按现行选择器重建链状态，而不是让读者拿到一条 query=California Venue 的旧 URL。",
+      "never_promotes": "重建只写 link_* / map_link_url / query_fields_used 等链字段；identity_status / google_resolution_status / coordinate_status 由 no_promotion 约束，永不因为重建被改。",
+      "provenance_kept": "重建前后的链字段都留在 migration.legacy_state_reconciliation.fields 里",
+      "legacy_url_mirrors": {
+        "fields": [
+          "google_url",
+          "apple_url"
+        ],
+        "rule": "provider 的 legacy 单值 URL 镜像必须等于该 provider 在 map_link_by_provider 里的那一条 map_link_url（NONE 档就是空串）。镜像不是第二个决定，是同一个决定的两种写法。",
+        "why": "V6-D 端到端实测：V6-L 只重建了 map_link_url 与容器，403/403 行的 google_url 仍停留在 V2R 迁移值，其中加州有 5 条按假名/近义名拼出的旧串被多个 POI 共用。读者页的 href 来自容器，但审计面与视觉门读的是镜像——同一目标在同一份产物里存着两个答案，任何一侧的对账都不可信。",
+        "never_promotes": "镜像只写 URL 值本身；identity_status / coordinate_status / google_resolution_status 不在重建清单里，永不被镜像写入影响。",
+        "measured": {
+          "california_v420": {
+            "targets": 205,
+            "google_url_differs_from_container_before": 205,
+            "legacy_urls_shared_across_names_before": 5
+          },
+          "philippines_v419": {
+            "targets": 198,
+            "google_url_differs_from_container_before": 198,
+            "legacy_urls_shared_across_names_before": 1
+          },
+          "measurement": ".temp/v422_honest_map/V6_candidate_run/artifacts/v6p_href_sharing2.txt"
+        },
+        "registered_reason": "REBUILD_LEGACY_URL_MIRROR"
+      }
+    }
+  }
+}

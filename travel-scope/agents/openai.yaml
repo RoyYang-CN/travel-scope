@@ -1,0 +1,4 @@
+interface:
+  display_name: "Travel-Scope"
+  short_description: "Travel planning with verified research and bilingual guides"
+  default_prompt: "Use $travel-scope to plan my trip with conversational Q0-Q9 and a bilingual guide."

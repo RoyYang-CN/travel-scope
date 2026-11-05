@@ -1,0 +1,7 @@
+{
+  "completed_statuses": ["included", "no_reliable_results"],
+  "search_terms": {
+    "domestic": ["咖啡馆", "精品咖啡", "烘焙咖啡"],
+    "international": ["cafe", "specialty coffee", "coffee shop"]
+  }
+}

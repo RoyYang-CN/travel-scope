@@ -1,0 +1,11 @@
+{
+  "policy_version": "1.0.0",
+  "banned_substring_patterns": [
+    "undefined",
+    "null",
+    "NaN"
+  ],
+  "bare_day_pattern": "(?<!\\d)-Day\\b",
+  "disallow_bare_day_prefix": true,
+  "disallow_duplicate_country": true
+}

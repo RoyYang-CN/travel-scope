@@ -1,0 +1,586 @@
+{
+  "product": "Travel-Scope",
+  "renderer_id": "travel-scope-split-v1",
+  "spa_renderer_id": "travel-scope-spa-v1",
+  "output_template": "{artifact_slug}-travel-guide.html",
+  "version": "5.0.0",
+  "zero_call_build_window": {
+    "status": "v4.2.2 ZH-RELEASE-2 步6c（2026-11-03 入册）",
+    "why": "§11 V4 要求 google_billable_api_calls／google_api_keys_used／google_maps_scrape_attempts／paid_fallback_attempts 四项必须来自执行期拦截器。此前树里只有两种账本：门禁自身审计窗口（formal_data_gate 报 self_check_window）与测试窗口（test_v422_map_execution 的 guarded scope）；正式构建那一段从来没有执行期账，所以『生成时零 Google 调用』一直是推论而不是测量。",
+    "applies_to": "只有 spa_renderer.formal_build_declared() 为真时生成器才写这份账本；smoke 与 demo 不产，也不得借用别的窗口的账本自称零调用。",
+    "outputs_relpath": "zero_call_ledger.json",
+    "scope_prefix": "generation_window",
+    "evidence_tier": "generation_window",
+    "binding_fields": ["input_sha256", "artifacts", "argv"],
+    "shape_authority": "scripts/spa_renderer.py::zero_call_build_window 是唯一读取处；gen_travel_scope.py 只执行，不再内置文件名或档位名。",
+    "loopback_explanation": "",
+    "loopback_explanation_rule": "本机回环非零时，账本里的解释文本取本块的 loopback_explanation；块里为空就让地图门按它自己的规则判缺解释，生成器不许现场编一句圆过去。",
+    "consumer": "map_gate_v422 --ledger 与 formal_data_gate --zero-call-ledger 读同一份账本；两门都没有自己造账的路径。"
+  },
+  "reader_language": {
+    "authority": "ZH-RELEASE-1（业主 2026-11-02 裁 Q1-A）：语言档位是构建期登记事实，不是读者可选功能。正式交付只有一个档位＝zh-formal；英文通道要真渲染验证就走 en-audit，产物只落 .temp。",
+    "formal_profile": "zh-formal",
+    "html_meta_name": "travel-scope-reader-profile",
+    "source_ledger_chain": {
+      "authority": "业主 2026-11-03 裁（finding_1 固定修复方向）：真生成器必须从正式输入 dataset 携带 source_evidence_meta，不得从十列位置面重新推导，也不得在缺失时回退空列表。正式链＝input dataset source_evidence_meta → canonical_dataset → source_projection → source_records → DOM，并核对输入 SHA。正式 run 缺少该字段应在生成阶段阻断；直调 render_spa_document() 仍只算 smoke。",
+      "chain": [
+        "input dataset source_evidence_meta（gen_travel_scope.py::load_demo_fixture 按字节读入，同一份字节既解析也钉摘要）",
+        "canonical_dataset（gen_travel_scope.py::assemble_source_ledger_face → export_runtime_dataset 写进载荷）",
+        "source_projection.project／counts（形状校验与投影的唯一实现）",
+        "reader payload source_records／source_ledger_status（spa_renderer.apply_reader_profile）",
+        "DOM .se-row（assets/spa-layout.js::sourcesBlock，逐行带 data-se-index／data-se-uid）"
+      ],
+      "machine_face_key": "source_evidence_meta",
+      "machine_face_key_registered_in": "references/data-model.json::source_evidence_reader_face",
+      "forbidden_fallbacks": [
+        "从十列位置面 source_evidence 反推机器面（#113 就是按位取值取成空白条目）",
+        "缺失时写空列表或空对象顶替（分不清「没有这一面」与「有但是空账」）",
+        "把缺失降级成警告后继续出货",
+        "门禁替合同另造一套核对规则（码与腿必须读 provenance_gate 登记）"
+      ],
+      "formal_build": {
+        "env": "TRAVEL_SCOPE_FORMAL_RUN",
+        "value": "1",
+        "read_by": "scripts/spa_renderer.py::formal_build_declared（生成器与渲染器共用这一处判据，不各自硬写变量名）",
+        "abort_stage": "生成阶段（载荷装配时＋渲染器投影前），不是交付门禁补判",
+        "abort_codes": [
+          "SOURCE_LEDGER_FACE_MISSING",
+          "SOURCE_LEDGER_FACE_EMPTY",
+          "SOURCE_LEDGER_FACE_NOT_LIST",
+          "SOURCE_LEDGER_INPUT_SHA_DRIFT",
+          "SOURCE_LEDGER_PROVENANCE_BROKEN"
+        ]
+      },
+      "provenance_self_declaration": {
+        "payload_key": "source_ledger_meta",
+        "fields": ["dataset_rows", "input_sha256", "ledger_sha256"],
+        "written_by": "gen_travel_scope.py 从它实际读到的那份输入字节（不在渲染器或门里补造）",
+        "single_implementation": "scripts/source_projection.py::ledger_digest／build_provenance／provenance_problems",
+        "digest_caliber": "sha256(json.dumps(rows, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')) —— 行序无关（sort_keys 只排对象键），跨平台稳定",
+        "stays_in_reader_payload": true,
+        "why_reader_visible": "只有三行数字与两个摘要，没有英文显示面；读者页的「这份台账指哪份输入」必须由产物自己说出，否则门检的是别的字节"
+      },
+      "smoke_call_rule": {
+        "direct_render_spa_document": "smoke",
+        "why": "直调渲染器没有正式输入字节可指 ⇒ 造不出 source_ledger_meta ⇒ 中文正式门按 provenance_gate.codes.absent 阻断；这不是「smoke 做得差」，是它的身份本来就只到 smoke",
+        "formal_gate_object": "中文正式门的被检对象＝真生成器产物（release_runs/<run>/outputs/*.html），且它自证的 input_sha256 要能与该 run manifest 封存值对上",
+        "evidence_rule": "任何以直调渲染器产出的 HTML 得出的「来源面板已对账」结论，不得写进交付台账"
+      },
+      "provenance_gate": {
+        "legs": ["absent", "rows", "input_sha", "ledger_digest", "seal_sha"],
+        "codes": {
+          "absent": "SPA_SOURCE_LEDGER_PROVENANCE_ABSENT",
+          "rows": "SPA_SOURCE_LEDGER_PROVENANCE_ROWS_WRONG",
+          "input_sha": "SPA_SOURCE_LEDGER_INPUT_SHA_MISMATCH",
+          "ledger_digest": "SPA_SOURCE_LEDGER_DIGEST_MISMATCH",
+          "seal_sha": "SPA_SOURCE_LEDGER_SEAL_SHA_MISMATCH"
+        },
+        "unregistered_rule_code": "SPA_SOURCE_LEDGER_PROVENANCE_RULE_UNREGISTERED",
+        "not_cross_checked_warning_code": "SPA_SOURCE_LEDGER_INPUT_SHA_NOT_CROSS_CHECKED",
+        "cross_check_inputs": "delivery_gate 必须同时带 --data 与 --run-manifest 才构成「输入 SHA 已核对」；缺任一腿时记 not_cross_checked 警告并把缺腿写进结论串，不得声称已核对",
+        "implemented_in": "scripts/delivery_gate.py::_check_zh_formal_ledger_provenance（判定）＋ scripts/visual_qa.py::check_source_panel（浏览器侧实测 ledger_provenance 与 SPA_SOURCE_PROVENANCE_WRONG）"
+      },
+      "measured_defect_2026_11_03": "中文正式件（真生成器产物）的来源台账整面缺失：读者载荷里 source_records=0 而运行 dataset 有 401 条机器面记录，面板印「0 verified」假统计——成因就是这一链在 export_runtime_dataset 的载荷字面量里根本没有 source_evidence_meta 这一格，渲染器读到 None 后回退空列表。已按本块登记修复：装载→装配→投影→DOM 四面都带账，缺面在生成阶段抛 SOURCE_LEDGER_FACE_* 阻断。"
+    },
+    "profiles_declare_self": "每一份构建出来的 HTML 都必须在 head 里写 meta（content＝档位名）；没声明档位的页面等于没人知道自己该被哪套门检查。",
+    "profiles": {
+      "zh-formal": {
+        "shipping": true,
+        "reader_toggle": false,
+        "state_lang_write_allowed": false,
+        "excluded_payload_keys": [
+          "en_text_replacements", "prose_en", "prose_en_provenance", "prose_en_required",
+          "category_en", "category_unmapped", "machine_translated_display_name", "name_pairs",
+          "name_pair_audit", "display_name_provenance", "display_name_conflicts",
+          "display_name_rejected", "country_en", "hero_credit_en", "source_evidence"
+        ],
+        "payload_scope": {
+          "authority": "业主 P0-1（2026-11-02）：顶层 denylist 证明不了嵌套英文消失——所以正式档走合同驱动的**允许清单＋递归剥离**，实现在 scripts/reader_payload_scope.py（唯一实现）。两个口径分开记，别混：剔除候审面**之前**加州原始载荷嵌套 EN 形状键 300 处（map_targets.*.names.en 205、caption_en 36、title_en 16、limitations_en 14、name_en 14、use_cases_en 14、en_note 1）；按现行顺序（先剔候审面再递归剥离）**之后**实测加州 292、第二地（run 202702） 253。差值只来自被剔掉的候审面自身，不是漏剥。",
+          "measured_defect_2026_11_02": "递归剥离把**数字值的标识键**也当英文显示面删了：第二地载荷 source_counts.by_provider['en.wikivoyage.org']=188 被 ^en\\. 命中删除，出货字节里 by_provider 合计 386 而 source_records 有 574 行／5 个 provider ⇒ 一份自相矛盾的统计坐在来源面板旁边（正是 #113 那一类假统计）。处置两条：① source_counts 不再进读者载荷（DOM 与门都从 source_records 现算，第二份副本没有读者，只有漂移空间），改登记在 excluded_top_level；② scripts/reader_payload_scope.py 新增硬门 scope_numeric_value_key_stripped：EN 形状键的值是数字 ⇒ 抛码阻断，统计形状的面不许被静默削。改判后复测：数字型命中加州 0／第二地（run 202702） 0（第二地（run 202702）原本就是这 1 处），现行口径剥离计数加州 292／第二地（run 202702） 253。",
+          "declared_scope_value": "zh_only",
+          "top_level_allowlist_measured_at": "2026-11-03 第三版口径（复算工具 .temp/v422_honest_map/ZH_RELEASE_1/tools/measure_payload_top_level_keys.py）：顶层键全集不是 dataset.json 的键，而是四条产出路径全并＝「gen_travel_scope.py 那份 payload 字面量（实测 50 键）∪ 生成器用 payload[...]／canonical_dataset[...] 下标写入的键（实测 artifact_slug、source_evidence_meta、source_ledger_meta）∪ spa_renderer 渲染期写进 adapted/data 的键 ∪ 两地冻结 dataset.json 的键」＝69 个观测键；登记 62 允许＋17 剔除。历次实测把历次漏登记都撞出来了：① 只按加州量 ⇒ 第二地（run 202702） hero_video 未登记即阻断；② 只按 dataset.json 量 ⇒ 渲染期内联资源 asset_blobs、构建期注入 map_region/media_gaps/theme_label/map_platforms/language/demo_mode/is_overseas/media_renditions/theme_accent/theme_evidence 全部未登记即阻断（共 11 处，见 measured_defect_2026_11_02_allowlist）；③ source_counts 因数字型统计被递归剥离删掉 188 条 provider 记录，改判为不出货；④ 2026-11-03 加 source_ledger_meta（血缘自证块，生成器条件写入）时才发现第二版量法把「生成器下标写入」这一路算出来又丢了（工具里 generator_writes 没并进并集）——补齐口径后重量，缺登记的只有这一个键。允许清单没有量到全部出货键时，构建会 abort——这条门是有牙的，不是靠我记得加黑名单。",
+          "measured_defect_2026_11_02_allowlist": "允许清单第一版按 dataset.json 顶层键量（51→50），漏掉 11 个由构建期/渲染期注入的出货键：asset_blobs、media_gaps、media_renditions、map_platforms、map_region、language、demo_mode、is_overseas、theme_label、theme_accent、theme_evidence。全量回归里 7 支测试用 inline/assets_dir 模式渲染，全部在 scope 处 abort（scope_payload_key_unregistered）⇒ 证明「未登记字段名带英文」这条路确实被堵，也证明我的量法口径错过。第二版按上面的三源并集重量。",
+          "top_level_allowlist": [
+            "artifact_slug", "asset_blobs", "attractions", "budget", "budget_fx",
+            "budget_meta", "cafe_classification", "cafe_coverage", "cafes", "country",
+            "demo_mode", "destination_coverage", "destinations", "dive_sites", "domestic_destination",
+            "duration_days", "editorial_media", "google_place_ids", "hero_credit_cn", "hero_image",
+            "hero_video", "hotels", "image_collection", "is_overseas", "itinerary",
+            "language", "legacy_state_reconciliation", "local_apps", "local_chains", "local_knowledge",
+            "map_link_render_projection", "map_link_selection", "map_link_ui", "map_migration", "map_platforms",
+            "map_region", "map_targets", "media_gaps", "media_renditions", "packing",
+            "practical", "provider_api_used", "provider_poi_ids", "reader_language_scope", "reader_profile",
+            "reader_profile_dropped_keys", "restaurants", "route_budgets", "routes", "schema_version",
+            "section_media", "source_ledger_meta", "source_ledger_status", "source_records", "theme", "theme_accent",
+            "theme_evidence", "theme_label", "transport", "transport_nodes", "travel_mode",
+            "worth_it"
+          ],
+          "excluded_top_level": [
+            "en_text_replacements", "prose_en", "prose_en_provenance", "prose_en_required",
+            "category_en", "category_unmapped", "machine_translated_display_name", "name_pairs",
+            "name_pair_audit", "display_name_provenance", "display_name_conflicts",
+            "display_name_rejected", "country_en", "hero_credit_en", "source_evidence",
+            "source_evidence_meta", "source_counts"
+          ],
+          "machine_readable_exempt_paths": [
+            {
+              "path_segments": ["map_targets", "*", "names", "en"],
+              "shape": "$.map_targets.*.names.en",
+              "value_checks": ["nonempty_string", "no_cjk", "names_schema"],
+              "wildcard_rule": "* 只许匹配恰好一段，且那一段只能是 map_targets 的直接子键（目标名 dest|Name）；结构段 map_targets／names／en 必须逐字相等才算命中。父路径换一个（例如 hotels[*].names.en、map_targets.*.labels.en）就不命中，照旧剥离。精确性还要机械判定（scripts/reader_payload_scope.py::_compile_exemptions）：段序列首段或末段是通配、或字面段少于 2 个 ⇒ 抛 scope_exempt_path_shape_unregistered，因为那已经是按父路径或按键名全局放行，裁②明令禁止。",
+              "authority": "业主 2026-11-03 裁②＝标识／URL 构造输入：names.en 是 NAMED_SEARCH 查询名的唯一来源、地图目标身份结构的一部分、别名五字段指纹之一。删它会改变地图行为（实测加州 30 个按钮消失＋别名指纹漂移），那不是「中文版缩小了」，是构建把自己的交付物改坏了。",
+              "reader_visible": false,
+              "reader_visible_proof": "业主 2026-11-03 裁②要求执行型哨兵测试，已量（scripts/test_v422_machine_readable_exempt.py，加州冻结 run 输入面，哨兵 ZZSENTINEL4237Q）：①放进该路径后 map_link_selector 仍读到它，rec.map_query_name_source=='names.en' 且 URL＝https://www.google.com/maps/search/?api=1&query=ZZSENTINEL4237Q,%20California,%20US；②真浏览器里 body.innerText 不含哨兵，值出现在该按钮的 href 与内嵌读者载荷（#lang-btn 仍为 0）；③data-* 审计属性实测**不含**该值（spa-layout.js 的 mapLinkAudit 不导 names.en），所以机读面证明只走 href＋内嵌载荷两条，不再声称 data-*；④同名字段放在 map_targets.<目标>.en 或 local_apps[*].en 都被剥离，整个文件不含该注入串。这段声明不自证，判据在上面那把尺子里。",
+              "must_not_extend_to": [
+                "键名 en 的全局放行",
+                "任意父路径下的 names.en",
+                "任何 *_en／en_*／含 english 的键（caption_en、title_en、limitations_en、name_en、use_cases_en、en_note 一律照旧剥离）",
+                "prose_en／en_text_replacements／category_en／name_pairs／machine_translated_display_name 这些候审散文面"
+              ],
+              "alias_fingerprint_rule": "别名等价五字段指纹必须与豁免前逐字相同：豁免只是「不删这一面」，不许改指纹算法，也不许把 findings 基准从 0 改成 30＋30 来接受退化。"
+            }
+          ],
+          "machine_readable_exempt_disposition": "keep_and_register：命中精确段序列 ⇒ 保留，值继续过 nonempty_string／no_cjk／names_schema 三项复检（规则来源 scripts/data_model.py 与 references/data-model.json::names_schema），计数登记在投影报告 machine_readable_kept／machine_readable_kept_total，并写进构建日志。任一项复检不过 ⇒ 抛 scope_exempt_value_rejected 阻断构建；豁免项形状不合法或登记了没实现的检查 ⇒ 抛 scope_exempt_path_shape_unregistered。",
+          "nested_en_patterns": ["^en$", "^en_", "_en$", "^en\\.", ".*english.*"],
+          "nested_en_disposition": "strip_and_register",
+          "nested_en_numeric_value_disposition": "abort：命中键的值是数字（int/float/bool）⇒ 那把键是**标识或统计维度**，不是英文显示面，静默删除＝丢记录（见 measured_defect_2026_11_02）。抛 scope_numeric_value_key_stripped，要求显式登记这一面该不该出货。",
+          "unregistered_top_level_disposition": "abort",
+          "honest_boundary": "这里分两件事，别再混着说（业主 2026-11-03 裁②要求显式区分）。① **machine-readable identity／query input**＝地图目标身份结构与 URL 构造输入：map_targets 的键（dest|Name）、coords、entity_type、link_mode、map_link_by_provider 里选好的 URL，以及精确路径 map_targets.*.names.en（NAMED_SEARCH 的查询名）。这一面印不给读者，读者页的可见文本是中文；它进成品是为了「按钮指向哪个实体」而不是「给读者看英文」。② **reader-visible English content**＝任何会以文字形式出现在读者屏幕上的英文：prose_en／en_text_replacements／category_en／name_pairs／machine_translated_display_name／caption_en／title_en／limitations_en／name_en／use_cases_en／en_note 等，全部剥离或整面剔除（顶层排除清单）。剥离的是**英文显示面的字段**与未登记顶层键；中文面本身合法包含拉丁实体名（POI 名、URL、核验日期），那不是候审英文散文。豁免只有 machine_readable_exempt_paths 登记的那一条精确路径，且值必须继续满足 nonempty_string／no_cjk／names_schema；豁免不改变读者可见文本的语言，也不给任何 *_en 字段开口子。",
+          "honest_boundary_measurements": {
+            "reader_visible_english": "中文正式件在真浏览器里量：可见文本（body innerText）不含哨兵英文串；哨兵测的是「放了才看得见」这条通路，不是靠声明。",
+            "machine_readable_input": "同一个哨兵值必须能被地图身份／URL 合同读到（href 或 data-* 审计属性），且地图最终 findings 仍为 0——两边同时成立才叫「机读面保留、读者面没有英文」。"
+          }
+        },
+        "reader_source_face": "source_records",
+        "gate_obligations": [
+          "交付物 DOM 里 #lang-btn 零命中（删除元素，不是 CSS 隐藏）",
+          "交付物 JS 里语言切换不可达：按钮由渲染器按档位决定是否渲染，handler 的 state.lang 写入点包在 if (langToggle) 里、元素不存在时永不执行。判据不放在源码字面上（那条 2026-11-02 写错了口径、也没有门执行它），改放实测：真浏览器里 html lang 全程不变＋english_mode_walk 记录 ran=False 且带原因。",
+          "excluded_payload_keys 在读者载荷里零命中",
+          "来源面板 dataset→投影→DOM 三段数量逐项相等（projected=source_records=渲染行）",
+          "核验统计来自投影的 verification_status，不得恒为 0"
+        ]
+      },
+      "en-audit": {
+        "shipping": false,
+        "reader_toggle": true,
+        "state_lang_write_allowed": true,
+        "excluded_payload_keys": [],
+        "reader_source_face": "source_records",
+        "purpose": "英文通道的执行型证据（11 支浏览器探针＋视觉门 EN 遍历）继续真渲染真点击；产物写进 .temp，不得出现在 outputs/ 或交付目录。",
+        "forbidden": ["把它当交付物", "用它证明英文语义正确（英文仍 DEFERRED）"],
+        "delivery_dir_rule": {"code": "SPA_AUDIT_PROFILE_IN_FORMAL_DIR", "scope": "交付目录（outputs/ 与 release_runs/**/outputs/）里每个 HTML 都按字节读 meta 档位：档位已登记但 shipping=false ⇒ 阻断；SPA 形状却没有档位声明 ⇒ 走 SPA_READER_PROFILE_UNDECLARED", "why": "业主 ZH-4：en-audit 写进任何正式 outputs/release 目录即阻断。文件名不算证据，档位必须由交付字节自己声明。"}
+      }
+    },
+    "forbidden_globally": [
+      "以 CSS 隐藏代替删除切换入口",
+      "在 zh-formal 载荷里留任何英文显示面",
+      "把 en-audit 产物写进 outputs/",
+      "覆盖已被锚点按 SHA 钉住的历史 HTML（ZH 正式件写新目标目录）"
+    ]
+  },
+  "delivery_profiles": {
+    "reader": [
+      "{artifact_slug}-travel-guide.html"
+    ],
+    "review": [
+      "{artifact_slug}-travel-guide.html",
+      "{artifact_slug}-travel-research.xlsx"
+    ],
+    "full_audit": "reader and review artifacts plus compatibility HTML, Excel and Markdown exports"
+  },
+  "map_platforms": {
+    "domestic": [
+      "amap",
+      "baidu"
+    ],
+    "international": [
+      "google",
+      "apple"
+    ]
+  },
+  "presentation": {
+    "hero_carousel": {
+      "max_route_images": 3,
+      "interval_ms": 5000,
+      "pause_control": false
+    },
+    "poi_item_images": false,
+    "poi_raw_coordinates": false,
+    "branch_cover_role_badges": true,
+    "branch_cover_fallback": "verified_same_destination_context",
+    "map_target_levels": [
+      "verified_platform_url",
+      "verified_place_id",
+      "verified_coordinate",
+      "unnamed_coordinate",
+      "search_candidate"
+    ],
+    "map_target_levels_authority": false,
+    "map_target_levels_note": "§17.2.7 兼容读取。渲染按钮由 map_link_contract（link_mode + 四维状态）决定，不再由 target_level 决定。",
+    "live_map_minimum_level": "verified_coordinate",
+    "live_map_minimum_level_authority": false,
+    "unnamed_coordinate_badge": {
+      "cn": "按坐标定位 · 名称未核验",
+      "en": "Located by coordinates · name not verified"
+    },
+    "map_link_contract": {
+      "policy_ref": "references/map-link-policy.md",
+      "data_model_ref": "references/data-model.json",
+      "decision_inputs": [
+        "link_mode",
+        "entity_type",
+        "identity_status",
+        "coordinate_status",
+        "google_resolution_status"
+      ],
+      "link_modes": {
+        "PUBLISHER_ENTITY_LINK": {
+          "label_cn": "在 Google Maps 查看地点",
+          "label_en": "View place in Google Maps",
+          "requires": [
+            "link_mode=PUBLISHER_ENTITY_LINK",
+            "evidence 完整且来源为该地点/运营方发布的实体链接"
+          ],
+          "forbidden_labels": [
+            "已由 Google 核验",
+            "Verified by Google",
+            "保证直达",
+            "guaranteed match"
+          ],
+          "semantics": "只证明发布方提供过该链接（§17.3.3），不证明当前地址、入口坐标或 Google 永久正确。"
+        },
+        "NAMED_SEARCH": {
+          "label_cn": "在 Google Maps 搜索此地点（落点未核验）",
+          "label_en": "Search this place in Google Maps (landing not verified)",
+          "url_template": "https://www.google.com/maps/search/?api=1&query={NAME}%2C+{ADDRESS_OR_DESTINATION}%2C+{COUNTRY}",
+          "key_required": false,
+          "forbids": [
+            "把 URL 构造成功当作地点或 Google 结果验证成功（§17.4.2）"
+          ]
+        },
+        "COORDINATE": {
+          "label_cn": "查看坐标位置",
+          "label_en": "View coordinate location",
+          "allowed_only_when": "entity_type=coordinate_landmark AND coordinate_status=VERIFIED（§17.4.3）",
+          "named_entity_may_render": false
+        },
+        "NONE": {
+          "render_button": false,
+          "allowed_text": "有来源的名称/地址 + “地图未解析 / map unresolved”说明",
+          "forbids": [
+            "额外生成会落到城市/州界的次级 Google 搜索来绕过状态（§17.4.4）"
+          ]
+        }
+      },
+      "per_provider_isolation": {
+        "rule": "每个 provider 各自记录 link_mode；一个提供者的实体链接不得把另一个提供者升级为实体直达（§17.4.5）。",
+        "providers": [
+          "google",
+          "apple",
+          "osm"
+        ]
+      },
+      "dom_audit_attributes": [
+        "data-target-id",
+        "data-entity-type",
+        "data-criticality",
+        "data-identity-status",
+        "data-coordinate-status",
+        "data-link-mode",
+        "data-google-resolution-status",
+        "data-provider"
+      ],
+      "dom_attribute_count_contract": "V4.2.2 §7 要求八项，缺一即 DOM↔dataset 对账 FAIL。",
+      "link_selection_contract": {
+        "authority": "references/map-link-selection.json",
+        "selection_version": "v422-link-selection-1",
+        "implementation": "scripts/map_link_selector.py::select",
+        "renderer_must_not_reimplement": "渲染层与 DOM 门禁不得再拼 URL、判主机或猜名称；只消费选择器写好的 link_mode/map_link_url/link_notices（§9）。",
+        "forbid_renderer_url_construction": true,
+        "no_status_promotion": "具名搜索 URL 的生成绝不写 identity_status / coordinate_status / google_resolution_status（§3.1/§3.4/§8.2）。",
+        "v422_change_note": "v4.2.1 W2 把 403 条全部记为 NONE；v4.2.2 按 §4 状态机改为：有可用名称且无已知错误即给具名搜索，已知错误或冲突仍然无按钮。"
+      },
+      "reader_notices": {
+        "key_target_unverified": "地图落点未核验，请以订单、票证或运营方公布的地址、航站楼/码头信息为准。",
+        "ambiguous_multiple_results": "可能有多个结果，请核对订单、票证或运营方信息。",
+        "local_name_only": "搜索词采用来源登记的当地名称原文（未提供英文别名）。",
+        "authority": "文案与 references/map-link-selection.json::ui.notices 必须逐字一致；两处不一致即合同漂移。"
+      },
+      "dom_attribute_authority": "每个按钮的 data-* 值必须与 dataset 与 gate 报告三者一致（§17.4.6）。",
+      "url_reference_classifier": {
+        "_authority_note": "W1R-B 方案 B / W1R-B1 语义收口的机器合同：本块只是指针，规则住在 references/data-model.json -> url_reference_classifier，实现住在 scripts/data_model.py::classify_reference。渲染层与 DOM 门禁不得再写一份判断。",
+        "classifier_version": "refclassifier-4",
+        "implementation": "scripts/data_model.py::classify_reference",
+        "reference_implementation": "scripts/data_model.py::classify_reference",
+        "schema_authority": "references/data-model.json::url_reference_classifier",
+        "output_fields": [
+          "provider",
+          "kind",
+          "canonical_locator",
+          "reason_code",
+          "host",
+          "scheme",
+          "adapter",
+          "detail",
+          "field",
+          "reference_form",
+          "namespace",
+          "purpose",
+          "approval_status"
+        ],
+        "kinds": [
+          "entity",
+          "search",
+          "coordinate",
+          "home",
+          "invalid"
+        ],
+        "identity_bearing_kinds": [
+          "entity"
+        ],
+        "forbidden_in_render_layer": [
+          "hostname literal",
+          "path prefix test",
+          "query key test",
+          "coordinate regex",
+          "kind inference from another field",
+          "source adapter path pattern",
+          "namespace host-root slicing"
+        ],
+        "reuse_points": {
+          "w4_renderer": {
+            "function": "scripts/data_model.py::classify_reference",
+            "surface": "按钮 href 与 data-* 状态",
+            "consumes": [
+              "kind",
+              "canonical_locator",
+              "reason_code",
+              "adapter"
+            ]
+          },
+          "w5_dom_gate": {
+            "function": "scripts/data_model.py::classify_reference",
+            "surface": "渲染后 DOM 的 href 审计",
+            "consumes": [
+              "provider",
+              "kind",
+              "canonical_locator",
+              "reason_code",
+              "adapter"
+            ]
+          },
+          "evidence_validator": {
+            "function": "scripts/data_model.py::classify_reference",
+            "surface": "身份证据与发布方链接",
+            "consumes": [
+              "kind",
+              "reason_code",
+              "canonical_locator",
+              "detail"
+            ]
+          },
+          "link_builder": {
+            "function": "scripts/data_model.py::classify_reference",
+            "surface": "构造后的自检（构造版本仍必填）",
+            "consumes": [
+              "provider",
+              "kind",
+              "canonical_locator"
+            ]
+          },
+          "note": "四处复用同一实现与同一份配置；W1R-B1 仍只改合同与校验，渲染层接线在 W4/W5。"
+        },
+        "drift_guard": "scripts/test_v421_ref_classifier.py::SingleJudgmentTests / ConfigDriftTests + scripts/test_v421_map_audit_vectors.py（人工冻结的消费端向量）",
+        "wiring_status": "contract_only_pending_W4_W5（W1R-B1 未改渲染器与门禁，本块先立接口）"
+      }
+    },
+    "google_call_surfaces": {
+      "policy": "§17.1.1/§17.1.3/§17.1.7：正式代码路径零 Google Billing/Key/抓取。",
+      "must_be_hard_blocked": [
+        "scripts/collect_google_images.py",
+        "scripts/audit_run.py (X-Goog-Api-Key 注入)",
+        "scripts/search_source_evidence.py (google SERP DOM 抓取)",
+        "scripts/gen_travel_scope.py --google-maps-key",
+        "scripts/preflight_qa.py TRAVEL_SCOPE_GOOGLE_PLACES_KEY 合同"
+      ],
+      "may_remain": "只做 URL 形状校验、域名黑名单或负样本测试的代码（不发请求）",
+      "block_status": "pending_w2_w5",
+      "note": "W1 只在合同层声明禁止并登记待阻断点；执行层删除/硬阻断与执行型负测属 W2/W5，本字段供其逐项销账。"
+    }
+  },
+  "tabs": [
+    {
+      "id": "overview",
+      "cn": "行程规划",
+      "en": "Trip Plan",
+      "modules": [
+        "routes",
+        "itinerary",
+        "editorial_media",
+        "destinations",
+        "destination_coverage"
+      ]
+    },
+    {
+      "id": "stays",
+      "cn": "住宿",
+      "en": "Stays",
+      "modules": [
+        "hotels"
+      ]
+    },
+    {
+      "id": "food",
+      "cn": "美食",
+      "en": "Food",
+      "modules": [
+        "local_chains",
+        "restaurants",
+        "cafes"
+      ]
+    },
+    {
+      "id": "sights",
+      "cn": "景点",
+      "en": "Sights",
+      "modules": [
+        "worth_it",
+        "attractions",
+        "dive_sites"
+      ]
+    },
+    {
+      "id": "transport",
+      "cn": "交通",
+      "en": "Transport",
+      "modules": [
+        "transport",
+        "transport_nodes"
+      ]
+    },
+    {
+      "id": "budget",
+      "cn": "预算",
+      "en": "Budget",
+      "modules": [
+        "budget"
+      ]
+    },
+    {
+      "id": "local_toolkit",
+      "cn": "在地工具",
+      "en": "Local Toolkit",
+      "modules": [
+        "local_apps"
+      ]
+    },
+    {
+      "id": "notes",
+      "cn": "贴士",
+      "en": "Notes",
+      "modules": [
+        "local_knowledge",
+        "practical",
+        "packing",
+        "source_evidence"
+      ]
+    }
+  ],
+  "modules": {
+    "routes": {
+      "cn": "路线灵感",
+      "en": "Route ideas"
+    },
+    "itinerary": {
+      "cn": "每日行程",
+      "en": "Daily itinerary"
+    },
+    "editorial_media": {
+      "cn": "沿途人文与风景",
+      "en": "People, culture and landscapes"
+    },
+    "destinations": {
+      "cn": "目的地",
+      "en": "Destinations"
+    },
+    "destination_coverage": {
+      "cn": "路线范围与取舍",
+      "en": "Route scope and choices"
+    },
+    "hotels": {
+      "cn": "住宿选择",
+      "en": "Places to stay",
+      "image": 8,
+      "coords": 7
+    },
+    "restaurants": {
+      "cn": "餐厅",
+      "en": "Restaurants",
+      "image": 8,
+      "coords": 7
+    },
+    "cafes": {
+      "cn": "咖啡馆",
+      "en": "Cafés",
+      "image": 8,
+      "coords": 7
+    },
+    "attractions": {
+      "cn": "景点",
+      "en": "Sights",
+      "image": 7,
+      "coords": 6
+    },
+    "dive_sites": {
+      "cn": "潜水",
+      "en": "Diving",
+      "image": 7,
+      "coords": 6
+    },
+    "transport": {
+      "cn": "跨目的地交通",
+      "en": "Transfers"
+    },
+    "transport_nodes": {
+      "cn": "车站、机场与码头",
+      "en": "Stations, airports and ports"
+    },
+    "local_chains": {
+      "cn": "当地连锁与便捷选择",
+      "en": "Local chains and convenient options"
+    },
+    "worth_it": {
+      "cn": "核心体验",
+      "en": "Key experiences"
+    },
+    "packing": {
+      "cn": "行前准备",
+      "en": "Pre-trip checklist"
+    },
+    "practical": {
+      "cn": "入境与当地事务",
+      "en": "Entry and local practicalities"
+    },
+    "local_knowledge": {
+      "cn": "当地旅行要点",
+      "en": "Local travel essentials"
+    },
+    "budget": {
+      "cn": "预算明细",
+      "en": "Budget details"
+    },
+    "local_apps": {
+      "cn": "在地常用工具",
+      "en": "Local toolkit"
+    },
+    "source_evidence": {
+      "cn": "研究来源",
+      "en": "Research sources"
+    }
+  },
+  "food_sub_tabs": [
+    "restaurants",
+    "cafes",
+    "local_chains"
+  ]
+}

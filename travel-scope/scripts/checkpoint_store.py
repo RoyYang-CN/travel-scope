@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Crash-tolerant checkpoint storage for Travel-Scope deep research runs."""
+"""Crash-tolerant checkpoint storage for all Travel-Scope Q7 research levels."""
 
 import argparse
 import json
@@ -185,7 +185,7 @@ def build_parser():
     init = sub.add_parser("init")
     init.add_argument("--root", default=".temp")
     init.add_argument("--country", required=True)
-    init.add_argument("--mode", default="deep", choices=("shallow", "medium", "deep", "super_deep", "custom"))
+    init.add_argument("--mode", required=True, choices=("concise", "standard", "deep", "ultra"), help="Must match the confirmed Q7 research depth")
     init.add_argument("--run-id")
     init.set_defaults(func=init_run)
 

@@ -1,0 +1,571 @@
+{
+ "schema_version": 2,
+ "source_priority": [
+  "user_supplied_with_permission",
+  "official_media_with_explicit_reuse_terms",
+  "wikimedia_commons",
+  "openverse_discovery_with_origin_recheck",
+  "stock_atmosphere_with_provider_terms",
+  "designed_no_photo_state"
+ ],
+ "source_verification_snapshot": {
+  "status": "ENROLLED",
+  "authorized_by": "业主 2026-11-03 裁 finding_4 选 A：正式构建完全离线。Commons 身份核验移出生成链，改成「在线媒体核验 → 固化验证快照 → 正式生成只读快照 → 零网络构建」；B 否决，不建立正式构建网络白名单。",
+  "why": "生成期外联使正式字节取决于第三方此刻答什么，既不可重放也撞 §8.1 硬零；把「来源是否真实」这件事留在输入核验阶段，把「输入与声明是否一致」这件事留在构建期，两边各自可判。",
+  "run_manifest_path_field": "source_verification_snapshot_path",
+  "path_rule": "快照落在 run 目录内（evidence/），路径由该 run 的 manifest 字段声明。生成器不许猜默认位置：没声明就阻断，因为「读不到就当没这回事」正是这条裁示要堵的洞。",
+  "producer_version": "4.2.2-r3d-normalized-1",
+  "schema_version_supported": "1",
+  "producer_version_source": "本格 producer_version 就是唯一持有人：生产者写快照时引这个登记值，代码里不留第二份副本，测试也只比登记值与实物字节。",
+  "local_original_path_rule": "清单资产没写 local_original_path 时，本地原图取 media_prepared/originals/<local_file 的文件名>；这一格是 run 内相对路径，快照里必须落成相对路径，离线复算才不依赖任何机器上的绝对位置。",
+  "api_endpoint": "https://commons.wikimedia.org/w/api.php",
+  "batch_size": 10,
+  "user_agent": "Travel-Scope/5.0.0 media source verifier",
+  "max_age_days": 90,
+  "expiry_clock": "UTC 当日。构建期默认取当天；测试与重放必须显式传 as_of（seal-52 的教训：拿墙钟过期的日期当判据，日历会自己把门改红）。",
+  "snapshot_fields_required": [
+   "schema_version",
+   "producer",
+   "producer_version",
+   "verified_at_utc",
+   "api_endpoint",
+   "batch_size",
+   "asset_manifest_sha256",
+   "records_expected",
+   "records",
+   "status",
+   "snapshot_sha256"
+  ],
+  "record_key": "asset_row_id",
+  "row_key_rule": "身份与血缘一律按清单行算，不按 File: 标题折叠：实测加州 36 行的 local_file 全部唯一（36/36），同一标题可被多行复用且各自的作者／源路径／采集摘要可以不同（Twin Peaks 三行：hero 行 Tuxyso＋c/ce 路径、sf_hotels 行 Bernard Gagnon＋4/4e 路径、sf_cafes 行 Tuxyso＋页面式 URL）。标题级汇总会把错的那一行藏起来，所以行级阻断是必须的，intra_manifest_consistent 那种布尔值不算替代。",
+  "record_fields_required": [
+   "asset_row_id",
+   "status",
+   "source_file_title",
+   "source_page_id",
+   "source_page_url",
+   "revision_id",
+   "revision_timestamp",
+   "original_sha1",
+   "original_width",
+   "original_height",
+   "author",
+   "license_short_name",
+   "license_url",
+   "acquisition_url",
+   "requested_width",
+   "returned_width",
+   "returned_height",
+   "acquisition_sha256",
+   "retrieved_at_utc",
+   "transform_recipe",
+   "prepared_sha256",
+   "delivered_sha256",
+   "producer_version",
+   "original_url"
+  ],
+  "lineage_sections": {
+   "commons_revision_identity": [
+    "source_file_title",
+    "source_page_id",
+    "revision_id",
+    "revision_timestamp",
+    "original_sha1",
+    "author",
+    "license_short_name",
+    "license_url"
+   ],
+   "actual_acquisition_bytes": [
+    "acquisition_url",
+    "requested_width",
+    "returned_width",
+    "returned_height",
+    "acquisition_sha256",
+    "retrieved_at_utc",
+    "producer_version"
+   ],
+   "local_derivation_chain": [
+    "transform_recipe",
+    "prepared_sha256",
+    "delivered_sha256",
+    "asset_row_id"
+   ]
+  },
+  "lineage_rule": "三段各自成立还不算完，必须接起来才叫来源血缘：修订身份说『这张图是哪一版』，采集字节说『我们确实从它取了这些字节』，派生链说『读者页那份是这些字节的哪一次变形』。缺任何一段＝该行 UNBOUND_LEGACY ⇒ 阻断。",
+  "no_original_digest_equality": "不要求本地缩略图摘要等于 Commons 原图摘要——那是错误断言（Angels Flight 原图 4416×2480，清单是 1600×899 派生档）。摘要一致性只要求在「采集字节 → prepared → delivered」这条链上成立。",
+  "acquisition_normalize": {
+   "authority": "唯一实现＝scripts/prepare_media.py::normalize_acquisition；生产者与门共用它，不在核验代码里另写一份 PIL 缩放。",
+   "resampling": "LANCZOS",
+   "quality": 92,
+   "subsampling": 0,
+   "optimize": true,
+   "progressive": true,
+   "never_upscale": true,
+   "target_width_source": "清单行的 source_width（＝这一行 prepared 原图的声明宽度）",
+   "when_returned_is_narrower": "API 实际返回宽度小于声明宽度 ⇒ 不许放大补像素，抛 MEDIA_LINEAGE_ACQUISITION_BRIDGE_MISSING ⇒ 该行 UNBOUND。",
+   "recipe_format": "normalize=resampling=LANCZOS|thumbnail_aspect_preserve(width=<声明宽度>)|jpeg(quality=92,subsampling=0,optimize=true,progressive=true)",
+   "determinism_proof": "同一份 acquisition 字节归一两次必须逐字节相同；快照落盘后离线重放两次，prepared 与 delivered 摘要不许变。",
+   "authorized_by": "业主 2026-11-03 R3D 裁示 1（先修生产者再隔离试点；三条来源侧码；退避参数登记不硬编码；撤『不动点』合同；只许用 API 给的 thumburl）"
+  },
+  "status_closed_set": [
+   "CURRENT_REVISION_RECOLLECTED",
+   "EXACT_HISTORICAL_REVISION_BOUND",
+   "UNBOUND_LEGACY"
+  ],
+  "status_meanings": {
+   "CURRENT_REVISION_RECOLLECTED": "从当前明确修订重新采集，派生链在这一趟里现场生成并核验。",
+   "EXACT_HISTORICAL_REVISION_BOUND": "在盘字节可证明来自某个历史修订（revision id＋该版摘要可取回并可复算），信用行按那一版登记。",
+   "UNBOUND_LEGACY": "拿不出采集桥梁。⇒ 阻断，不发布级来源证明。"
+  },
+  "status_unbound_is_blocking": "UNBOUND_LEGACY",
+  "historical_revision_addressing_verified": false,
+  "historical_revision_addressing_note": "2026-11-03 实拍：prop=imageinfo 对 File: 只返回当前版（archivename／archiveurl 均为 null），页面修订列表 prop=revisions 返回 48 条但多为分类编辑。要发 EXACT_HISTORICAL_REVISION_BOUND 必须先量通「按历史修订取回该版字节」这条路，量不通就只许用 CURRENT_REVISION_RECOLLECTED 或走无图状态，不许口头声称历史绑定。",
+  "complete_status_value": "COMPLETE",
+  "identity_url_normalization": "比较 URL 时去 query/fragment、百分号解码、域名小写，只比路径：清单写 wiki 页面或写 upload 原图都算同一种声明，但路径段不同就是身份不符。实拍依据见 .temp/v422_honest_map/ZH_RELEASE_3/SOURCE_VERIFICATION_SURVEY.json 与 COMMONS_IDENTITY_PREFLIGHT.json。",
+  "identity_text_normalization": "作者与许可只归一空白（清单里有手打双空格），大小写与措辞不改——把「rogel tura」与「P199」判成同一个人不是归一，是放水。",
+  "source_url_verbatim_rule": {
+    "authority": "业主 2026-11-04 R3E 窄修复裁示：现场发现 7 行新换源资产的 source_asset_url 被重复追加查询串，来源定位符与快照里的权威 original_url 不一致",
+    "why": "身份判据与定位符判据是两件事。identity_url_normalization 去 query/fragment 只比路径，用来判「是不是同一个 Commons 文件」是对的；但它看不见同一路径上被追加的第二段追踪查询，所以 7 行的定位符带着两遍 utm 出了三张面孔，而快照的 original_url 是正确的单查询串，门禁当时全绿。缺的就是下面这一条逐字核对。",
+    "manifest_field": "source_asset_url",
+    "authority_fields": ["original_url", "source_page_url"],
+    "declaration_forms": "清单这一格今天有两种合法写法（登记见 identity_url_normalization）：① 写 upload 原图字节的位置符 ⇒ 必须逐字等于快照的 original_url；② 写 Commons 文件页 ⇒ 必须逐字等于快照的 source_page_url。两条权威串都是 API 原样返回的那一串，本地不许加工。\"同一种声明\"管的是身份，不再被当成「写法可以随便差」的豁免。",
+    "alignment_key": "asset_row_id",
+    "comparison": "逐字相等：不裁剪、不百分号解码、不小写化、不去查询串。权威值只有快照对应那一行的那两条串，禁止任何代码或工具对 URL 做字符串追加来「凑」出权威值",
+    "note": "快照的 original_url 是 API imageinfo.url 原样返回的定性串（本身就带一段 utm）；它对不对不由本地拼接证明，清单与它逐字相等才是这一格的证明方式",
+    "measured_on_live_run_2026_11_04": {"rows_total": 27, "equal_original_url": 11, "equal_source_page_url": 9, "matching_neither": 7, "matching_neither_rows": ["assets/editorial/la_grand_central_market.jpg", "assets/section/big_sur_cafes.jpg", "assets/section/big_sur_sights.jpg", "assets/section/monterey_food.jpg", "assets/section/monterey_hotels.jpg", "assets/section/santa_barbara_food.jpg", "assets/section/santa_barbara_hotels.jpg"], "measured_by": "本工具现场读正式 run 的 asset-manifest.json 与 evidence/media-source-snapshot.json 逐行比对，不是手填"},
+    "scope_note": "业主点名修 7 行；这条规则对全部 27 行成立，其余 20 行本来就逐字等于两条权威串之一（上面现场量出来的 11＋9），所以窄修复只动那 7 行。若业主要求所有行统一改写成 upload 字节位置符，那是另一条裁示（还要再动 9 行），本轮不擅自扩面",
+    "applies_to_faces": ["asset-manifest.json（根面孔＝唯一可写的源）", "outputs/asset-manifest.json（构建投影，由生成器从根清单写出）", "media_prepared/media-manifest.json（派生面孔的 entries，由 prepare_media 从根清单写出）"],
+    "faces_rule": "三张面孔都由同一份根清单派生：修复只许改根清单，再重跑构建／重派生投影，不许手改两份形成第二套来源",
+    "derived_faces": {"outputs/asset-manifest.json": "assets[].source_asset_url 必须逐字等于根清单同 local_file 行（这一份由构建投影产生，验证它确实同源）", "media_prepared/media-manifest.json": "entries[].source_asset_url 必须逐字等于根清单同 local_file 行（派生面孔，历史上由重派生工具从清单复制）"},
+    "face_check_rule": "同一行在几张面孔里指的不是同一个定位符＝那份交付账自己不一致，读哪张面孔出货都不一样；所以面孔之间也要逐字对，而不是只对各对快照"
+  },
+  "source_url_query_shape": {
+    "max_query_segments": 1,
+    "duplicate_param_keys_blocks": true,
+    "repeat_marker_substrings": ["?utm_source="],
+    "max_marker_hits": 1,
+    "rule": "同一串定位符里 ? 至许出现一次（query 段最多一段）、同一个参数键不许出现两次、repeat_marker_substrings 里每个标记的命中次数不得超过 max_marker_hits（0 次是合法的：不是每条来源 URL 都带追踪查询）；超出即形状自己承认是追加产物，先阻断再谈它是否与快照相等"
+  },
+  "run_relative_path_rule": {
+    "authority": "业主 2026-11-04 R3F 窄修复第 2～5 条；外加同轮追问后裁的两条——「输入路径也 run 相对」与「测量件保留绝对路径并登记为运行记录豁免」",
+    "why": "正式 run 交出去时带的是本机绝对路径：链条面 media_prepared/media-manifest.json 的 entries[].source 指到 candidate_runs 的旧候选树、renditions[].relpath 指到 .temp 的派生工作区，run 自己的 manifest.json 四个输入字段（构建与交付门从这里取 scope/corridors/asset-manifest/evidence）也指到 .temp 的 staging。今天 dangling=0 只因为旧目录还在本机——换机、移工作区或清 .temp 就断链，而 prepare_media.install_run_media 与派生重放确实按这些值取字节，所以「离线可重放」今天只在保留旧临时目录的本机成立。R3E 证的是定位符⇄快照逐字相等，证不了 run 自包含；这一条补的是后者。",
+    "applies_to_faces": {"media_prepared/media-manifest.json": {"role": "派生面孔（链条面）：记录每行的采集实物、prepared 原图与交付档", "fields": {"entries[].source": "media_prepared/originals/{file}", "entries[].renditions[].relpath": "assets/renditions/{file}"}}, "manifest.json": {"role": "run 自己的输入声明：构建（gen_travel_scope._require_formal_run_manifest）与交付门（delivery_gate._check_scope_evidence）就从这几格取文件", "fields": ["source_evidence_path", "scope_path", "route_corridors_path", "asset_manifest_path", "source_verification_snapshot_path"], "layout_note": "这几格本来就是 run 内的文件（现量逐字节等于被指的旧位置），改写成 run 相对不移动任何字节"}},
+    "must": {"relative": true, "posix_separators": true, "no_drive_letter": true, "no_leading_slash": true, "no_parent_traversal": true, "resolves_inside_run_root": true, "non_empty": true, "target_digest_equals_recorded_digest": true, "layout_template_must_match": true},
+    "forbid_substrings": [".temp", "candidate_runs"],
+    "runtime_may_use_absolute": "派生过程可以把临时产物落在工作区外的绝对目录（prepare_asset 的 out_dir 就是），但写进 run 里那张面孔之前必须转成 run 相对。三把唯一实现：链条面序列化＝scripts/prepare_media.py::finalize_chain_face；输入声明序列化＝scripts/local_media_gate.py::run_manifest_relative_face（两者共用同一把底层转换器 local_media_gate.to_run_relative_path）；判据＝scripts/local_media_gate.py::run_path_containment_errors；读侧＝scripts/local_media_gate.py::resolve_run_path。别处不许再拼一份",
+    "reader_tolerance": "读侧（gen_travel_scope.py／delivery_gate.py）经 resolve_run_path 解析：相对值按 run 根解析，绝对值照旧能用——因为菲律宾正式 run（AUDIT_HOLD，本轮一个字节不动）与 candidate run 仍带绝对路径，读侧硬拒绝会把「那条 run 今天什么形状」改成另一件事。阻断出货的是门，不是读取兼容；要把绝对值一并拒掉，得等 PH 也进同一口径后另裁",
+    "byte_identity": {"rule": "改路径字段不许改任何被指文件的字节：每个新值解析到的文件摘要必须等于该行原登记的摘要；不等就是「顺手换了图」，按 MEDIA_RUN_PATH_TARGET_NOT_THE_RECORDED_BYTES 阻断", "entries_list_field": "entries", "renditions_list_field": "renditions", "source_digest_field": "source_sha256", "relpath_digest_field": "delivered_sha256"},
+    "record_exempt": {"rule": "这些格记的是「那一次跑的真实命令行与输入位置」，不被解析、不参与出货判定，所以保留绝对路径；门只扫上面 applies_to_faces 点名的格，不 glob、不猜。要把它们一并相对化是另一条裁示（会丢掉当次运行的真实位置信息，需要另存原值）。", "faces": {"evidence/media-lineage-remediation.json": {"/quarantine[*]/quarantine": 15}, "evidence/media_audit.json": {"/producer/inputs/asset_manifest/path": 1, "/producer/inputs/data/path": 1, "/producer/inputs/html/path": 1, "/producer/argv[*]": 4, "/producer/cwd": 1}, "evidence/visual_qa.json": {"/asset_manifest/path": 1, "/run_dataset/path": 1, "/checks[*]/screenshot": 1, "/producer/inputs/asset_manifest/path": 1, "/producer/inputs/html[spa]/path": 1, "/producer/inputs/run_dataset/path": 1, "/producer/argv[*]": 4, "/producer/cwd": 1}, "evidence_inherited/media_audit.json": {"/producer/inputs/asset_manifest/path": 1, "/producer/inputs/data/path": 1, "/producer/inputs/html/path": 1, "/producer/argv[*]": 5, "/producer/cwd": 1}, "evidence_inherited/visual_qa.json": {"/asset_manifest/path": 1, "/checks[*]/en_text_export": 1, "/checks[*]/screenshot": 1, "/producer/inputs/asset_manifest/path": 1, "/producer/inputs/html[spa]/path": 1, "/producer/argv[*]": 4, "/producer/cwd": 1}, "outputs/delivery-visual-rerun.json": {"/asset_manifest/path": 1, "/run_dataset/path": 1, "/checks[*]/screenshot": 1, "/producer/inputs/asset_manifest/path": 1, "/producer/inputs/html[spa]/path": 1, "/producer/inputs/run_dataset/path": 1, "/producer/argv[*]": 5, "/producer/cwd": 1}, "outputs/formal_data_gate.json": {"/producer/inputs/asset_manifest/path": 1, "/producer/inputs/corridors/path": 1, "/producer/inputs/data/path": 1, "/producer/inputs/manifest/path": 1, "/producer/inputs/scope/path": 1, "/producer/argv[*]": 11, "/producer/cwd": 1}, "outputs/zero_call_ledger.json": {"/input_path": 1, "/artifacts[*]/path": 1}, "ZH_INPUT_PROVENANCE.json": {"/inherited_candidate_path_rebase/detail[*]/to": 4, "/amended_2026_11_04_r3d_replacement/superseded_tree_backup/path": 1, "/amended_2026_11_04_r3e_source_url_fix/rollback_faces/pre_r3d": 1, "/amended_2026_11_04_r3e_source_url_fix/rollback_faces/pre_r3e": 1}, "manifest.json": {"/seal_history[*]/generation_argv[*]": 20, "/seal/generation_argv[*]": 1, "/derived_from/manifest_path": 1, "/derived_from/input_provenance": 1, "/path_fields_point_at/source_evidence_path": 1, "/path_fields_point_at/scope_path": 1, "/path_fields_point_at/route_corridors_path": 1, "/path_fields_point_at/asset_manifest_path": 1}}, "measured_on_live_run_2026_11_04": {"evidence/media-lineage-remediation.json": {"/quarantine[*]/quarantine": 15}, "evidence/media_audit.json": {"/producer/inputs/asset_manifest/path": 1, "/producer/inputs/data/path": 1, "/producer/inputs/html/path": 1, "/producer/argv[*]": 4, "/producer/cwd": 1}, "evidence/visual_qa.json": {"/asset_manifest/path": 1, "/run_dataset/path": 1, "/checks[*]/screenshot": 1, "/producer/inputs/asset_manifest/path": 1, "/producer/inputs/html[spa]/path": 1, "/producer/inputs/run_dataset/path": 1, "/producer/argv[*]": 4, "/producer/cwd": 1}, "evidence_inherited/media_audit.json": {"/producer/inputs/asset_manifest/path": 1, "/producer/inputs/data/path": 1, "/producer/inputs/html/path": 1, "/producer/argv[*]": 5, "/producer/cwd": 1}, "evidence_inherited/visual_qa.json": {"/asset_manifest/path": 1, "/checks[*]/en_text_export": 1, "/checks[*]/screenshot": 1, "/producer/inputs/asset_manifest/path": 1, "/producer/inputs/html[spa]/path": 1, "/producer/argv[*]": 4, "/producer/cwd": 1}, "outputs/delivery-visual-rerun.json": {"/asset_manifest/path": 1, "/run_dataset/path": 1, "/checks[*]/screenshot": 1, "/producer/inputs/asset_manifest/path": 1, "/producer/inputs/html[spa]/path": 1, "/producer/inputs/run_dataset/path": 1, "/producer/argv[*]": 5, "/producer/cwd": 1}, "outputs/formal_data_gate.json": {"/producer/inputs/asset_manifest/path": 1, "/producer/inputs/corridors/path": 1, "/producer/inputs/data/path": 1, "/producer/inputs/manifest/path": 1, "/producer/inputs/scope/path": 1, "/producer/argv[*]": 11, "/producer/cwd": 1}, "outputs/zero_call_ledger.json": {"/input_path": 1, "/artifacts[*]/path": 1}, "ZH_INPUT_PROVENANCE.json": {"/inherited_candidate_path_rebase/detail[*]/to": 4, "/amended_2026_11_04_r3d_replacement/superseded_tree_backup/path": 1, "/amended_2026_11_04_r3e_source_url_fix/rollback_faces/pre_r3d": 1, "/amended_2026_11_04_r3e_source_url_fix/rollback_faces/pre_r3e": 1}, "manifest.json": {"/seal_history[*]/generation_argv[*]": 20, "/seal/generation_argv[*]": 1, "/derived_from/manifest_path": 1, "/derived_from/input_provenance": 1, "/path_fields_point_at/source_evidence_path": 1, "/path_fields_point_at/scope_path": 1, "/path_fields_point_at/route_corridors_path": 1, "/path_fields_point_at/asset_manifest_path": 1}}},
+    "measured_on_live_run_2026_11_04": {"chain_rows": 27, "rendition_rows": 27, "absolute_source_rows": 26, "absolute_source_examples": ["D:\\文档\\项目开发\\Travel-Scope\\travel-scope-v4.2.2\\candidate_runs\\travel_scope_run_202701_usa_california_v422_001\\assets\\editorial\\sf_golden_gate.jpg", "D:\\文档\\项目开发\\Travel-Scope\\travel-scope-v4.2.2\\candidate_runs\\travel_scope_run_202701_usa_california_v422_001\\assets\\editorial\\sf_palace_fine_arts.jpg", "D:\\文档\\项目开发\\Travel-Scope\\travel-scope-v4.2.2\\candidate_runs\\travel_scope_run_202701_usa_california_v422_001\\assets\\editorial\\monterey_lone_cypress.jpg"], "empty_source_rows": ["assets/editorial/la_grand_central_market.jpg"], "absolute_relpath_rows": 27, "absolute_relpath_into_temp": 27, "absolute_relpath_examples": ["D:\\文档\\项目开发\\Travel-Scope\\.temp\\v422_honest_map\\ZH_RELEASE_3\\staging\\full_ca_run\\assets\\renditions\\sf_golden_gate--w1000.jpg", "D:\\文档\\项目开发\\Travel-Scope\\.temp\\v422_honest_map\\ZH_RELEASE_3\\staging\\full_ca_run\\assets\\renditions\\sf_palace_fine_arts--w1000.jpg"], "run_manifest_input_fields": {"source_evidence_path": {"kind": "absolute", "into_temp": true, "into_candidate_runs": false, "target_digest": "456863642E43", "run_own_copy_digest": null}, "scope_path": {"kind": "absolute", "into_temp": true, "into_candidate_runs": false, "target_digest": "F0E26C72C41C", "run_own_copy_digest": null}, "route_corridors_path": {"kind": "absolute", "into_temp": true, "into_candidate_runs": false, "target_digest": "08BD8C957260", "run_own_copy_digest": null}, "asset_manifest_path": {"kind": "absolute", "into_temp": true, "into_candidate_runs": false, "target_digest": "8816FF22A61A", "run_own_copy_digest": null}, "source_verification_snapshot_path": {"kind": "relative", "into_temp": false, "into_candidate_runs": false, "target_digest": null, "run_own_copy_digest": "2387F4B0ACF1"}}, "measured_by": "本工具现场读正式 run 的 media_prepared/media-manifest.json 与 manifest.json，逐格判形状并解析到实物摘要，不是手填"},
+    "owner_claims_reproduced": {"absolute_source": 26, "empty_source_rows": 1, "staging_relpath": 27, "run_manifest_input_fields_absolute": 4}
+  },
+  "blocking_codes": {
+   "MEDIA_RUN_PATH_EMPTY": "该格是空的：没有定位符就没有可核验的字节出处，空串不能当「这条不重要」的豁免",
+   "MEDIA_RUN_PATH_ABSOLUTE": "交付 run 里可解析的路径格写了绝对路径（盘符开头或前导 /）⇒ 这份 run 只在这台机器的这个位置能用，换机／移工作区即断链；窄修复要求 run 相对 POSIX",
+   "MEDIA_RUN_PATH_SEPARATOR": "路径用反斜杠或混用分隔符（登记 must.posix_separators）⇒ 值是 Windows 本机拼出来的，不是 run 内可移植的定位符；判绝对与否不能靠这种串",
+   "MEDIA_RUN_PATH_FORBIDDEN_ROOT": "路径里出现登记的 forbid_substrings（.temp／candidate_runs）⇒ 值指向 run 外的另一棵树，今天的 dangling=0 只是旧目录还在本机的假象",
+   "MEDIA_RUN_PATH_TRAVERSES_OUT": "路径含 .. 段（登记 must.no_parent_traversal）⇒ 写法自己承认要跳出 run 根，相对不等于在内",
+   "MEDIA_RUN_PATH_OUTSIDE_RUN_ROOT": "路径没有 .. 但解析后仍落在 run 根之外 ⇒ 形状像相对、实质在外面，自包含不成立",
+   "MEDIA_RUN_PATH_TARGET_MISSING": "路径解析后在 run 内却没有那个文件 ⇒ 这条链指向一份不存在的字节；跨目录复制／清 .temp 之后就是这么断的，本机 dangling=0 不能替代它",
+   "MEDIA_RUN_PATH_TARGET_NOT_THE_RECORDED_BYTES": "路径解析到的文件摘要与该格登记的摘要不等 ⇒ 改路径时把字节也换了，这是「只修序列化」越界成「重派生媒体」的信号，硬阻断",
+   "MEDIA_RUN_PATH_LAYOUT_MISMATCH": "形状合格（相对、在根内、文件在、摘要对）但不是登记 fields 点名的那个位置（如 entries[].source 必须落在 media_prepared/originals/{file}）⇒ 位置也是合同的一部分，自己另挑一层目录会让下一个人找不到实物",
+   "MEDIA_SOURCE_URL_NOT_VERBATIM": "清单 source_asset_url 与快照记的任何一条权威定位符（original_url／source_page_url）都不逐字相等⇒ 定位符不是权威那一条；身份路径相同也照样阻断，因为路径判据只证「同一个文件」，证不了「同一个定位符」",
+   "MEDIA_SOURCE_URL_QUERY_DUPLICATED": "定位符自身形状不合格：query 段数超过 max_query_segments、参数键重复、或 repeat_marker_substrings 命中次数超过 max_marker_hits⇒ 这是被追加出来的第二串查询，不是来源自己的 URL",
+   "MEDIA_FACE_SOURCE_URL_DIVERGED": "登记的派生面孔（derived_faces 点名的文件）不在盘上，或同一行的 source_asset_url 与根清单不等⇒ 交付账自己不一致／或根本无法证明它同源；面孔必须同源生成，不许各改一份，也不许缺了当没事",
+   "MEDIA_SOURCE_HTTP_ERROR": "远端在登记的尝试次数与总等待预算内始终返回非 2xx（且不是 429）⇒ 采集那一跳没做成：整体不写快照、不改正式 run、不回退旧缓存",
+   "MEDIA_SOURCE_RATE_LIMITED": "远端返回 429（含不带 Retry-After 头的限流）⇒ 按 source_fetch_policy 有界退避；预算耗尽仍是 429 就抛本码中止",
+   "MEDIA_SOURCE_RESPONSE_UNREADABLE": "远端 2xx 但答体不是可用响应：HTML 错误页、截断、空体，或 JSON 里带着 API 的 error 对象（多标题配 rvlimit 的 invalidparammix 就是这一类）⇒ 抛本码，禁止让 requests 的 JSONDecodeError 或一个被忽略的 error 对象悄悄溜过去",
+   "MEDIA_SNAPSHOT_PATH_UNDECLARED": "run manifest 没有 source_verification_snapshot_path 这一格",
+   "MEDIA_SNAPSHOT_MISSING": "声明了路径但文件不在盘上",
+   "MEDIA_SNAPSHOT_UNREADABLE": "文件在但读不成 JSON 对象",
+   "MEDIA_SNAPSHOT_SCHEMA_UNSUPPORTED": "快照的 schema_version 或 producer_version 不在登记支持范围内 ⇒ 形状或口径换了要人来裁，不是代码自适应；被否定的旧口径（identity_plus_local_digest）不能靠这条混进新合同",
+   "MEDIA_SNAPSHOT_FIELD_MISSING": "快照顶层或某条记录缺登记字段（含空串／None／非int页号）",
+   "MEDIA_SNAPSHOT_INCOMPLETE": "records 条数不等于 records_expected，或不等于清单里 Commons 资产数⇒ 半份表",
+   "MEDIA_SNAPSHOT_NOT_COMPLETE": "status 不等于登记的 COMPLETE⇒ 生产者自己声明这一趟没验完",
+   "MEDIA_SNAPSHOT_SELF_DIGEST_MISMATCH": "snapshot_sha256 与现算的规范摘要不等⇒ 账被手改过",
+   "MEDIA_SNAPSHOT_MANIFEST_DIGEST_MISMATCH": "asset_manifest_sha256 与被检清单字节不等⇒ 快照不是这一份清单的快照",
+   "MEDIA_SNAPSHOT_EXPIRED": "verified_at_utc 距 as_of 超过 max_age_days",
+   "MEDIA_SNAPSHOT_ASSET_MISSING": "清单里某个 Commons 资产在快照中没有对应记录",
+   "MEDIA_SNAPSHOT_IDENTITY_MISMATCH": "标题／页号／原图 URL／作者／许可任一项与清单或快照不符（含 API missing）",
+   "MEDIA_SNAPSHOT_LOCAL_DIGEST_MISSING": "在盘 prepared（media_prepared/originals/<名>）或 delivered（local_file）文件取不到，派生链无从复算",
+   "MEDIA_SNAPSHOT_DIGEST_CHANGED": "在盘字节现算摘要与快照记的采集／prepared／delivered 任一段不符",
+   "MEDIA_SNAPSHOT_SOURCE_DIGEST_CONFLICT": "清单声明的 prepared 摘要（source_sha256）与快照记的 prepared_sha256 或 acquisition_sha256 不符 ⇒ 用的是另一份字节",
+   "MEDIA_SNAPSHOT_ROW_KEY_UNAVAILABLE": "清单行的 asset_row_id（登记规则＝local_file）缺失、不唯一，或快照记录没带这个键 ⇒ 行级血缘没有锚；退回标题级汇总正是这次要修的错",
+   "MEDIA_LINEAGE_ROW_UNBOUND": "该行状态是 UNBOUND_LEGACY ⇒ 拿不出采集桥梁，不给发布级来源证明（业主裁：阻断）",
+   "MEDIA_LINEAGE_STATUS_UNREGISTERED": "状态不在 status_closed_set 里 ⇒ 词表被绕过",
+   "MEDIA_LINEAGE_SECTION_FIELD_MISSING": "三段血缘里任一段的登记字段缺失或为空 ⇒ 链条自己报缺件",
+   "MEDIA_LINEAGE_REVISION_IDENTITY_MISSING": "第一段不合格：revision_id／revision_timestamp／original_sha1 任一项为空，或与清单声明的精确标题／pageid 不符 ⇒ 说不出「哪一版」就谈不上绑定",
+   "MEDIA_LINEAGE_ACQUISITION_BRIDGE_MISSING": "第二段不合格：缺采集 URL／请求宽度／实际返回宽高／采集 SHA-256／取回时间任一项，或采集摘要接不上本地 prepared 字节 ⇒ 「我们确实从它取了这些字节」这段是空的",
+   "MEDIA_LINEAGE_DERIVATION_CHAIN_BROKEN": "第三段不合格：派生链重放不出交付字节（用登记的 ladder 从 prepared 重算的摘要≠快照记的 delivered_sha256）⇒ 这一行是标题级汇总蒙过来的",
+   "MEDIA_LINEAGE_DELIVERED_DIGEST_MISMATCH": "快照记的 delivered_sha256 与清单行的 delivered_sha256 或在盘 local_file 现算摘要不符 ⇒ 验的不是出货的那份",
+   "MEDIA_LINEAGE_TITLE_AGGREGATION_FORBIDDEN": "快照按 File: 标题折叠多条资产行（同一标题的记录数少于清单里该标题的行数，或记录按标题而非 asset_row_id 作键）⇒ 一行有错会被别的行盖掉",
+   "MEDIA_LINEAGE_HISTORICAL_BOUND_NOT_PROVABLE": "声称 EXACT_HISTORICAL_REVISION_BOUND，但登记面记着「按历史修订取回该版字节」这条路尚未量通（historical_revision_addressing_verified=false）⇒ 不许口头声称历史绑定"
+  },
+  "no_network_in_generation": true,
+  "generation_network_rule": "local_media_gate.py 的核验路径不得发网络请求：requests 只在导出快照的生产者函数里延迟导入，模块顶层没有它。构建期 external_network_attempts 仍必须为 0（§8.1 第五道牙不放宽）。",
+  "no_fallback_to_stale_snapshot": true,
+  "fallback_rule": "生产者任何一张图核验失败就整体不写快照（抛码中止，不留部分件），也不允许「网络失败后拿上一份旧快照继续」⇒ 快照的 verified_at 必须来自真的跑过的那一趟。",
+  "verification_of_record": "快照由 scripts/local_media_gate.py --export-source-snapshot 产生（唯一生产者），由 --source-snapshot 与生成器、delivery_gate 三方读同一份字节。",
+  "asset_row_id_rule": "asset_row_id＝清单行的 local_file（run 内相对路径，POSIX 写法）。实测加州 36 行全部唯一（36/36，见 .temp/v422_honest_map/ZH_RELEASE_3/SOURCE_VERIFICATION_SURVEY.json），所以它可以当行锚；不唯一就抛 MEDIA_SNAPSHOT_ROW_KEY_UNAVAILABLE，不许改用标题兜底——标题兜底就是这次要撤掉的聚合口径。",
+  "acquisition_to_prepared_rule": "第二段接第三段的第一跳只有两条合法桥，配方逐字记在记录的 transform_recipe 格，其余写法一律阻断：① COMMONS_RENDITION_STORED_VERBATIM——按请求宽度取回的缩略档原样落盘（acquisition_sha256 逐字等于 prepared_sha256）；② COMMONS_API_THUMB_FETCHED_THEN_NORMALIZED——只许使用 API 自己返回的 thumburl 取字节（禁止自行拼 /1600px-... 那种 URL，实测那种写法今天直接 400），取回档若比清单声明的采集宽度宽，就按本登记面的 acquisition_normalize 参数做一次确定性归一，归一结果必须逐字等于在盘 media_prepared/originals/<名> 与清单行 source_sha256。两条桥都必须现场可复算：核验方拿快照里的 acquisition_sha256 与本地字节做同一步变换，摘要不等就是 UNBOUND_LEGACY。「先下原图再本地缩放」这类没有可复算实现的配方仍然禁止——那正是 identity_plus_local_digest 被否掉的地方。",
+  "prepared_to_delivered_replay": {
+   "authority": "scripts/prepare_media.py::prepare_asset",
+   "ladder_registration": "references/single-file-delivery-policy.json::delivered_rendition_ladder",
+   "recipe_field": "清单行的 transform（ladder id 内嵌其中）",
+   "rule": "第二跳离线重放：用登记的 ladder 从 prepared 字节重算交付档，重放摘要必须等于快照记的 delivered_sha256、清单行的 delivered_sha256 与在盘 local_file 的现算摘要，四者逐字相同。",
+   "note": "重放用产图的那一份实现，不在核验代码里另写一个 PIL 缩放，免得两把尺子各自漂移。"
+  },
+  "revision_identity_note": "第一段各字段来自哪里、能证到什么，按 2026-11-03 实拍登记（.temp/v422_honest_map/ZH_RELEASE_3/COMMONS_IDENTITY_PREFLIGHT.json）：prop=imageinfo 对 File: 只返回当前版（archivename／archiveurl 均为 null）；revision_id 取该页当前修订号（prop=revisions rvlimit=1），文件版本本身由 revision_timestamp＋original_sha1 指认；页面修订多为分类编辑，所以 revision_id 不等同于「文件第 N 版」，登记与判据都不许把它读成后者。original_sha1 是原图指纹，本合同不要求本地缩略档摘要与它相等（业主裁：那是错误断言）。",
+  "producer_version_note": "4.2.2-r3-snapshot-1 产的是 identity_plus_local_digest 口径的快照，业主 2026-11-03 第二轮裁示不认它是发布级来源证明；换口径必须换生产者版本号，否则旧件会被新尺子读成「同一形状」。已落盘的 ZH_RELEASE_3/snapshot_probe.json 留作旧口径的测量证据，不再作为可发布快照引用（取证不删除）。",
+  "record_fields_note": "record_fields_required＝lineage_sections 三段字段（19 个）＋status＋producer_version 的并集，逐行必填；名单以 lineage_sections 为准，这里不另起一套。",
+  "request_throttle_seconds": 1.5,
+  "accepted_source_mimes": {
+   "authority": "本段是 MIME 允许清单的唯一持有人：检索与采集侧只许读这里，工具与代码里不许出现 mime 字面量清单。",
+   "primary_test": "Commons API 的 imageinfo.mime 是主判据。",
+   "secondary_test": "文件扩展名是第二道一致性检查；与 API mime 冲突 ⇒ 直接拒绝该候选（不选边、不猜哪个对）。",
+   "allowed_this_round": [
+    "image/jpeg",
+    "image/png"
+   ],
+   "rejected_this_round": [
+    "application/pdf",
+    "image/tiff",
+    "image/svg+xml",
+    "image/gif"
+   ],
+   "conditional": {
+    "image/webp": "暂不进正式候选。只有独立证明「解码→归一→派生→两次离线重放」稳定之后才可加入；不得为了扩大候选池子引入未验证的输入面。"
+   },
+   "shape_filter_is_not_semantics": "h/w ≥ 0.5143（由 min_delivered_geometry 推导）只负责形状初筛，不能证明语义合格。",
+   "rejected_media_forms": [
+    "多页文档与扫描本（如 Internet Archive 扫描书 .pdf/.tif 册页）",
+    "非静态照片（地图册页、书页、矢量图、动图）"
+   ],
+   "semantic_confirmation_required": {
+    "hotels": "住宿建筑、客房或明确的酒店空间",
+    "food_and_cafes": "真实餐饮场所，或同目的地的餐饮场景",
+    "sights": "景点本体",
+    "forbidden": "目的地名恰好出现在标题或描述里的无关照片"
+   },
+   "per_slot_shortlist": "筛完后每个槽位保留 2–3 条可审计候选，再按语义准确性、许可、当前修订与几何余量择一。",
+   "zero_candidates_action": "某槽位为 0 ⇒ 触发既定停止条件；不得放宽几何、类别或许可门限，也不得用无关图顶位。",
+   "authorized_by": "业主 2026-11-03 裁决（Big Sur 换源＋复用建模那一轮的筛选口径）"
+  },
+  "source_fetch_policy": {
+   "authority": "本段是唯一持有人：scripts/local_media_gate.py 的受控取数函数只许读这里，代码里不许出现尝试次数或等待秒数的字面量。",
+   "max_attempts": 3,
+   "max_total_wait_seconds": 120,
+   "retry_after_header": "Retry-After",
+   "retry_after_bounded": "对端给的等待秒数先被「剩余总等待预算」钳住再睡；预算用完即断，不因对端开大值而无限等。",
+   "backoff_when_no_header": "没有 Retry-After 头时按剩余预算做有界线性等待：第 n 次失败后等 n×基准秒，基准＝总预算÷(次数×(次数+1)/2)，同样不许写死。",
+   "on_exhausted": "抛本段点名的码并整体中止：不写半份快照、不改正式 run、不回退旧缓存（no_fallback_to_stale_snapshot 不变）。",
+   "http_error_code": "MEDIA_SOURCE_HTTP_ERROR",
+   "rate_limited_code": "MEDIA_SOURCE_RATE_LIMITED",
+   "unreadable_response_code": "MEDIA_SOURCE_RESPONSE_UNREADABLE",
+   "separation_from_snapshot_codes": "MEDIA_SNAPSHOT_UNREADABLE 只描述「盘上那份快照读不成 JSON 对象」；远端答不好是另一件事，必须用 MEDIA_SOURCE_* 三条码，混用会把归因写成为「本地文件坏掉」。",
+   "authorized_by": "业主 2026-11-03 R3D 裁示 1（先修生产者再隔离试点；三条来源侧码；退避参数登记不硬编码；撤『不动点』合同；只许用 API 给的 thumburl）"
+  },
+  "request_throttle_seconds_note": "逐行采集时每次 API/图片请求之间的等待秒数，生产者读这一格。构建期不发网络请求（裁 A），所以这一格只影响在线核验那一趟的礼貌程度，不影响判据。",
+  "thumb_width_snapping_measured": "档距仍是实测事实（按 W 请求，API 给的 thumburl 路径常写更大的档位：实测 640→960、1000→1280、1600→1920、2560→3840；1280/1920 这类请求原地不动；API 的 thumbwidth 字段回显请求值而不是返回值，不能当判据）。但业主 2026-11-03 R3D 明确：不许把「请求宽度必须是 1280/1920 不动点」写成合同。真正权威的是三件东西——API 实际返回的 thumburl、那次返回的实际尺寸（returned_width／returned_height），以及那串字节的采集摘要。清单声明的采集宽度与返回宽度可以不同，差额由 acquisition_normalize 那次确定性归一吸收；requested_width 与 returned_width 仍分两格登记，是为了让「今天取回的是哪一档」这件事可复盘。原始测量见 .temp/v422_honest_map/ZH_RELEASE_3/ACQUISITION_URL_FORM_PROBE.json 与 TWIN_PEAKS_LINEAGE_PROBE.json。"
+ },
+ "providers": {
+  "wikimedia_commons": {
+   "api": "https://commons.wikimedia.org/w/api.php",
+   "download_locally": true,
+   "hotlink": false,
+   "allowed_license_prefixes": [
+    "CC0",
+    "CC BY ",
+    "CC BY-SA ",
+    "Public domain"
+   ]
+  },
+  "openverse": {
+   "discovery_only": true,
+   "origin_license_recheck_required": true
+  },
+  "stock": {
+   "allowed_roles": [
+    "destination_atmosphere",
+    "category_reference"
+   ],
+   "exact_place_claim_forbidden": true
+  },
+  "generated": {
+   "allowed_roles": [
+    "decorative_texture",
+    "abstract_map"
+   ],
+   "photorealistic_place_or_business_substitute_forbidden": true,
+   "no_photo_state_is_not_an_image": "业主 2026-11-03 R3B：「不得用生成的写实图片、SVG 假封面或其他地点图片填充。」以前这一档 allowed_roles 里挂着 designed_no_photo_state，等于让生成图顶着无图状态的名进页面；撤掉之后，generated 只能出现在真正的装饰性图档里，无图状态由 media-policy::designed_no_photo_state 单独持有。"
+  }
+ },
+ "module_categories": {
+  "hotels": "accommodation",
+  "restaurants": "food",
+  "cafes": "food",
+  "attractions": "sights",
+  "dive_sites": "sights"
+ },
+ "selection_levels": [
+  "verified_exact_place",
+  "same_destination_same_category_reference",
+  "same_region_same_category_reference",
+  "designed_no_photo_state"
+ ],
+ "display_roles": [
+  "verified_exact_place",
+  "category_reference",
+  "destination_atmosphere",
+  "designed_no_photo_state"
+ ],
+ "rules": [
+  "Editorial media and section media are separate collections and must not be used as automatic fallbacks for one another.",
+  "A section image may serve only modules that map to its declared module_category.",
+  "Another identifiable hotel, restaurant, cafe, attraction, dive operator or transport operator must never substitute for a named POI.",
+  "Every local image requires an exact original source page, immutable source identity, source asset URL, SHA256, author, license, retrieval date and separate recorded visual-review evidence.",
+  "Collection status is always pending_visual_review; a collector configuration may not self-promote media to verified.",
+  "Duplicate image bytes across editorial and section slots are forbidden.",
+  "A same-destination or same-region atmosphere image may replace a missing branch cover only when category and geography are verified and the caption says it is atmosphere/context; it must not imply that it depicts the named POI.",
+  "When rights, geography or category cannot be verified, use a designed no-photo state rather than an unrelated photograph.",
+  "A destination branch cover may reuse an already verified same-destination atmosphere or local-feature asset when no dedicated module cover exists. This exception applies only to destination-level context, never to a named POI, and the original role and source remain recorded in data attributes and the manifest."
+ ],
+ "recommended_standard_coverage": {
+  "overview_editorial_images": "4-6",
+  "section_images": "one per destination and section category",
+  "transport_photos": "0-2 only when verified and editorially useful",
+  "budget_and_notes": "layout, texture and icons instead of filler photography"
+ },
+ "authenticity_gate": {
+  "min_color_entropy": 4.5,
+  "max_dominant_color_ratio": 0.4,
+  "reject_synthetic_wireframes": true,
+  "disallow_template_evidence": true,
+  "require_valid_source_url": true,
+  "disallow_generic_authorship": true
+ },
+ "geographic_consistency": {
+  "enforce_country_boundary": true,
+  "enforce_destination_exclusion": true,
+  "module_purpose_checks": true,
+  "banned_cross_country_markers": {
+   "中国": [
+    "thailand",
+    "chiang mai",
+    "bangkok",
+    "phuket",
+    "ayutthaya",
+    "sukhothai",
+    "japan",
+    "tokyo",
+    "kyoto",
+    "osaka",
+    "bali",
+    "indonesia",
+    "france",
+    "paris",
+    "wat ",
+    "phra "
+   ],
+   "china": [
+    "thailand",
+    "chiang mai",
+    "bangkok",
+    "phuket",
+    "ayutthaya",
+    "sukhothai",
+    "japan",
+    "tokyo",
+    "kyoto",
+    "osaka",
+    "bali",
+    "indonesia",
+    "france",
+    "paris",
+    "wat ",
+    "phra "
+   ],
+   "泰国": [
+    "china",
+    "beijing",
+    "shanghai",
+    "guangxi",
+    "guilin",
+    "yangshuo",
+    "longji",
+    "japan",
+    "tokyo",
+    "korea"
+   ],
+   "thailand": [
+    "china",
+    "beijing",
+    "shanghai",
+    "guangxi",
+    "guilin",
+    "yangshuo",
+    "longji",
+    "japan",
+    "tokyo",
+    "korea"
+   ],
+   "马来西亚": [
+    "thailand",
+    "chiang mai",
+    "bangkok",
+    "phuket",
+    "ayutthaya",
+    "japan",
+    "tokyo",
+    "kyoto",
+    "osaka",
+    "bali",
+    "indonesia",
+    "france",
+    "paris",
+    "wat ",
+    "phra "
+   ],
+   "malaysia": [
+    "thailand",
+    "chiang mai",
+    "bangkok",
+    "phuket",
+    "ayutthaya",
+    "japan",
+    "tokyo",
+    "kyoto",
+    "osaka",
+    "bali",
+    "indonesia",
+    "france",
+    "paris",
+    "wat ",
+    "phra "
+   ]
+  }
+ },
+ "asset_review": {
+  "require_individual_review_evidence": true,
+  "disallow_shared_single_evidence": true
+ },
+ "designed_no_photo_state": {
+  "status": "ENROLLED",
+  "authorized_by": "业主 2026-11-03（ZH-RELEASE-3 / R3B）：「采用现有 designed_no_photo_state，不再发明第二套无图机制。」裁决指针＝.temp/v422_honest_map/ZH_RELEASE_3/R3B_AUTHORIZATION_NO_PHOTO.json",
+  "meaning": "数据层明确决定该槽位正式无图。它同时不是：图片资产、media_gaps 的异常扣留、「图片加载失败」的视觉表现。三件事不能同时成立（业主原话：dataset 声称有照片／renderer 临时扣留／页面看起来偶然少图）。",
+  "not_a_photo_asset": "无图行不携带任何来源声明。业主：「无图状态不是另一种图片资产，不能继续携带旧来源声明。」",
+  "allowed_fields": [
+   "destination",
+   "modules",
+   "primary_module",
+   "module_category",
+   "selection_level",
+   "asset_role",
+   "image",
+   "no_photo_reason_code",
+   "no_photo_evidence"
+  ],
+  "field_set_rule": "字段闭集＝上面九项，顺序也按裁示。多一个键（caption_cn／caption_en／focal_point／retrieved_at／author／license／license_url／commons_page／sha256／image_srcset）就阻断：那等于把无图行继续当图片资产登记。",
+  "image_value": "",
+  "image_rule": "image 必须是空串。声明无图却带路径＝数据层自己打脸。",
+  "reason_code_closed_set": [
+   "SOURCE_LINEAGE_UNBOUND_NO_COMPLIANT_RENDITION"
+  ],
+  "reason_code_meanings": {
+   "SOURCE_LINEAGE_UNBOUND_NO_COMPLIANT_RENDITION": "该槽位唯一可用来源拿不出三段行级血缘（修订身份⇄实际采集字节⇄本地派生链任一段接不上），且从该来源无法生成符合登记几何下限（640×360）的语义合理图，故数据层决定正式无图。"
+  },
+  "reason_code_rule": "闭集：未登记的码即阻断。新增一条码＝一次登记修订，不在代码里写死字面量。",
+  "evidence_field": "no_photo_evidence",
+  "evidence_path_rule": "run 内相对路径，文件必须真实存在；写无图行之前证据文件必须先落盘，否则门禁读到空引用（本回合＝evidence/media-lineage-remediation.json）。",
+  "forbidden_value_rule": "任一字段的值若指向图片字节位置（assets/**、media_prepared/**、renditions/**、data:image、http(s) 图片 URL）即阻断，与键名无关——只禁字段名会被「换个键名继续带旧图路径」绕过。",
+  "manifest_rule": "该槽位（destination × primary_module，category=SECTION_MEDIA）不得在 asset-manifest.json 里留资产行；留着就是「清单说交付了、读者拿不到」的死登记。",
+  "media_gap_rule": "无图行不得产生 media_gaps。缺口机制只服务于「已声明图片在渲染投影时被剔」；本槽位从未声明图片，出现缺口记录就说明数据层与渲染层在互相顶。",
+  "dom": {
+   "attribute": "data-media-state",
+   "attribute_value": "designed_no_photo_state",
+   "carrier_class": "branch-visual",
+   "visible_label": {
+    "cn": "暂无已核验图片",
+    "en": "No verified photograph"
+   },
+   "forbidden_in_dom": [
+    "该槽位内出现 img 元素",
+    "该槽位内出现 asset:// 引用",
+    "JS 占位 fallback（makePlaceholderSvg／data-asset-digest=fallback）",
+    "其他地点的图片",
+    "生成的写实图片",
+    "SVG 假封面"
+   ],
+   "label_source_rule": "文案与属性名以本块为唯一权威：门禁（visual_qa）读本块判定，渲染器里的字面量必须与本块逐字一致，双向核对由 scripts/test_v422_no_photo_state.py::RendererContractTests 执行——渲染器漂了测试红，登记面漂了测试也红。",
+   "not_a_load_failure": "无图状态不得表现成图片加载失败：页面上不出现坏图占位、不出现「加载失败」文案，只有登记的无图声明。"
+  },
+  "ratio_lock": {
+   "rule": "占比的分母是「按覆盖要求应声明的 section 槽位数」，不是「当前声明了几行」——否则删掉一行就能把 10% 洗成 0%。分母面＝validate_section_media(require_complete) 的覆盖检查 + run-quality-policy.json::depth_profiles[deep].max_designed_no_photo_ratio。",
+   "merge_forbidden": "不得通过删除分母或合并槽位降低比例；重复槽位与缺失槽位各自有码。",
+   "measured_ca_2026_11_03": {
+    "section_slots": 20,
+    "photographic": 18,
+    "designed_no_photo": 2,
+    "ratio": 0.1,
+    "depth": "deep",
+    "max_designed_no_photo_ratio": 0.1,
+    "headroom": 0,
+   "r3d_live_row_counts_2026_11_04": {
+   "manifest_rows": 27,
+   "chain_entries": 27,
+   "delivered_image_bytes_total": 1857173,
+   "delivered_bytes_second_ruler": 1857173,
+   "editorial_rows": 14,
+   "section_media_rows": 17,
+   "section_slots": 20,
+   "designed_no_photo_slots": 2,
+   "photographic_slots": 18,
+   "ratio_designed_no_photo": 0.1000,
+   "denominator_ruler": "无图占比的分母＝展开后的 (destination, module) 槽位数（20），不是行数（17）；唯一实现 scripts/local_media_gate.py::section_slot_denominator，formal_data_gate 调它",
+   "measured_by": "本工具现算：清单行文件字节求和 ⇄ media_prepared/media-manifest.json::rendition_bytes 两路同值",
+   "why_registered": "R3D 第④⑤步把清单 29→27（三组合并退役 3 行＋GCM 入行）、editorial 15→14（Warner 退出）、section_media 20→17 行但展开槽位仍是 20；这些数必须有登记面持有人，否则测试只能硬写数字，下一轮改媒体面又会悄悄漂。",
+   "supersedes": "r3c_live_row_counts_2026_11_03（那一格描述的是合并与换源之前的活体面，保留作历史锚点，不机械替换）",
+   "consumer": "scripts/test_v422_no_photo_state.py::LiveCaliforniaStateTests 拿现场对登记"
+  },
+"r3c_live_row_counts_2026_11_03": {
+     "manifest_rows": 29,
+     "chain_entries": 29,
+     "delivered_image_bytes_total": 1284837,
+     "editorial_rows": 15,
+     "section_slots": 20,
+     "measured_by": "本工具与 local_media_gate 交付字节求和同值（三口径互证后才落登记）",
+     "why_registered": "第 2 步退出 4 条死登记使清单 33→29；这些数必须有登记面持有人，否则测试只能硬写数字，下一轮改媒体面又会悄悄漂。",
+     "consumer": "scripts/test_v422_no_photo_state.py::LiveCaliforniaStateTests 拿现场对登记，不再写死 33"
+    },
+    "note": "恰好贴线：再来第三条无图行＝0.15 > 0.10，formal_data_gate 直接阻断。此格是本轮实测登记值，下一次改三行媒体面必须重测。"
+   }
+  },
+  "blocking_codes": {
+   "SECTION_NO_PHOTO_FIELDS_UNREGISTERED": "字段集合不等于 allowed_fields（多键或少键都算）⇒ 表示法被改写",
+   "SECTION_NO_PHOTO_IMAGE_NOT_EMPTY": "selection_level／asset_role 声明无图，image 却不是空串",
+   "SECTION_NO_PHOTO_REASON_CODE_UNREGISTERED": "no_photo_reason_code 不在闭集里，或根本没写",
+   "SECTION_NO_PHOTO_EVIDENCE_MISSING": "没写 no_photo_evidence，或它指向的文件不在盘上／不是 run 内相对路径",
+   "SECTION_NO_PHOTO_IMAGE_SOURCE_PRESENT": "字段值里仍带图片字节位置（旧图路径／旧源 URL／data URI）⇒ 无图行还在携带旧来源声明",
+   "SECTION_NO_PHOTO_ASSET_ROW_PRESENT": "asset-manifest 仍有该槽位的 SECTION_MEDIA 资产行 ⇒ 死登记",
+   "SECTION_NO_PHOTO_ROLE_LEVEL_DISAGREE": "asset_role 与 selection_level 对「无图」这件事说法不一致",
+   "SECTION_NO_PHOTO_MEDIA_GAP_CONTRADICTION": "由 verify_media_gaps 发：无图行的退役字节又以媒体缺口的形式出现在读者载荷里 ⇒ 数据层说无图、渲染层说被我扣了"
+  },
+  "code_closure_rule": "本格 blocking_codes 与 local_media_gate 里 SECTION_NO_PHOTO_ 前缀的实现码双向相等：登记了没实现＝死登记，实现了没登记＝词表被绕过。核对由 test_v422_no_photo_state.py::CodeClosureTests 执行。",
+  "implemented_by": [
+   "scripts/local_media_gate.py::validate_section_media（行级判据唯一实现）",
+   "scripts/local_media_gate.py::verify_media_gaps（退役字节不得变成缺口）",
+   "assets/spa-layout.js::sectionMediaState + renderModuleBranches 的 branch-visual 分支",
+   "scripts/visual_qa.py::check_rendered_image_registration（DOM 侧四条 IMG_RENDERED_NO_PHOTO_*）",
+   "scripts/formal_data_gate.py::max_designed_no_photo_ratio（占比上限，既有实现）"
+  ],
+  "tested_by": [
+   "scripts/test_v422_no_photo_state.py"
+  ],
+  "policy_readiness_codes": {
+   "SECTION_NO_PHOTO_POLICY_UNREGISTERED": "登记面里没有 designed_no_photo_state 块 ⇒ 尺子没了，代码不许靠内置默认值继续放行",
+   "SECTION_NO_PHOTO_POLICY_INCOMPLETE": "块在但缺字段（含 dom 的属性名／文案）⇒ 表示法不完整，判据无法逐条落地",
+   "SECTION_NO_PHOTO_POLICY_CODES_UNREGISTERED": "登记码表与代码名字表双向不相等 ⇒ 死登记或被绕过的词表"
+  },
+  "policy_readiness_note": "这三条说的是「尺子本身不成立」，不是「某一行数据不合格」，所以与 blocking_codes 分两组登记；两组都与 local_media_gate 的名字表双向核对（NO_PHOTO_BLOCKING_CODES ＋ NO_PHOTO_POLICY_ERROR_CODES）。"
+ }
+}

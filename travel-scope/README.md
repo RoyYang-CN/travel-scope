@@ -1,25 +1,11 @@
-# Travel-Scope
+# Travel-Scope Skill Engine
 
-Current baseline: **v3.1.0**. See [VERSION.md](VERSION.md) for the POI identity, coordinate, image, category, transport, and regression acceptance criteria.
+Current baseline: **v5.0.0**.
 
-Travel-Scope is an evidence-aware travel research and itinerary generation skill. It produces HTML, Markdown, and Excel outputs from one structured travel dataset, with Chinese and English output modes.
+Use `SKILL.md` as the product workflow authority and run
+`python scripts/verify_product.py` before a build. Live inputs belong in a fresh
+run-local JSON dataset supplied with `--data`; do not edit installed source
+constants.
 
-## Offline demo
-
-The demo does not need API keys or network access to provider APIs:
-
-```powershell
-python scripts/gen_travel_scope.py --mode demo --fixture fixtures/demo.json --output-dir .temp/demo --language both
-```
-
-The fixture is synthetic and must not be used for real travel decisions.
-
-## Live mode
-
-Live mode uses the normal Travel-Scope workflow and requires provider credentials to be injected at runtime. Never commit API keys, raw provider responses, image caches, or generated URLs containing keys.
-
-```powershell
-python scripts/gen_travel_scope.py --mode live --output-dir <output> --map-platform all --language both
-```
-
-See [SKILL.md](SKILL.md) for the SOP, QA gates, data-source boundaries, and domestic/international routing rules.
+The active HTML renderer is `scripts/travel_renderer.py`. External reference
+products are not runtime or packaging dependencies.

@@ -1,0 +1,41 @@
+{
+  "themes": {
+    "ocean": {
+      "label": "Ocean & Island",
+      "keywords": ["海岛", "海滩", "潜水", "冲浪", "海湾", "港口", "渡轮", "海洋", "island", "beach", "dive", "surf", "coast", "reef", "ferry"],
+      "match_sources": ["country", "destinations", "itinerary", "attractions", "dive_sites", "transport_nodes", "restaurants", "cafes", "local_knowledge"],
+      "hero_image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=85",
+      "hero_video": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260831_231820_baf1d009-9cc2-4f94-a720-b04a94a8eab4.mp4",
+      "accent": "#3F83A3",
+      "palette": {
+        "deep": "#0B2239",
+        "primary": "#183C55",
+        "accent": "#3F83A3",
+        "warm_accent": "#C8B28E",
+        "ivory": "#F4F0E8",
+        "card_bg": "#FCFBF8"
+      }
+    },
+    "forest": {
+      "label": "Nature & Wild",
+      "keywords": ["森林", "草原", "山地", "湖泊", "徒步", "国家公园", "自然", "forest", "mountain", "lake", "hiking", "national park", "trail", "park"],
+      "match_sources": ["country", "destinations", "itinerary", "attractions", "transport_nodes", "local_knowledge", "worth_it"],
+      "hero_image": "assets/themes/nature-mountain-lake-ultra.jpg",
+      "hero_image_source": "https://commons.wikimedia.org/wiki/File:Lake_Mountain_Landscape.jpg",
+      "hero_image_author": "Bonnie Moreland",
+      "hero_image_license": "CC0 1.0; public domain dedication",
+      "accent": "#b5cf8d"
+    },
+    "city": {
+      "label": "Modern City",
+      "keywords": ["城市", "博物馆", "地铁", "购物", "建筑", "夜生活", "城市群", "city", "museum", "metro", "shopping", "architecture", "nightlife", "downtown"],
+      "match_sources": ["country", "destinations", "itinerary", "attractions", "transport_nodes", "restaurants", "cafes", "local_knowledge", "worth_it"],
+      "hero_image": "assets/themes/city-manhattan-ultra.jpg",
+      "hero_image_source": "https://commons.wikimedia.org/wiki/File:NYC_Manhattan_Skyline.JPG",
+      "hero_image_author": "Lesekreis",
+      "hero_image_license": "CC0 1.0; public domain dedication",
+      "accent": "#9cb9d7"
+    }
+  },
+  "default": "ocean"
+}

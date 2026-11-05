@@ -1,0 +1,474 @@
+{
+  "schema_version": "4.2.2",
+  "registered_by_round": "MT-D2 第 6 步（业主 2026-11-01 对 #99 的裁决：完成固定术语表，以及数字、日期、币种、URL、实体名和目的地不漂移对账）",
+  "purpose": "把「译文不得引入原文没有的事实、也不得丢掉原文有的事实」这句合同话变成**能跑的尺子**。MT-C 在 prose-translation-contract 的 no_new_facts.enforced_by 里点名了本文件与 scripts/prose_reconcile.py，但当时两者都不存在——那是一条登记了却没执行的合同。本文件补的就是这一格。",
+  "owner_ruling_2026_11_01": "「6. 完成尚未执行的固定术语表，以及数字、日期、币种、URL、实体名和目的地不漂移对账。」这一条排在「冻结 MT-E 实际表长」之前：尺子不立起来，表长冻多少都是空数字。",
+  "authority": "唯一实现 scripts/prose_reconcile.py；唯一登记面本文件。二者由 scripts/test_v422_prose_glossary.py 双向闭合（登记的检查项必须真在查，代码查的项必须在册；登记的映射表必须真被读，代码里的映射不许有第二份）。",
+  "scope": "只查**结构事实**：数字、日期（年/月/日）、币种码、URL 主机名、登记过的实体名、登记过的目的地名。语义层面（反义、漏译、语气、事实编造）不在本文件的能力范围内，那是 MT-F 第二遍人工复核——把结构对账写成「语义已核」就是假陈述。",
+  "required_top_level_fields": [
+    "schema_version",
+    "checks",
+    "term_required_fields",
+    "terms",
+    "unit_map",
+    "currency_map",
+    "month_names",
+    "forbidden",
+    "entity_and_destination_source",
+    "verified_by",
+    "unit_system_switches",
+    "enforced_fields",
+    "descriptive_fields",
+    "proper_name_variants"
+  ],
+  "checks": [
+    "number",
+    "date",
+    "currency",
+    "url",
+    "entity",
+    "destination",
+    "term",
+    "unit_system",
+    "proper_name_variant"
+  ],
+  "finding_codes": {
+    "number": "fact_drift_number",
+    "date": "fact_drift_date",
+    "currency": "fact_drift_currency",
+    "url": "fact_drift_url",
+    "entity": "fact_drift_entity",
+    "destination": "fact_drift_destination",
+    "term": "fact_drift_term",
+    "unit_system": "fact_drift_unit_system",
+    "proper_name_variant": "fact_drift_proper_name_variant"
+  },
+  "structural_codes": [
+    "glossary_not_object",
+    "glossary_missing_field",
+    "glossary_entry_incomplete",
+    "glossary_term_duplicate",
+    "glossary_check_unregistered",
+    "glossary_english_contains_cjk",
+    "glossary_term_match_unknown",
+    "glossary_not_after_shape",
+    "glossary_proper_name_shape_unknown",
+    "glossary_proper_name_param_unregistered",
+    "glossary_allowed_pair_incomplete",
+    "glossary_allowed_pair_duplicate",
+    "glossary_allowed_pair_not_a_conflict"
+  ],
+  "term_required_fields": [
+    "cn",
+    "en",
+    "category",
+    "source",
+    "witnessed_in",
+    "match"
+  ],
+  "term_semantics": "同一措辞在全表必须写成同一个英文形式。术语表是**一致性**约束，不是词典：它不许诺「这样翻最好」，只登记「本轮已经定下来这样写，改它要过业主」。",
+  "terms": [
+    {
+      "cn": "约",
+      "en": "Approx.",
+      "category": "hedging",
+      "source": "PH 载荷 en_text_replacements 实测写法（同一措辞在多条金额行里都是 Approx.）",
+      "witnessed_in": "primary_aliased/philippines_v419/dataset_v422_aliased.json::en_text_replacements[\"约 110-180 元\"]",
+      "match": "before_number",
+      "match_reason": "'约' 单独当子串会撞 '预约/盟约/条约'——MT-D2 第一次量实测语料时就撞上 4 条这种假阳性（例：\"商务预约随叫随到\" 被判没写 Approx.）。所以这条措辞只在**后面紧跟数字**时算金额约估，即 '约 110-180 元' 那种写法。假阳性也是实测出来的，登记在这里而不是悄悄改掉。 第二版再加词边界：'预约 3 晚' 这种「约」后跟数字、但整个词是「预约」的写法，由 not_after 挡掉（今天的语料里没有这种句子，登记为已知残余形状）。",
+      "not_after": [
+        "蜜",
+        "配",
+        "预",
+        "》",
+        "人",
+        "盟"
+      ],
+      "not_after_source": "实测分布（california_v420 + philippines_v419 的 legacy 键全集 ∪ collect_fragments 全集）：「约」后面紧跟数字的 13 处**全部在词首**（前面没有字）；「约」在词内部时前面只出现过 蜜(蜜月)、配(配约?实为「配」前缀用例)、预(预约)、》(书名号后)、人(人约)、盟(盟约) 这 6 个字。所以这个词边界表是量出来的，不是偏旁猜想；下一轮若出现新的词内部用例，必须带着该条实测原文加进来，不许顺手放宽整条检查。"
+    },
+    {
+      "cn": "人均参考",
+      "en": "per-person reference",
+      "category": "money_note_prefix",
+      "source": "MT-B1 金额骨架通道：note_price_prefix 的英文前缀由渲染层登记，术语表复用它的意思，不新造写法",
+      "witnessed_in": "scripts/translate_prose.py::note_price_prefix + assets/spa-layout.js money() 骨架",
+      "match": "substring"
+    },
+    {
+      "cn": "全天候随时出发",
+      "en": "depart any time",
+      "category": "transport_note",
+      "source": "本轮 MT-D2 定写（旧表那条英文 Any time, any weather 只作对照候选，不作来源）",
+      "witnessed_in": ".temp/v422_honest_map/MT1_translation/artifacts/MTD2_LEGACY_MIGRATION.json::runs.california.input_side.samples",
+      "match": "substring"
+    }
+  ],
+  "unit_map": [
+    {
+      "cn": "公里",
+      "en": "km",
+      "witnessed": true,
+      "evidence": "PH：\"邦劳岛最著名的1.5公里白沙滩\" → \"Panglao Island's Celebrated 1.5 km\""
+    },
+    {
+      "cn": "小时",
+      "en": "hours",
+      "witnessed": true,
+      "evidence": "PH：\"1-2小时\" → \"1-2 hours\""
+    },
+    {
+      "cn": "分钟",
+      "en": "mins",
+      "witnessed": true,
+      "evidence": "PH：\"110分钟\" → \"110 mins\""
+    },
+    {
+      "cn": "米",
+      "en": "m",
+      "witnessed": true,
+      "evidence": "PH：\"入口位于海下30米处\" → \"... 30 m ...\"（同一行英文里保留公制）"
+    },
+    {
+      "cn": "℃",
+      "en": "°C",
+      "witnessed": true,
+      "evidence": "PH：\"气温25-31℃\" 行；温度单位不换华氏（见 forbidden.no_unit_system_switch）"
+    }
+  ],
+  "currency_map": [
+    {
+      "cn": "元",
+      "en": "CNY",
+      "witnessed": true,
+      "evidence": "PH：\"约 110-180 元\" → \"Approx. CNY 110-180\""
+    },
+    {
+      "cn": "比索",
+      "en": "PHP",
+      "witnessed": true,
+      "evidence": "PH：\"100比索\" → \"PHP 100\""
+    },
+    {
+      "cn": "美元",
+      "en": "USD",
+      "witnessed": true,
+      "evidence": "CA 数据原文自带写法：\"全美境内消费均以美元(USD)结算。\"——中文币种词与其代码在同一格出现，映射由此定下"
+    }
+  ],
+  "month_names": [
+    {
+      "cn": 1,
+      "en": "January",
+      "witnessed": false
+    },
+    {
+      "cn": 2,
+      "en": "February",
+      "witnessed": true,
+      "evidence": "PH：\"2月为菲律宾旱季…\" → \"February sits in the Philippine dry season…\""
+    },
+    {
+      "cn": 3,
+      "en": "March",
+      "witnessed": false
+    },
+    {
+      "cn": 4,
+      "en": "April",
+      "witnessed": false
+    },
+    {
+      "cn": 5,
+      "en": "May",
+      "witnessed": false
+    },
+    {
+      "cn": 6,
+      "en": "June",
+      "witnessed": false
+    },
+    {
+      "cn": 7,
+      "en": "July",
+      "witnessed": false
+    },
+    {
+      "cn": 8,
+      "en": "August",
+      "witnessed": false
+    },
+    {
+      "cn": 9,
+      "en": "September",
+      "witnessed": false
+    },
+    {
+      "cn": 10,
+      "en": "October",
+      "witnessed": false
+    },
+    {
+      "cn": 11,
+      "en": "November",
+      "witnessed": false
+    },
+    {
+      "cn": 12,
+      "en": "December",
+      "witnessed": false
+    }
+  ],
+  "month_names_note": "12 个月全登记是**尺子要能用**的必要性：只登记被看见过的那一个月，其余月份的对账会静默跳过。witnessed 逐条标出哪些有实测样本，其余是公历月名本身，不是本项目新造的事实。",
+  "entity_and_destination_source": {
+    "rule": "实体名与目的地名**不在本文件抄一份**。对账时现场读两个既有登记面：display_names.read_pairs(dataset)（tier1 中文名↔英文名）与 dataset.destinations 的 [中文名, 英文名] 两列。",
+    "why": "名字表一旦在术语面再抄一遍，就会有两份「谁是权威英文名」——MT-B3 刚把这条坑填上（专名归 display-name-channel，身份不升级），不能在新模块里再挖一次。",
+    "unregistered_name_behaviour": "原文里的中文名字如果两个面都没有登记英文名，本模块**不报漂移也不猜译名**：那是 MT-F 人工复核要处理的「没登记的名字」，不是结构漂移。"
+  },
+  "forbidden": [
+    "no_number_conversion：数字不许换算、取整、改区间端点（1-2小时不能写成 60–120 minutes，两公里不能写成 1.2 miles）。",
+    "no_currency_conversion：币种不许折算，汇率不是译文的来源；要按预算口径另行渲染，且那张脸归 budget-policy/exchange contract。",
+    "no_unit_system_switch：公制不许换英制，摄氏不许换华氏。",
+    "no_url_host_change：链接主机名必须原样；路径可以因渲染需要不同，域名换了就是把读者带去别处。",
+    "no_invented_entity_names：不许给没登记的专名自造英文名，也不许把 tier2 机器显示名当权威名写进散文。",
+    "no_legacy_source_reuse：legacy en_text_replacements 的英文只作**对照候选**（合同 disposition=candidate_only），把它整段抄进本轮译文＝把伪血缘搬进交付物。"
+  ],
+  "false_positive_regressions": {
+    "note": "尺子收窄的**可重放证据**：这些是真实旧表对（PH run 的 en_text_replacements），第一版实现把它们标成漂移、逐条复核确认是真译文。收窄（terms[].match=before_number、币种只查金额表达式）之后，这把尺子对每一对都不再发那一条码——回归测试逐条重放本表，所以「收窄」不是口头承诺，也不是把整类检查关掉。",
+    "measured_over": "philippines_v419 legacy 候选对 819 条（见 MTD2_DRIFT_BASELINE.json）",
+    "replayed_by": "scripts/test_v422_prose_glossary.py::RulerPrecisionTests",
+    "false_positives_removed": {
+      "currency": 2,
+      "term": 4
+    },
+    "samples": {
+      "term": [
+        {
+          "cn": "历史盟约纪念青铜像",
+          "en": "Blood Compact Shrine Bronze Monument",
+          "would_have_been_flagged_by": "fact_drift_term",
+          "other_codes_now": []
+        },
+        {
+          "cn": "商务预约随叫随到",
+          "en": "Business reservation on demand",
+          "would_have_been_flagged_by": "fact_drift_term",
+          "other_codes_now": []
+        },
+        {
+          "cn": "国际航站楼出站口右侧官方调度台派车或酒店提前礼宾预约",
+          "en": "Official taxi dispatch counter right of international arrivals, or hotel concierge reservation in advance",
+          "would_have_been_flagged_by": "fact_drift_term",
+          "other_codes_now": []
+        },
+        {
+          "cn": "需要提前预约的悬崖小露台，老板娘亲手烹饪的南洋椰浆鸡与鲜烤海鱼",
+          "en": "An Intimate Cliffside Balcony by Reservation Only, Where the Owner Cooks Coconut Chicken and Grilled Fish",
+          "would_have_been_flagged_by": "fact_drift_term",
+          "other_codes_now": []
+        }
+      ],
+      "currency": [
+        {
+          "cn": "在麦克坦机场或宿务市区大型商场兑换比索汇率较优",
+          "en": "Currency exchange for Pesos typically yields superior rates at Mactan Airport or Cebu malls",
+          "would_have_been_flagged_by": "fact_drift_currency",
+          "other_codes_now": []
+        },
+        {
+          "cn": "宿务等大城市商超酒店支持Visa/Mastercard信用卡，离岛与跳岛船家务必备足菲律宾比索现金",
+          "en": "Shopping malls and hotels in major cities like Cebu accept Visa/Mastercard; island hopping requires PHP cash",
+          "would_have_been_flagged_by": "fact_drift_currency",
+          "other_codes_now": []
+        }
+      ]
+    }
+  },
+  "measured_2026_11_01": {
+    "note": "用这把尺子量**旧表自己的英文**（legacy 候选对）：见 .temp/v422_honest_map/MT1_translation/artifacts/MTD2_DRIFT_BASELINE.json。这不是验收旧表，是给「旧英文能不能直接当本轮来源」一条实测答案。",
+    "denominator_warning": "flagged_pairs 按对计，一条对可以撞多个码；code_counts 按码计。两个数不可互推。",
+    "first_pass_then_fixed": [
+      "第一版实现在 819 条 PH 旧对上标了 83 条漂移，其中 6 条是尺子自己的毛病：单字 '约' 当子串撞了 预约/盟约（4 条），无金额的「兑换比索」被要求写 PHP（2 条）。",
+      "已按登记面收窄（match=before_number + not_after 词边界、币种只查金额表达式），假阳性回归测试见 test_v422_prose_glossary.py::RulerPrecisionTests；那 6 条原文与译文原样登记在 false_positive_regressions，重放后当前实现一条码都不发。",
+      "收窄后重测＝77 条真漂移（见 final_measured_2026_11_01），全部逐码入账。",
+      "剩下的才是真漂移：登记专名与旧英文互相冲突（如 乌托邦山巅度假村：旧英文 Utopia Mountain Peak Resort vs 登记名 Utopia Resort Siquijor）、目的地名被泛化（宿务 → Visayas）、温度/数字区间整段丢失。这就是「旧英文不能整表当本轮来源」的实测依据。"
+    ],
+    "final_measured_2026_11_01": {
+      "tool": ".temp/v422_honest_map/MT1_translation/tooling/mtd2_drift_baseline.py",
+      "artifact": ".temp/v422_honest_map/MT1_translation/artifacts/MTD2_DRIFT_BASELINE.json",
+      "california": {
+        "input_pairs": 16,
+        "input_flagged": 0,
+        "reader_pairs": 111,
+        "reader_flagged": 0
+      },
+      "philippines": {
+        "input_pairs": 819,
+        "input_flagged": 77,
+        "reader_pairs": 906,
+        "reader_flagged": 77,
+        "code_counts": {
+          "fact_drift_entity": 66,
+          "fact_drift_destination": 5,
+          "fact_drift_number": 6
+        }
+      },
+      "why_flagged_is_lower_than_the_first_pass": "83 − 6（尺子假阳性）= 77。数字来自**同一把尺子**的两次实现，不是两套口径：第一版的 6 条毛病已登记在 false_positive_regressions，并由 RulerPrecisionTests 重放。",
+      "reader_face_note": "读者面 PH 906 条比输入面 819 条多出来的那批来自生成器自带的字面量表；多出来的部分一条都没增加漂移计数（77＝77），说明那批是形状安全的候选，但「形状安全」不等于语义对。"
+    }
+  },
+  "verified_by": "scripts/test_v422_prose_glossary.py",
+  "consumed_by": [
+    "MT-E：生成翻译表时逐条对照本文件（固定措辞一致 + 结构事实不漂移）",
+    "MT-F：第二遍复核的输入之一（另一半是语义，本文件管不了）",
+    "scripts/translate_prose.py::validate_table：表里每条 entry 现场跑对账，漂移即阻断 --apply"
+  ],
+  "term_enforcement": "术语是**硬约束**：原文出现登记的中文措辞，译文必须出现登记的英文形式（reconcile_pair 逐条查，码=fact_drift_term）。之所以敢做硬：表里每一条都带 witnessed_in（实测出处），没出处的措辞不进表。",
+  "unit_system_switches": [
+    {
+      "cn": "公里",
+      "alien": [
+        "mile",
+        "miles"
+      ],
+      "metric_en": "km",
+      "evidence": "PH：1.5公里 → 1.5 km"
+    },
+    {
+      "cn": "米",
+      "alien": [
+        "feet",
+        "foot",
+        "ft."
+      ],
+      "metric_en": "m",
+      "evidence": "PH：海下30米 → 30 m"
+    },
+    {
+      "cn": "℃",
+      "alien": [
+        "°F",
+        "Fahrenheit"
+      ],
+      "metric_en": "°C",
+      "evidence": "PH：气温25-31℃ → 25-31°C"
+    }
+  ],
+  "unit_system_note": "单位检查只查**换制式**（原文公制、译文出现英制词），不查「有没有写出 km」：两公里翻成 two-kilometer 是合法英文，硬要求 km 只会把尺子变成假阳器。",
+  "proper_name_variants": {
+    "registered_by_round": "MT-F4（业主 2026-11-02 第 2 条：授权一次窄范围入树轮实施 #119）",
+    "rule": "只查**同一语义对内部**：中文原文与英文译文各自抽出的拉丁专名，若前缀相同、Levenshtein 距离在登记上限内且两串不完全相同 ⇒ 发 fact_drift_proper_name_variant。只产 finding，不改中文也不改英文。",
+    "why_intra_pair_only": "全 run 级近重复实测 CA 238＋PH 801＝1039 对，里面混着两个各自成立的专名，工具没资格分辨谁是谁的错 ⇒ 已否决（见 rejected_census）。收窄到同一对内部后，误报空间只剩「同一行两个专名确实指两个东西」这一种，而那一种必须按具体 pair 登记豁免，不许立宽规则。",
+    "token_shape": "(?<![A-Za-z])([A-Z][A-Za-z]{4,})(?![A-Za-z])",
+    "min_token_length": 5,
+    "shared_prefix_length": 3,
+    "max_levenshtein": 2,
+    "punctuation_policy": "标点**不算等价**：撇号与连字符就是 token 边界，所以 `Cathy's` 抽出 `Cathy`、与 `Cathys` 距离 1 ⇒ 阻断。任何『去掉标点再比』的写法都会把这一类放过，实现里禁止。",
+    "why_the_shape_has_no_word_boundary": "中文也算 `\\w`，`\\b` 在『炖锅Cioppino』处不成立 ⇒ 用 `(?<![A-Za-z])…(?![A-Za-z])` 而不是 `\\b`；写成 `\\b` 会整批漏检（这条是 MT-F3 第一版自己踩的）。",
+    "case_policy": "比较不分大小写，但**完全相同才算不冲突**；仅大小写不同（`cioppino`/`Cioppino`）不发码。",
+    "allowance_policy": "豁免按整对原文逐字节登记：`cn_text`＋`en_text`＋`cn_token`＋`en_token` 四项全等才生效。禁止任何一般化（所有复数／所有撇号差异／同一词根所有形式）。豁免条目本身必须是**真冲突**，否则算死豁免，实现抛码。",
+    "allowed_pairs": [
+      {
+        "cn_text": "纯正澳白Flat White与牛油果酸酵母吐司，邦劳早晨最受欢迎的能量补给站",
+        "en_text": "Authentic Aussie Flat Whites and avocado sourdough toast, Panglao's premier morning energy haven",
+        "cn_token": "White",
+        "en_token": "Whites",
+        "reason": "同一种咖啡在英文里写复数形式是合法措辞，事实没变（没有增加实体、没有换地点、没有改数量级）",
+        "owner_ruling": "业主 2026-11-02 第 2 条：登记为这一个具体 pair 的允许复数差异，不得建立『所有复数放行』的宽规则",
+        "witnessed_in": ".temp/v422_honest_map/MT1_translation/artifacts/MTF3_DETERMINISTIC_TERM_CANDIDATES.json::intra_row.rows[P0803]（run philippines，entry fb00a037ac5）"
+      }
+    ],
+    "blocking_examples": [
+      {
+        "cn_token": "Cathy",
+        "en_token": "Cathys",
+        "pair": "P0097（california，entry f90009bf57d）",
+        "expected": "阻断：撇号不是可选装饰，`Cathys Corner` 把登记写法里的所有格写坏了 ⇒ 不能靠『忽略标点』放过"
+      },
+      {
+        "cn_token": "Ciopinno",
+        "en_token": "Cioppino",
+        "pair": "P0283（california，entry feb55e59b0d）",
+        "expected": "阻断，并标为**源数据侧与译文侧不一致**：错在中文原格里，勘误只改过英文 ⇒ 只修英文不算结案"
+      }
+    ],
+    "rejected_census": {
+      "whole_run_pairs": {"california": 238, "philippines": 801, "total": 1039},
+      "verdict": "REJECTED_NOT_A_GATE",
+      "measured_from": "scripts 侧不读这份计数；它是 .temp 的 MT-F3 账（同一判据的全 run 版本）",
+      "why_rejected": "全 run 级把两个各自成立的专名也算成冲突，工具无从分辨、业主也没逐条裁过 ⇒ 接进门禁只会造出噪音，噪音最后的下场是被整条关掉"
+    },
+    "not_a_semantic_gate": "本检查只看字符串形状，能证明的是『中英两面对不上』，不能证明译文语义正确；语义仍归 MT-F 高敏感度筛查。"
+  },
+  "enforced_fields": [
+    "checks",
+    "terms",
+    "term_required_fields",
+    "currency_map",
+    "month_names",
+    "unit_system_switches",
+    "proper_name_variants"
+  ],
+  "descriptive_fields": {
+    "unit_map": "单位英文名**只作对照说明**，不当门：要求「公里必须写成 km」会把 two-kilometer 这种合法英文判成漂移，假阳性会把尺子变成噪音机。真正拦得住的是 unit_system_switches（原文公制、译文出现英制词）。",
+    "forbidden": "给 MT-F 人工复核与本轮汇报看的口径说明；结构面对账不逐条实现它。",
+    "entity_and_destination_source": "这条规则不靠实现读键名生效：它由 test_v422_prose_glossary.py::test_no_second_copy_of_name_tables 用源码扫描保证——实现必须读 display_names.read_pairs 与 dataset.destinations，并且源码里不许出现任何具体名字（出现名字就是把登记面抄进了代码）。",
+    "false_positive_regressions": "这份清单是给回归测试重放用的，结构对账实现不读它（读了就成了第二把尺子：尺子不该知道自己曾错过谁）。它记的是**收窄前后行为差异的样本**，不是白名单。"
+  },
+  "finding_codes_registration_note": "本表是码名的一面；实现自己那份叫 FINDING_CODES。两面由 test_v422_prose_glossary.py::test_every_registered_finding_code_is_emitted_by_the_implementation 双向核对（登记⇄实现字面量），所以它不算「实现要读的字段」，而是「实现要等于的登记」。",
+  "term_match_modes": {
+    "substring": "中文子串出现即算该措辞被使用（适合多字短语，如 人均参考）。",
+    "before_number": "仅当该字后面（允许空格）紧跟数字**且前一个字不在该条目的 not_after 里**时才算——用来登记 '约' 这类既会撞 预约/条约、又会撞「预约 3 晚」的单字措辞。not_after 只在 before_number 下有意义：term_table 读到别的模式还带它就抛 glossary_not_after_shape。"
+  },
+  "currency_scope": "只查**金额表达式**里的币种（数字与币种词相邻，前后各允许 4 字内），因为合同要防的是「110-180 元被折算成 $25」。散文里单独提「比索现金」「兑换比索」不带金额＝不查：那条句子本来没有可对照的数字，硬要求 ISO 码只会把尺子变成噪音机（实测 2 条假阳性，登记在 measured_2026_11_01）。",
+  "currency_token_overlap_measured": {
+    "rule": "币种扫描**长令牌优先并遮字**：'美元'／'美金'／'日元' 里那个 '元' 不是第二笔钱，遮掉之后不再单独要求 CNY（实现 scripts/prose_reconcile.py::currencies_in）。",
+    "why_this_is_not_a_blunting": "遮字只作用于**同一处令牌重叠**：两处独立金额（'门票 10-15 美元' 加 '服务费 20 元'）仍要 USD 与 CNY 两个码，漏一个照样阻断。与 false_positive_regressions 不同，这一条不改任何既有对账的结论：测试把第 1 版尺子的行为留在**测试侧**（_currencies_before_fix，实现不引用它），对两地 legacy 候选对 835 条逐条算「修前要求的 ISO 码集合 ≠ 修后要求的集合」的行数，量到 0 条（见 counts_measured）⇒ 83→77 那笔账与 MTD2_DRIFT_BASELINE.json 的分母不受影响。",
+
+    "measured_at_local": "2026-11-01（分母随 MT-E1 改冻：见 corpus 与 counts_measured 的 note，重叠行那 5 条一条没变）",
+    "corpus": "取数面＝translate_prose.prose_translation_worklist 两地现算（MT-E1 之后 CA 393／PH 324＝**717**；MT-E0 当时量到的是 CA 501／PH 385＝886，那是**按列所有权**的 prose 面，169 行按身份绑定迁给 DISPLAY_NAME 之后不再是 prose 的行）；legacy 面＝prose_reconcile.legacy_candidate_pairs（CA 16／PH 819＝835，与 prose 分母无关，没动过）",
+    "counts_measured": {
+      "worklist_rows": 717,
+      "worklist_rows_note": "886→717 只是分母换了面：这 5 条重叠行在两个面上都还是 prose 的行（逐条 id 由 RulerPrecisionTests 现算比对），legacy 面 835 条与「修前≠修后」为 0 那条结论也没被这次改冻动到。",
+      "worklist_rows_when_registered": 886,
+      "worklist_rows_with_overlapping_currency_tokens": 5,
+      "legacy_pairs": 835,
+      "legacy_pairs_with_overlapping_currency_tokens": 0,
+      "rows_with_two_independent_amounts_on_two_currencies": 0
+    },
+    "overlap_rows_before_fix": [
+      {
+        "id": "f21be9a9fa9",
+        "cn": "10-15美元/人",
+        "required_before": ["CNY", "USD"],
+        "required_after": ["USD"]
+      },
+      {
+        "id": "fa9c3865c4b",
+        "cn": "15-30美元/次",
+        "required_before": ["CNY", "USD"],
+        "required_after": ["USD"]
+      },
+      {
+        "id": "ff33c1ebf92",
+        "cn": "20-40美元/人",
+        "required_before": ["CNY", "USD"],
+        "required_after": ["USD"]
+      },
+      {
+        "id": "fa51d71b6c8",
+        "cn": "5-8美元/杯",
+        "required_before": ["CNY", "USD"],
+        "required_after": ["USD"]
+      },
+      {
+        "id": "f6a01d3f22d",
+        "cn": "6-8美元/杯",
+        "required_before": ["CNY", "USD"],
+        "required_after": ["USD"]
+      }
+    ],
+    "selection_source": "这 5 行不是手抄名单：测试从两地 worklist 现算「含 美元 且金额相邻、且 元 只出现在长令牌内部」的行，与登记面双向闭合（多一行少一行都算失配）。",
+    "replayed_by": "scripts/test_v422_prose_glossary.py::RulerPrecisionTests.test_currency_token_overlap_rows_are_registered_and_reproducible",
+    "kept_separate_from_false_positive_regressions": "那一份记的是 legacy 对的收窄史，计数由 MTD2_DRIFT_BASELINE.json 探针核；这 5 行来自 MT-E0 取数面，两边分母不同，并成一张账就又造出「一个事实两个出处」。"
+  }
+}

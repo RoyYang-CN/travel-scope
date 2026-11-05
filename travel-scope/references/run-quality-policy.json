@@ -1,0 +1,256 @@
+{
+  "schema_version": 3,
+  "country_run_min_routes": 3,
+  "route_continuity_min_percent": 100,
+  "source_evidence_min_coverage_percent": 100,
+  "required_content_modules": ["worth_it", "local_chains", "packing", "local_knowledge"],
+  "required_intake_fields": ["q0_destination", "q1_time", "q2_days", "q3_tier", "q4_transport", "q5_arrival", "q6_departure", "q7_depth", "q8_pace"],
+  "required_destination_profile_fields": ["scope_type", "geography", "mobility_modes", "map_region", "candidate_pool_count", "coverage_boundary", "data_availability", "uncertainties"],
+  "pace": {
+    "compact": {"max_transfer_day_ratio": 0.75, "max_double_transfer_days": 1, "max_consecutive_city_changes": 3},
+    "moderate": {"max_transfer_day_ratio": 0.60, "max_double_transfer_days": 1, "max_consecutive_city_changes": 2},
+    "relaxed": {"max_transfer_day_ratio": 0.45, "max_double_transfer_days": 0, "max_consecutive_city_changes": 1}
+  },
+  "itinerary_rules": {
+    "disallow_duplicate_pois_per_route": true,
+    "require_arrival_departure_loop": true,
+    "enforce_base_deduction_transit_check": true
+  },
+  "budget_rules": {
+    "require_independent_route_budgets": true,
+    "require_route_budget_card_match": true,
+    "max_subtotal_tolerance_cny": 0.0,
+    "require_currency_metadata": true
+  },
+  "evidence_rules": {
+    "disallow_patterned_entity_urls": true,
+    "disallow_sequential_id_urls": true,
+    "disallow_arithmetic_progression_ids": true,
+    "disallow_unencoded_chinese_paths": true,
+    "enforce_platform_specific_patterns": true,
+    "enforce_domain_category_alignment": true,
+    "disallow_verified_status_on_scraping_blocked": true,
+    "disallow_pass_evidence_hash_duplication": true,
+    "min_pass_evidence_file_bytes": 500,
+    "disallowed_domains_by_category": {
+      "accommodation": ["myrapid.com.my", "ktmb.com.my", "kliaekspres.com", "mrt.com.my", "prasarana.com.my"],
+      "food": ["myrapid.com.my", "ktmb.com.my", "kliaekspres.com", "mrt.com.my", "prasarana.com.my"]
+    }
+  },
+  "translation_rules": {
+    "disallow_synthetic_boilerplate": true,
+    "banned_synthetic_phrases": [
+      "distinctive malaysian destination",
+      "premier malaysian hospitality",
+      "curated malaysian experience",
+      "authentic malaysian destination",
+      "spot spot",
+      "days spot",
+      "days area",
+      "area days",
+      "loop-day",
+      "核验收录",
+      "on-site research",
+      "featured in this destination",
+      "特色收录",
+      "占位",
+      "restaurant rating",
+      "待补充"
+    ],
+    "disallow_untranslated_file_presence": true,
+    "disallow_repetitive_tokens": ["area", "spot", "hotel", "food", "sight"],
+    "max_repetitive_token_density": 0.008,
+    "max_cjk_ratio_in_english_artifacts": 0.001,
+    "min_leaked_cjk_to_report": 1,
+    "threshold_note": "v4.2.2 V5-C：阈值判定改用 english_residue_measurement 口径下的 leaked_cjk/chars；旧实现要求 cjk>5 才报，等于允许 5 个汉字静默通过。",
+    "require_final_artifact_scan": ["html", "md", "xlsx"],
+    "max_boilerplate_frequency": 0.03
+  },
+  "english_residue_measurement": {
+    "authoritative": true,
+    "registered_at": "2026-10-30",
+    "why": "v4.2.1 同时留着 7.5%（§3.2.5）与 2/7080＝0.03%（§16.2 第 5 条）两个数字；复算发现发布树里有四处各写一套 CJK 计数，且都没排除语言切换按钮上刻意保留的「中文」。口径不唯一，数字就没有可比性。",
+    "scope": "读者可见英文正文文本：由 visual_qa 在注册视口点击 #lang-btn 后取 document.body.innerText 并导出到 visual-qa/spa-en-text.txt；其他英文产物（html_en/md_en/xlsx_en）用同一函数逐段测量，只是文本来源不同。",
+    "counts_as_residue": "\\u4e00-\\u9fff\\u3400-\\u4dbf\\uf900-\\ufaff",
+    "excluded_from_residue": "全角与中文标点（\\u3000-\\u303f、\\uff00-\\uffef）不计入残留——它们是排版不是未翻译正文；单独计数为 fullwidth_punctuation，不允许因为『不算』而从报告里消失。",
+    "denominator": "chars = 同一段文本的字符总数（含空白）；ratio = leaked_cjk / chars，另附未经刻意项扣除的 ratio_unadjusted，两个数一起进报告。",
+    "intentional_cjk": ["中文"],
+    "intentional_cjk_note": "语言切换按钮在英文态必须写着「中文」，读者靠它切回去；这是刻意的，不是泄漏。命中位置逐条列出，不静默扣除。",
+    "measured_anchors": {
+      "purpose": "口径不能只在文档里自证：下面三个点用同一函数、同一浏览器、同一英文态跑，跑不出这些数就是代码漂移。",
+      "how_to_replay": ".temp/v422_honest_map/V5_nonmap/tooling/v5c_evidence.py（只读打开产物，测完立刻复验 SHA）",
+      "points": [
+        {"artifact": "runs/travel_scope_run_202701_usa_california_v420_001/outputs/usa-california-travel-guide.html",
+         "state": "EN", "chars": 4247, "raw_cjk": 944, "intentional_cjk": 2, "leaked_cjk": 942,
+         "ratio": 0.221804,
+         "matches": "v4.2.1 §2.2.3 记的『第 6 步实测 22.23%』（raw 944/4247＝0.222275）——v4.2.0 交付基线的英文态真有整段中文没翻译"},
+        {"artifact": ".temp/v421/seal_run/outputs/usa-california-travel-guide.html",
+         "state": "EN", "chars": 7080, "raw_cjk": 2, "intentional_cjk": 2, "leaked_cjk": 0, "ratio": 0.0,
+         "matches": "§16.2 第 5 条的 2/7080＝0.03%：那 2 个汉字整条就是按钮「中文」，按本口径 intentional 与 leaked 分得开"},
+        {"artifact": "v4.2.2 V2R dataset 经现行 renderer 的读者页（CA 4976 / PH 4642 字符）",
+         "state": "EN", "raw_cjk": 2, "intentional_cjk": 2, "leaked_cjk": 0, "ratio": 0.0,
+         "matches": "候补产物在 0.1% 阈值内，且不是空页：同页中文态分别 3094 字符/1701 汉字与 2000 字符/1064 汉字"}
+      ],
+      "scope_control": "同一份 v4.2.0 加州成品在 1280x720、1920x1080、390x844 三档视口下 leaked_cjk 恒为 942（390 档分母 4203）：残留判定不随视口漂移，视口只影响分母。",
+      "negative_control": "在英文正文里植入『海岸线未翻译』（6 个汉字）：leaked_cjk=6、ratio=13.95%、breach=true 且样本串可定位——口径是分类，不是把数字抹平。"
+    },
+    "single_implementation": "scripts/en_residue_measure.py：发布树里任何第二份 CJK 计数（自行 re.findall 汉字类）都算口径漂移，由测试扫描禁止。"
+  },
+  "route_claim_rules": {
+    "enforce_title_corridor_subset": true,
+    "disallow_off_corridor_media": true,
+    "min_exclusive_hero_media_per_route": 3
+  },
+  "transport_rules": {
+    "disallow_future_unreleased_fixed_schedule": true,
+    "require_direct_schedule_page": true,
+    "disallow_on_demand_fixed_departure_times": true,
+    "disallow_fixed_schedules_for_self_drive": true,
+    "disallow_bidirectional_symmetric_timetables": true,
+    "require_distinct_endpoints": true,
+    "enforce_operator_domain_alignment": true,
+    "max_operating_schedule_staleness_days": 180,
+    "enforce_historical_reference_marking": true
+  },
+  "map_rules": {
+    "disallow_synthetic_place_ids": true,
+    "disallow_coordinate_query_as_platform_url": true,
+    "disallow_search_url_as_verified_platform": true,
+    "require_named_entity_page_for_pois": true,
+    "require_specific_station_or_terminal_endpoints": true,
+    "require_qa_evidence_file_exists": true,
+    "enforce_physical_landing_verification": true,
+    "disallow_self_cloning_verification": true,
+    "max_distance_to_destination_center_km": 75,
+    "transport_node_distance_whitelist": true,
+    "disallow_templated_address_patterns": [
+      "Premises,.*Coast Rd",
+      "Premises,.*6000"
+    ],
+    "max_coordinate_drift_degrees": 0.001
+  },
+  "local_apps_rules": {
+    "require_official_source": true,
+    "disallow_third_party_apk_mirrors": true,
+    "disallow_search_urls_as_official": true,
+    "disallow_retired_apps_in_recommendations": true,
+    "require_conditional_risk_notes": true,
+    "enforce_city_specific_boundary": true,
+    "enforce_freshness_limits": true,
+    "enforce_cross_artifact_count_parity": true
+  },
+  "research_depth": {
+    "concise": {
+      "candidate_pool_target": 6,
+      "min_local_apps": 3,
+      "required_app_priorities": ["essential"],
+      "tier1_min_poi": {
+        "hotels": 2,
+        "restaurants": 2,
+        "cafes": 1,
+        "attractions": 4,
+        "total": 9
+      },
+      "tier2_min_poi": {
+        "hotels": 1,
+        "restaurants": 1,
+        "cafes": 0,
+        "attractions": 2,
+        "total": 5
+      },
+      "total_run_min_poi": 40,
+      "min_visible_poi_per_destination": 5,
+      "required_poi_categories": ["hotels", "restaurants", "attractions"],
+      "min_editorial_images": 3,
+      "min_independent_direct_sources": 1,
+      "cross_source_review_required": false,
+      "section_media_required": false,
+      "max_designed_no_photo_ratio": 0.5,
+      "research_passes": ["route_critical_facts"]
+    },
+    "standard": {
+      "candidate_pool_target": 8,
+      "min_local_apps": 5,
+      "required_app_priorities": ["essential", "recommended"],
+      "tier1_min_poi": {
+        "hotels": 4,
+        "restaurants": 6,
+        "cafes": 3,
+        "attractions": 6,
+        "total": 20
+      },
+      "tier2_min_poi": {
+        "hotels": 2,
+        "restaurants": 3,
+        "cafes": 1,
+        "attractions": 3,
+        "total": 10
+      },
+      "total_run_min_poi": 100,
+      "min_visible_poi_per_destination": 10,
+      "required_poi_categories": ["hotels", "restaurants", "cafes", "attractions"],
+      "min_editorial_images": 4,
+      "min_independent_direct_sources": 1,
+      "cross_source_review_required": false,
+      "section_media_required": true,
+      "max_designed_no_photo_ratio": 0.2,
+      "research_passes": ["route_critical_facts", "material_dynamic_facts"]
+    },
+    "deep": {
+      "candidate_pool_target": 12,
+      "min_local_apps": 8,
+      "required_app_priorities": ["essential", "recommended"],
+      "tier1_min_poi": {
+        "hotels": 8,
+        "restaurants": 12,
+        "cafes": 6,
+        "attractions": 10,
+        "total": 36
+      },
+      "tier2_min_poi": {
+        "hotels": 4,
+        "restaurants": 6,
+        "cafes": 2,
+        "attractions": 5,
+        "total": 17
+      },
+      "total_run_min_poi": 180,
+      "min_visible_poi_per_destination": 17,
+      "required_poi_categories": ["hotels", "restaurants", "cafes", "attractions"],
+      "min_editorial_images": 6,
+      "min_independent_direct_sources": 2,
+      "cross_source_review_required": true,
+      "section_media_required": true,
+      "max_designed_no_photo_ratio": 0.1,
+      "research_passes": ["route_critical_facts", "material_dynamic_facts", "cross_source_review"]
+    },
+    "ultra": {
+      "candidate_pool_target": 16,
+      "min_local_apps": 12,
+      "required_app_priorities": ["essential", "recommended", "optional"],
+      "tier1_min_poi": {
+        "hotels": 15,
+        "restaurants": 20,
+        "cafes": 10,
+        "attractions": 15,
+        "total": 60
+      },
+      "tier2_min_poi": {
+        "hotels": 6,
+        "restaurants": 10,
+        "cafes": 4,
+        "attractions": 8,
+        "total": 28
+      },
+      "total_run_min_poi": 300,
+      "min_visible_poi_per_destination": 28,
+      "required_poi_categories": ["hotels", "restaurants", "cafes", "attractions"],
+      "min_editorial_images": 9,
+      "min_independent_direct_sources": 3,
+      "cross_source_review_required": true,
+      "section_media_required": true,
+      "max_designed_no_photo_ratio": 0.05,
+      "research_passes": ["route_critical_facts", "material_dynamic_facts", "cross_source_review", "exhaustive_entity_profiling"]
+    }
+  }
+}

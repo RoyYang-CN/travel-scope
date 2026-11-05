@@ -1,0 +1,288 @@
+{
+  "schema_version": "release-scope-1",
+  "product_version": "5.0.0",
+  "release_tier": "LIMITED_SCOPE",
+  "declared_label": "v5.0.0 LIMITED-SCOPE RELEASE — California zh-formal validated",
+  "production_certified": false,
+  "validated_profile": "zh-formal",
+  "signed_by_owner": {
+    "date": "2026-11-04",
+    "rulings": {
+      "R1": "英文面不作为 v4.2.2 门槛；MT-E／MT-F／MT-G 与 31 处英文槽位拆除移入下一迭代",
+      "R2": "按目的地切分，本版只发布加州；菲律宾不进本版发布范围",
+      "R3": "授权文档同步、ZIP 与 Skill 安装，但必须标记 LIMITED-SCOPE 且不得宣称整体认证"
+    },
+    "authority_quote": "无需再修菲律宾或英文面后才封装 v4.2.2。它们进入下一迭代，不再拖延本版收口。"
+  },
+  "version_identity_migration": {
+    "date": "2026-11-05",
+    "from_version": "4.2.2",
+    "to_version": "5.0.0",
+    "authority": "业主明确授权将已收口的有限范围版作为新一代产品合同，迁移到 v5.0.0。",
+    "change_class": "release-identity-only",
+    "must_not_expand_scope": true,
+    "source_release": {
+      "product_origin_sha256": "AD1FEA5D848EBCFD00C1905BAE4FCECC12D15BB185D991C4FA4E86ED15E62BF8",
+      "sealed_files": 169,
+      "zip_sha256": "3D2BA28B2AE85CEF5140A05BCF33F9D0F12E0CAB462905FA134102E3BB42D80D",
+      "reader_html_sha256": "55A83704B6A06FB6B8D0539EC0C7EDAC31FB2E2AB69540E49FBA27F56206DE1F"
+    },
+    "release_tree_additions": [
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "scripts/build_release_package.py",
+      "scripts/test_v500_release_package.py"
+    ],
+    "release_tree_additions_rule": "只允许这四个文件使源封册 169 增加到当前 173：LICENSE 使独立 ZIP 带 Apache-2.0 授权，THIRD_PARTY_NOTICES.md 登记内置 CC0 图片的来源与摘要，打包器将 product-origin.json 连同 inventory 确定性打包，门牙证明缺封条或混入额外文件必须失败。四者不扩展目的地、语言或产品认证范围。",
+    "unchanged_scope": {
+      "release_tier": "LIMITED_SCOPE",
+      "validated_profile": "zh-formal",
+      "in_scope_destinations": ["california"],
+      "english": "DEFERRED",
+      "philippines": "AUDIT_HOLD_EXCLUDED",
+      "production_certified": false
+    },
+    "artifact_rule": "加州中文正式 HTML 继承业主已签署的 v4.2.2 字节；本回合只改变发布与 Skill 身份，不重建攻略内容。"
+  },
+  "scope": {
+    "in_scope_destinations": [
+      "california"
+    ],
+    "in_scope_profiles": [
+      "zh-formal"
+    ],
+    "excluded_destinations": [
+      "philippines"
+    ],
+    "excluded_profiles": [
+      "en-formal",
+      "en-audit"
+    ],
+    "deferred_to_next_iteration": [
+      "MT-E apply（英文候选表 717 行）",
+      "MT-F 全量双审",
+      "MT-G 应用与两地重建",
+      "31 处英文渲染槽位拆除"
+    ],
+    "note": "en-audit 仅供审计与后续迭代，不得进入正式输出目录（业主 R1 原话）。"
+  },
+  "california_formal_run": {
+    "aggregate_sha256": "4323955073293070208A2444DD68382415136731A749C3C8EB2C11ED113DD4FD",
+    "files": 224,
+    "bytes": 52568833,
+    "path": "release_runs/travel_scope_run_202701_usa_california_v422_zh_001",
+    "reader_html": {
+      "path": "outputs/usa-california-travel-guide.html",
+      "bytes": 3536450,
+      "sha256": "55A83704B6A06FB6B8D0539EC0C7EDAC31FB2E2AB69540E49FBA27F56206DE1F"
+    },
+    "chain_face": {
+      "rows": 27,
+      "rendition_cells": 27,
+      "absolute_source": 0,
+      "empty_source": 0,
+      "absolute_relpath": 0
+    },
+    "manifest_face": {
+      "declared_html": "usa-california-travel-guide.html",
+      "html_on_disk": [
+        "usa-california-travel-guide.html"
+      ],
+      "artifact_generation_claimed": true,
+      "snapshot_field": "evidence/media-source-snapshot.json",
+      "snapshot_file_present": true
+    }
+  },
+  "philippines_status": {
+    "state": "AUDIT_HOLD",
+    "in_this_release": false,
+    "delivered": false,
+    "exclusion_reason_measured_on_disk": {
+      "manifest_declares_reader_artifact": "philippines-visayas-guide-travel-guide.html",
+      "declared_artifact_absent_from_outputs": true,
+      "completed_stages_still_claims_artifact_generation": true,
+      "source_verification_snapshot_path_value": "None",
+      "snapshot_file_present": false,
+      "media_chain_rows": 18,
+      "media_chain_absolute_source": 18,
+      "media_chain_absolute_relpath": 18
+    },
+    "run_identity_not_in_release": {
+      "aggregate_sha256": "0A80E23855787AD09B8EAF51CDEF45CA7675344CD2B95828C59728A617F6A514",
+      "files": 87,
+      "bytes": 15515712,
+      "path": "release_runs/travel_scope_run_202702_philippines_visayas_v422_zh_001"
+    },
+    "expression_constraint": "菲律宾不得随 ZIP、Skill 安装或版本文档被表述成已验证样例"
+  },
+  "english_status": {
+    "state": "DEFERRED",
+    "certified": false,
+    "part_of_this_release": false,
+    "reason_measured_on_disk": "英文正式交付四项全部 NOT RUN：MT-E apply 被两条真缺陷阻断、MT-F 全量双审未跑、MT-G 未做、31 处英文渲染槽位未拆",
+    "en_audit_is_formal_output": false
+  },
+  "documentation_requirements": {
+    "VERSION.md": {
+      "must_contain": [
+        "v5.0.0 LIMITED-SCOPE RELEASE — California zh-formal validated",
+        "本版＝加州中文正式范围发布",
+        "加州中文正式 run 已签署通过",
+        "英文面未认证（DEFERRED，不作本版门槛）",
+        "菲律宾未交付（AUDIT_HOLD／EXCLUDED）",
+        "不保证每个地图链接打开唯一 Google 实体卡",
+        "本版不声明整体 production-certified（production_certified=false）"
+      ],
+      "must_not_contain": [
+        "完整双语正式版",
+        "双语正式发布",
+        "所有目的地均已验证",
+        "菲律宾已验证",
+        "整体已认证"
+      ]
+    },
+    "SKILL.md": {
+      "must_contain": [
+        "默认正式档位：zh-formal",
+        "英文 slug 命名的中文单文件 SPA",
+        "en-audit 不是正式交付物，不得进入正式输出目录",
+        "零付费 Google API 调用、不使用 API Key",
+        "NAMED_SEARCH 允许，但必须标明落点未核验",
+        "媒体来源逐字定位符、run 相对路径、离线重放与正式门要求",
+        "当前版本只以加州正式 run 完成端到端验证；其他目的地必须重新通过全部门禁"
+      ],
+      "must_not_contain": [
+        "完整双语正式版",
+        "所有目的地均已验证",
+        "菲律宾已验证",
+        "菲律宾",
+        "philippines",
+        "Philippines",
+        "印度尼西亚",
+        "indonesia"
+      ],
+      "must_not_contain_note": "点名被排除目的地这件事不归 SKILL.md 管：它是运行时指令面，同时受 scripts/test_product_recovery.py::RecoveryTests::test_release_identity_and_inventory 那条目的地中立守卫管辖（该守卫把 SKILL.md 算进 active 文件，防的是把某个目的地写死进产品）。排除名单与现场硬事实登记在本文档的 scope.excluded_destinations 与 philippines_status，人类叙述在 VERSION.md；指令面只说「未验证的目的地一律不得表述成已验证样例」＋「当前版本只以加州正式 run 完成端到端验证；其他目的地必须重新通过全部门禁」。本条不是本轮新造的第二把尺子，是把既有守卫的约束登记成范围合同的值——现场依据：2026-11-04 R3H 第 5 步跑全量套件时，我写进 SKILL.md 的「菲律宾未交付（AUDIT_HOLD／EXCLUDED）」把那条守卫判红，放宽守卫被拒绝，改的是措辞。账见 R3H_SCOPE_SKILL_NEUTRALITY_AMEND.json。"
+    }
+  },
+  "phrase_rules": [
+    {
+      "phrase": "production-certified",
+      "allowable_only_with": [
+        "不",
+        "未",
+        "false",
+        "not"
+      ],
+      "why": "文档要能说「不声明整体 production-certified」，所以不能粗暴禁词；规则是该词必须落在否定句里，逐行检查（英文侧同样：SKILL.md 的恢复规程里已有 「not production-certified」这一句）"
+    },
+    {
+      "phrase": "production certification",
+      "allowable_only_with": [
+        "不",
+        "未",
+        "false",
+        "not"
+      ],
+      "why": "同上（VERSION.md 头部历史句式与撤回段）"
+    }
+  ],
+  "required_fields": [
+    "product_version",
+    "version_identity_migration",
+    "release_tier",
+    "production_certified",
+    "validated_profile",
+    "declared_label",
+    "scope",
+    "california_formal_run",
+    "philippines_status",
+    "english_status",
+    "documentation_requirements",
+    "phrase_rules",
+    "packaging"
+  ],
+  "closed_values": {
+    "release_tier": [
+      "LIMITED_SCOPE"
+    ],
+    "production_certified_must_be": false,
+    "validated_profile": [
+      "zh-formal"
+    ],
+    "product_version": [
+      "5.0.0"
+    ]
+  },
+  "blocking_codes": [
+    "RELEASE_SCOPE_FILE_MISSING",
+    "RELEASE_SCOPE_FIELD_MISSING",
+    "RELEASE_SCOPE_OVERCLAIM",
+    "RELEASE_SCOPE_EXCLUSION_MISSING",
+    "RELEASE_SCOPE_DIGEST_STALE",
+    "RELEASE_SCOPE_RUN_DIGEST_STALE",
+    "RELEASE_SCOPE_FACE_NOT_CLEAN",
+    "RELEASE_SCOPE_EXCLUDED_FACT_STALE",
+    "RELEASE_SCOPE_DOC_PHRASE_MISSING",
+    "RELEASE_SCOPE_DOC_OVERCLAIM",
+    "RELEASE_SCOPE_NEGATED_CLAIM_VIOLATED",
+    "RELEASE_SCOPE_FORMAL_OUTPUT_HAS_AUDIT_ARTIFACT"
+  ],
+  "code_meanings": {
+    "RELEASE_SCOPE_FILE_MISSING": "references/release-scope.json 不在盘上：范围没有机器可读出处",
+    "RELEASE_SCOPE_FIELD_MISSING": "required_fields 里任一格缺失",
+    "RELEASE_SCOPE_OVERCLAIM": "release_tier／production_certified／validated_profile／product_version 与 closed_values 不符——这一格是防「把有限范围写成整体认证」",
+    "RELEASE_SCOPE_EXCLUSION_MISSING": "excluded_destinations 少 philippines 或 excluded_profiles 少 en-formal",
+    "RELEASE_SCOPE_DIGEST_STALE": "登记的加州读者 HTML 字节或摘要与在盘实物不等",
+    "RELEASE_SCOPE_RUN_DIGEST_STALE": "登记的 run 逐文件聚合与现场重算不等",
+    "RELEASE_SCOPE_FACE_NOT_CLEAN": "加州链条面出现绝对／空格子（R3F 判据口径）",
+    "RELEASE_SCOPE_EXCLUDED_FACT_STALE": "菲律宾的排除理由现场复算不再成立（它已补齐或被改动）⇒ 范围登记必须重看，不能继续挂着旧理由",
+    "RELEASE_SCOPE_DOC_PHRASE_MISSING": "VERSION.md／SKILL.md 缺 must_contain 的必须措辞",
+    "RELEASE_SCOPE_DOC_OVERCLAIM": "两份文档出现 must_not_contain 的越界表述",
+    "RELEASE_SCOPE_NEGATED_CLAIM_VIOLATED": "phrase_rules 点名的词出现在非否定句里",
+    "RELEASE_SCOPE_FORMAL_OUTPUT_HAS_AUDIT_ARTIFACT": "正式 run 的 outputs 里出现审计档／英文产物"
+  },
+  "packaging": {
+    "zip_name": "travel-scope-v5.0.0-limited-release.zip",
+    "package_root": "travel-scope/",
+    "manifest_file_required": "product-origin.json",
+    "whitelist_authority": "product-origin.json::inventory ∪ {product-origin.json}；inventory 的逐文件摘要对发布源码，product-origin.json 作为封条本身单独加入 ZIP",
+    "sealed_files_observed_when_measured": 169,
+    "seal_sha256_observed_when_measured": "0b0a287de2646ae8debbe8fe5f82a60cc55f849a1c8387fa6b3d6757ac7799b5",
+    "these_two_cells_are_observations_not_gates": "封册自己的文件数与摘要**不能**当范围合同的门：release-scope.json 本身在被封的对象里，拿它钉现场封册就是自指（签那一刻盘上只能是上一封）。所以这两格只登记「量这一格时盘上是哪一封、多少件」，白名单一律现场读 product-origin.json::inventory；每次重封都要重新读，不许回头抄这里的数。",
+    "must_exclude": [
+      ".temp",
+      "candidate runs",
+      "菲律宾 run",
+      "缓存（__pycache__/*.pyc/.pytest_cache）",
+      "superseded 证据",
+      "未认证英文产物"
+    ],
+    "exclude_match_substrings": [
+      ".temp",
+      "candidate_runs",
+      "release_runs/travel_scope_run_202702_philippines_visayas_v422_zh_001",
+      "__pycache__",
+      ".pyc",
+      ".pytest_cache",
+      "superseded"
+    ],
+    "rule": "ZIP 只能包含封存 inventory 与封条 product-origin.json；缺封条、多文件或出现任一排除项＝该包不合格，不许装 Skill"
+  },
+  "skill_install_requirements": {
+    "precondition": "ZIP 内 inventory 逐文件与 product-origin.json 都与发布源码逐字节一致之后才允许安装",
+    "backup_old_install_outside_skills_dir": true,
+    "installed_copy_must_match_zip_file_by_file": true,
+    "run_verify_product_inside_installed_copy": true,
+    "installed_skill_md_must_show_limited_scope": true
+  },
+  "evidence_pointers": [
+    "R3F_RELOCATED_REPLAY_VERIFY.json",
+    "R3F_FORMAL_VERIFY.json",
+    "R3F_ATOMIC_REPLACEMENT.json",
+    "R3D_UNIT_178_CONSOLIDATED_REPORT.json",
+    "V422_RELEASE_SCOPE_PROPOSAL.json"
+  ],
+  "measured_at_utc": "2026-11-05T01:43:24Z",
+  "problems": [],
+  "verdict": "REGISTERED"
+}
