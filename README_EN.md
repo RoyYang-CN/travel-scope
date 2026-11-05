@@ -1,10 +1,12 @@
 # Travel-Scope v5.0.0
 
-[Chinese documentation](README.md) · [Download v5.0.0](https://github.com/RoyYang-CN/travel-scope/releases/tag/v5.0.0) · [Open the signed California zh-formal reader (Chinese UI)](https://github.com/RoyYang-CN/travel-scope/releases/download/v5.0.0/travel-scope-v5.0.0-california-zh-formal.html)
+[Chinese documentation](README.md) · [Live demo (temporary deployment)](https://california-travel-hqeij2hs4gk.qoder.zone) · [Download v5.0.0](https://github.com/RoyYang-CN/travel-scope/releases/tag/v5.0.0) · [Open the signed California zh-formal reader (Chinese UI)](https://github.com/RoyYang-CN/travel-scope/releases/download/v5.0.0/travel-scope-v5.0.0-california-zh-formal.html)
 
 [![Public verification](https://github.com/RoyYang-CN/travel-scope/actions/workflows/quality.yml/badge.svg)](https://github.com/RoyYang-CN/travel-scope/actions/workflows/quality.yml)
 [![Release](https://img.shields.io/github/v/release/RoyYang-CN/travel-scope)](https://github.com/RoyYang-CN/travel-scope/releases/tag/v5.0.0)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
+> **Temporary live demo:** [Open the California Chinese reader](https://california-travel-hqeij2hs4gk.qoder.zone). This URL is provided for quick browser access and may change with the temporary hosting environment. The durable, reproducible artifact remains the [single-file HTML attached to the GitHub release](https://github.com/RoyYang-CN/travel-scope/releases/download/v5.0.0/travel-scope-v5.0.0-california-zh-formal.html).
 
 Travel-Scope is an **evidence-aware travel research, validation, and single-file guide generation system**. It does more than ask a model to write an itinerary: it connects conversational intake, route discovery, accommodation/food/sight/transport research, honest map-link degradation, media lineage, budget semantics, browser QA, and a cryptographic release seal.
 

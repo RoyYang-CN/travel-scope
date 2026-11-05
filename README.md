@@ -1,10 +1,12 @@
 # Travel-Scope v5.0.0
 
-[English](README_EN.md) · [下载 v5.0.0](https://github.com/RoyYang-CN/travel-scope/releases/tag/v5.0.0) · [查看 California 正式案例](https://github.com/RoyYang-CN/travel-scope/releases/download/v5.0.0/travel-scope-v5.0.0-california-zh-formal.html)
+[English](README_EN.md) · [在线体验（临时部署）](https://california-travel-hqeij2hs4gk.qoder.zone) · [下载 v5.0.0](https://github.com/RoyYang-CN/travel-scope/releases/tag/v5.0.0) · [查看 California 正式案例](https://github.com/RoyYang-CN/travel-scope/releases/download/v5.0.0/travel-scope-v5.0.0-california-zh-formal.html)
 
 [![Public verification](https://github.com/RoyYang-CN/travel-scope/actions/workflows/quality.yml/badge.svg)](https://github.com/RoyYang-CN/travel-scope/actions/workflows/quality.yml)
 [![Release](https://img.shields.io/github/v/release/RoyYang-CN/travel-scope)](https://github.com/RoyYang-CN/travel-scope/releases/tag/v5.0.0)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
+> **临时在线演示：** [打开 California 中文读者版](https://california-travel-hqeij2hs4gk.qoder.zone)。该地址用于快速浏览，可能随临时托管环境变化；长期可复现、可下载的正式资产仍以 [GitHub Release 中的单文件 HTML](https://github.com/RoyYang-CN/travel-scope/releases/download/v5.0.0/travel-scope-v5.0.0-california-zh-formal.html) 为准。
 
 Travel-Scope 是一个**证据感知的旅行研究、核验与单文件攻略生成系统**。它不是简单地让模型写一篇游记，而是把需求访谈、路线探索、住宿/餐饮/景点/交通研究、地图链接降级策略、媒体来源血缘、预算口径、浏览器视觉 QA 和发布封印串成一条可审计的交付链。
 
